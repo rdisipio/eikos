@@ -14,3 +14,14 @@ Unfolder::~Unfolder()
 
 
 ////////////////////////////
+
+void Unfolder::MCMCUserIterationInterface()
+{
+}
+
+////////////////////////////
+
+double Unfolder::LogLikelihood(std::vector<double, std::allocator<double> > const&)
+{
+   return 0;
+}

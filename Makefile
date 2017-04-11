@@ -47,7 +47,7 @@ clean :
 
 project: src/run-Eikos.cxx $(CXXOBJS)
 	$(CXX) $(CXXFLAGS) -c $<
-	$(CXX) $(LDFLAGS) src/run-Eikos.o $(CXXOBJS) $(LIBS) -o bin/run-Eikos
+	$(CXX) $(LDFLAGS) run-Eikos.o $(CXXOBJS) $(LIBS) -o bin/run-Eikos
 
 print :
 	echo compiler  : $(CXX)

@@ -1,6 +1,8 @@
 #ifndef __SAMPLE_H__
 #define __SAMPLE_H__
 
+#include <string>
+
 class Sample
 {
  public:

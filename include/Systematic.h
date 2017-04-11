@@ -6,9 +6,10 @@
 class Systematic
 {
  public:
-   Systematic();
+   Systematic( const std::string& name = "" );
    ~Systematic();
 
+   void SetName( const std::string& name ) { m_name = name; };
    const std::string& GetName() { return m_name; };
 
    void SetParIndex( int i ) { m_par_index = i;   };
