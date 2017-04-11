@@ -45,9 +45,9 @@ link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 clean :
 	$(RM) $(GARBAGE)
 
-project: run-Eikos.cxx $(CXXOBJS)
+project: src/run-Eikos.cxx $(CXXOBJS)
 	$(CXX) $(CXXFLAGS) -c $<
-	$(CXX) $(LDFLAGS) run-Eikos.o $(CXXOBJS) $(LIBS) -o run-Eikos
+	$(CXX) $(LDFLAGS) src/run-Eikos.o $(CXXOBJS) $(LIBS) -o bin/run-Eikos
 
 print :
 	echo compiler  : $(CXX)
