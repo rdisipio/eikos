@@ -1,0 +1,48 @@
+<config>
+
+<parameters>
+  <param name="accuracy"  value="low"      />
+  <param name="INPUTPATH" value="/afs/cern.ch/work/d/disipio/public/ttbar_diffxs_13TeV/AnalysisTop/run" />
+  <param name="OBS"       value="t2_pt"    />
+  <param name="PHSPACE"   value="particle" />
+</parameters>
+
+<diffxs name="AbsoluteDiffXs" >
+  <template fpath="@INPUTPATH@/unfolding_results/@PHSPACE@/@PHSPACE@.@OBS@.ttAH_pwgpy8.nominal.truth.root" hpath="TheoryXs_abs" />
+</diffxs>
+
+<systematics>
+  <systematic name="iLumi"                                     type="norm"  symmetrize="both"       label="Luminosity"                                />
+  <systematic name="LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA" type="shape" symmetrize="none"       label="(LJES) Large-$R$ jet Baseline $#tau_{32}$" />
+  <systematic name="parton_shower"                             type="shape" symmetrize="one_sided"  label="Parton Shower and Hadronization"           />
+</systematics>
+<samples>
+
+  <sample name="data"      label="Data 2015+2016"     type="data">
+    <det fpath="@INPUTPATH@/output/data/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root" hpath="@OBS@_passed_J1_1t1b_J2_1t1b" />
+  </sample>
+
+  <sample name="tt_allhad" label="t#bar{t} (all had)" type="signal"     fillcolor="0"   linecolor="1">
+     <det fpath="@INPUTPATH@/output/@SYST@/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.@SYST@.YearAll.histograms.root" hpath="@OBS@_passed_J1_1t1b_J2_1t1b" />
+     <res fpath="@INPUTPATH@/output/@SYST@/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.@SYST@.YearAll.histograms.root" hpath="response_singlespectrum_@PHSPACE@_@OBS@_passed_J1_1t1b_J2_1t1b" />
+     <gen fpath="@INPUTPATH@/output/@PHSPACE@/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.@PHSPACE@.nominal.YearAll.histograms.root"  hpath="@OBS@_passed_J1_1t1b_J2_1t1b" />
+  </sample>
+
+  <sample name="tt_lept"   label="t#bar{t} (lept)"    type="background" fillcolor="433" linecolor="433" >
+     <det fpath="@INPUTPATH@/output/@SYST@/mc15_13TeV.410501.DAOD_TOPQ1.TightTop.@SYST@.YearAll.histograms.root" hpath="@OBS@_passed_J1_1t1b_J2_1t1b" />
+  </sample>
+
+  <sample name="ttWZH"     label="t#bar{t}+W/Z/H"     type="background"	fillcolor="798" linecolor="798" >
+     <det fpath="@INPUTPATH@/output/@SYST@/mc15_13TeV.ttWZH.DAOD_TOPQ1.TightTop.@SYST@.YearAll.histograms.root" hpath="@OBS@_passed_J1_1t1b_J2_1t1b" />
+  </sample>
+
+  <sample name="s_top"     label="Single Top"         type="background"	fillcolor="62"  linecolor="62" >
+     <det fpath="@INPUTPATH@/output/@SYST@/mc15_13TeV.SingleTop.DAOD_TOPQ1.TightTop.@SYST@.YearAll.histograms.root" hpath="@OBS@_passed_J1_1t1b_J2_1t1b" /> 
+  </sample>
+
+  <sample name="qcd"       label="QCD"                type="background" fillcolor="619" linecolor="619" >
+     <det fpath="@INPUTPATH@/output/@SYST@/mc15_13TeV.QCD_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.@SYST@.YearAll.histograms.root" hpath="@OBS@_passed_J1_1t1b_J2_1t1b" /> 
+  </sample>
+
+</samples>
+</config>
