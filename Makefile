@@ -20,7 +20,7 @@ CINT         = /cvmfs/atlas.cern.ch/repo/sw/software/17.4.0/sw/lcg/app/releases/
 CXXFLAGS    += $(ROOTCFLAGS) 
 
 CXXFLAGS    += -I. -I./include -I$(BATINSTALLDIR)/include
-LIBS        += -L$(BATINSTALLDIR)/lib -lBATmodels -lBAT $(ROOTLIBS)
+LIBS        += -L$(BATINSTALLDIR)/lib -lBATmodels -lBAT -lBATmtf $(ROOTLIBS)
 
 CXXSRCS      = src/EikosUnfolder.cxx src/Systematic.cxx src/Sample.cxx
 
@@ -49,7 +49,11 @@ clean :
 	$(RM) $(GARBAGE)
 
 library: src/EikosUnfolderDict.o $(CXXOBJS)
-	$(CXX) -shared -fPIC -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(ROOTLIBS) -L$(BATINSTALLDIR)/lib -lBAT -lc
+	$(CXX) -shared -fPIC -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(LIBS) -lc
+
+install:
+	mv libEikos.so $(BATINSTALLDIR)/lib
+	mv EikosUnfolderDict_rdict.pcm $(BATINSTALLDIR)/lib
 
 project: src/run-Eikos.cxx $(CXXOBJS)
 	$(CXX) $(CXXFLAGS) -c $<

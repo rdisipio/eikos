@@ -5,14 +5,13 @@
 #include <TH1D.h>
 
 #include <BAT/BCModel.h>
+#include <BAT/BCMTFSystematic.h>
+#include <BAT/BCMTFSystematicVariation.h>
+#include <BAT/BCMTFTemplate.h>
 
 #include <map>
 
 #include "Sample.h"
-#include "Systematic.h"
-
-//class Sample;
-//class Systematic;
 
 //enum StatusCode { kSuccess = 0, kWarning = 1, kError = 2 };
 
@@ -33,9 +32,12 @@ class EikosUnfolder : public BCModel, public TObject
     int GetSystematicIndex( const std::string& name );
 
     int AddSample( const std::string& sample_name, double x_min, double x_max, int color = -1, int fillstyle = -1, int linestyle = -1 );
-    int AddSystematic( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );
+    int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
+    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );
+    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const TH1D * h_n = NULL );
 
-    void   SetData( const TH1D * data );
+    void SetDiffXsTemplate( const TH1 * h );
+    void SetData( const TH1D * data );
     std::vector<double>& GetData() { return m_data; };
 
     double LogLikelihood( const std::vector<double>& parameters );
@@ -47,11 +49,14 @@ class EikosUnfolder : public BCModel, public TObject
 
  protected:
     std::string m_name;
+    int         m_nbins;
+    std::vector<double> m_xedges;
+    std::vector<double>	m_bw;
 
     std::vector< Sample * >          m_samples;
     std::map< const std::string, int >     m_samples_index;
 
-    std::vector< Systematic * >      m_systematics;
+    std::vector< BCMTFSystematic * >       m_systematics;
     std::map< const std::string, int >     m_systematics_index;
 
     std::vector<double> m_data;
