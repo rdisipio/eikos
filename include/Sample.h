@@ -3,16 +3,14 @@
 
 #include <string>
 
-class Sample
+#include <TObject.h>
+
+class Sample : public TObject
 {
  public:
    Sample( const std::string& name );
    ~Sample();
 
-   inline std::string& GetName() { return m_name; };
-
-   void SetName( const std::string& name ) { m_name = name; };
-   
    void SetColor( int color )         { m_color     = color;     };
    void SetFillStyle( int fillstyle ) { m_fillstyle = fillstyle; };
    void SetLineStyle( int linestyle ) { m_linestyle = linestyle; };
@@ -21,9 +19,9 @@ class Sample
    int GetFillStyle() { return m_fillstyle; };
    int GetLineStyle() { return m_linestyle; };
 
- protected:
-   std::string m_name;
+   ClassDef( Sample, 1 )
 
+ protected:
    int m_color;
    int m_linestyle;
    int m_fillstyle;

@@ -1,7 +1,6 @@
 # Root variables
 ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := -lMinuit $(shell root-config --libs)
-
 ROOTLIBS     += -lRooFitCore -lRooFit -lRooStats -lFoam -lMathMore
 
 # compiler and flags
@@ -23,27 +22,34 @@ CXXFLAGS    += $(ROOTCFLAGS)
 CXXFLAGS    += -I. -I./include -I$(BATINSTALLDIR)/include
 LIBS        += -L$(BATINSTALLDIR)/lib -lBATmodels -lBAT $(ROOTLIBS)
 
-CXXSRCS      = src/Unfolder.cxx src/Systematic.cxx src/Sample.cxx
+CXXSRCS      = src/EikosUnfolder.cxx src/Systematic.cxx src/Sample.cxx
 
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
+
 EXEOBJS      =
 MYPROGS      = run-Eikos
 
-GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS)
+GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS) src/*Dict.cxx src/*Dict.o src/*.pcm
 
 # targets
-all : project
+all : library
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
 
 -include link.d
 
+src/EikosUnfolderDict.cxx :  
+	rootcint -f src/EikosUnfolderDict.cxx -c include/EikosUnfolder.h include/LinkDef.h
+
 %.o : %.cxx
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
 
 clean :
 	$(RM) $(GARBAGE)
+
+library: src/EikosUnfolderDict.o $(CXXOBJS)
+	$(CXX) -shared -fPIC -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(ROOTLIBS) -L$(BATINSTALLDIR)/lib -lBAT -lc
 
 project: src/run-Eikos.cxx $(CXXOBJS)
 	$(CXX) $(CXXFLAGS) -c $<

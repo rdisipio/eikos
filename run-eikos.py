@@ -8,12 +8,12 @@ import xml.etree.ElementTree as ET
 from ROOT import *
 
 gSystem.Load( "libBAT.so")
-from ROOT import BCAux#, BCLog
+gSystem.Load( "libEikos.so" )
 
-exit(1)
-BCAux.SetStyle();
+from ROOT import *
 
 BCLog.OpenLog("log.txt")
 BCLog.SetLogLevel(BCLog.detail)
 BCLog.OutSummary("Welcome to Eikos v2.0")
 
+unfolder = EikosUnfolder()
