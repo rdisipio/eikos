@@ -51,6 +51,12 @@ hpath = hpath.replace("@PHSPACE@",gparams['PHSPACE'])
 
 f = TFile.Open( fpath )
 h = f.Get( hpath ).Clone( diffxs_name )
+
+normalize_to = diffxs_template.attrib['normalize'].split(",")
+if "luminosity" in normalize_to:
+   BCLog.OutSummary( "Scaling diffxs template to iLumi %s" % gparams['ILUMI'] )
+   h.Scale( 1./float(gparams['ILUMI']) )
+
 unfolder.SetDiffXsTemplate( h )
 
 # Define samples

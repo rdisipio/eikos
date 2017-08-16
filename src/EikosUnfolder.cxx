@@ -4,12 +4,13 @@
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins(-1)
+  m_nbins(-1), m_h_data(NULL)
 {
 }
 
 EikosUnfolder::~EikosUnfolder()
 {
+  if( m_h_data ) delete m_h_data;
 }
 
 int EikosUnfolder::GetSampleIndex( const std::string& name )
@@ -91,6 +92,9 @@ void EikosUnfolder::SetDiffXsTemplate( const TH1 * h )
 
 void EikosUnfolder::SetData( const TH1D * data )
 {
+  if( m_h_data != NULL ) delete m_h_data;
+
+  m_h_data = (TH1D*)data->Clone( "data" );
 }
 
 
@@ -98,7 +102,26 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 {
   double logL = 0.;
 
+  copy( parameters.begin(), parameters.end(), back_inserter(m_parameters) );
+
+  for( int r = 0 ; r < m_nbins ; ++r ) {
+       
+       const double D   = m_h_data->GetBinContent( r+1 ); 
+       
+       const float mu   = ExpectationValue( r );
+       
+       logL += BCMath::LogPoisson( D, mu ); // faster!
+       
+       //m_posteriors_tmp[r] = mu;
+  }
+
   return logL;
 }
 
 
+double EikosUnfolder::ExpectationValue( int r )
+{
+  double mu = 0.;
+
+  return mu;
+}

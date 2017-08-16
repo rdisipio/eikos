@@ -8,6 +8,7 @@
 #include <BAT/BCMTFSystematic.h>
 #include <BAT/BCMTFSystematicVariation.h>
 #include <BAT/BCMTFTemplate.h>
+#include <BAT/BCMath.h>
 
 #include <map>
 
@@ -38,18 +39,23 @@ class EikosUnfolder : public BCModel, public TObject
 
     void SetDiffXsTemplate( const TH1 * h );
     void SetData( const TH1D * data );
-    std::vector<double>& GetData() { return m_data; };
+    TH1D * GetData() { return m_h_data; };
 
     double LogLikelihood( const std::vector<double>& parameters );
 //    void MCMCUserIterationinterface();
 
     ClassDef( EikosUnfolder, 1 )
 
+ protected:
+    double ExpectationValue( int r );
+
  //~~~~~~~~~~~~~~~~~~~~~
 
  protected:
     std::string m_name;
     int         m_nbins;
+    std::vector<double> m_parameters;
+
     std::vector<double> m_xedges;
     std::vector<double>	m_bw;
 
@@ -59,7 +65,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector< BCMTFSystematic * >       m_systematics;
     std::map< const std::string, int >     m_systematics_index;
 
-    std::vector<double> m_data;
+    TH1D * m_h_data;
 };
 
 //} // namespace Eikos
