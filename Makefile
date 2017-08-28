@@ -22,7 +22,7 @@ CXXFLAGS    += $(ROOTCFLAGS)
 CXXFLAGS    += -I. -I./include -I$(BATINSTALLDIR)/include
 LIBS        += -L$(BATINSTALLDIR)/lib -lBATmodels -lBAT -lBATmtf $(ROOTLIBS)
 
-CXXSRCS      = src/EikosUnfolder.cxx src/Systematic.cxx src/Sample.cxx
+CXXSRCS      = src/EikosUnfolder.cxx src/Sample.cxx
 
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
 
@@ -49,6 +49,9 @@ clean :
 	$(RM) $(GARBAGE)
 
 library: src/EikosUnfolderDict.o $(CXXOBJS)
+	@echo
+	@echo Building shared library libEikos.so
+	@echo 
 	$(CXX) -shared -fPIC -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(LIBS) -lc
 
 install:

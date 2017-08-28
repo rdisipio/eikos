@@ -10,7 +10,7 @@ EikosUnfolder::EikosUnfolder() :
 
 EikosUnfolder::~EikosUnfolder()
 {
-  if( m_h_data ) delete m_h_data;
+//  if( m_h_data ) delete m_h_data;
 }
 
 int EikosUnfolder::GetSampleIndex( const std::string& name )
@@ -27,12 +27,29 @@ int EikosUnfolder::GetSystematicIndex( const std::string& name )
   return index;
 }
 
-int EikosUnfolder::AddSample( const std::string& sample_name, double x_min, double x_max, int color, int fillstyle, int linestyle )
+int EikosUnfolder::AddSample( const std::string& name, const std::string& latex, SAMPLE_TYPE type, int color, int fillstyle, int linestyle )
 {
   int index = -1;
 
+  Sample sample;
+
+  sample.SetName( name );
+  sample.SetLatex( latex );
+  sample.SetType( type );
+  sample.SetIndex( m_samples.size() );
+
+  sample.SetColor( color );
+  sample.SetFillStyle( fillstyle );
+  sample.SetLineStyle( linestyle );
+
+  m_samples[name] = sample;
+
   return index;
 }
+
+
+/////////////////////////////////////
+
 
 int EikosUnfolder::AddSystematic( const std::string& sname, double min, double max, const std::string & latexname, const std::string & unitstring )
 {
@@ -90,7 +107,7 @@ void EikosUnfolder::SetDiffXsTemplate( const TH1 * h )
 }
 
 
-void EikosUnfolder::SetData( const TH1D * data )
+void EikosUnfolder::SetData( const TH1 * data )
 {
   if( m_h_data != NULL ) delete m_h_data;
 

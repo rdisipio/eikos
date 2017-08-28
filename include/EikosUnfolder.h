@@ -32,13 +32,15 @@ class EikosUnfolder : public BCModel, public TObject
     int GetSampleIndex( const std::string& name );
     int GetSystematicIndex( const std::string& name );
 
-    int AddSample( const std::string& sample_name, double x_min, double x_max, int color = -1, int fillstyle = -1, int linestyle = -1 );
+    int AddSample( const std::string& name, const std::string& latex = "Sample", SAMPLE_TYPE type = SAMPLE_TYPE::kSignal, int color = -1, int fillstyle = -1, int linestyle = -1 );
+    Sample * GetSample( const std::string& name ) { return &(m_samples[name]); };
+
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const TH1D * h_n = NULL );
 
     void SetDiffXsTemplate( const TH1 * h );
-    void SetData( const TH1D * data );
+    void SetData( const TH1 * data );
     TH1D * GetData() { return m_h_data; };
 
     double LogLikelihood( const std::vector<double>& parameters );
@@ -59,7 +61,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector<double> m_xedges;
     std::vector<double>	m_bw;
 
-    std::vector< Sample * >          m_samples;
+    SampleCollection_t                     m_samples;
     std::map< const std::string, int >     m_samples_index;
 
     std::vector< BCMTFSystematic * >       m_systematics;
