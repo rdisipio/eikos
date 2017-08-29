@@ -33,10 +33,10 @@ class EikosUnfolder : public BCModel, public TObject
     int GetSampleIndex( const std::string& name );
     int GetSystematicIndex( const std::string& name );
 
-    int AddSample( const std::string& name, const std::string& latex = "Sample", SAMPLE_TYPE type = SAMPLE_TYPE::kSignal, int color = -1, int fillstyle = -1, int linestyle = -1 );
-    void SetSignalSample( Sample * signal )       { m_signal_sample = signal; };
+    int AddSample( const std::string& name, SAMPLE_TYPE type = SAMPLE_TYPE::kBackground, const std::string& latex = "Sample", int color = -1, int fillstyle = -1, int linestyle = -1 );
+    void SetSignalSample( const std::string& name );
     Sample * GetSample( const std::string& name ) { return m_samples[name]; };
-    Sample * GetSignalSample() { return m_signal_sample; };
+    Sample * GetSignalSample() { return m_samples[m_signal_sample]; };
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );
@@ -67,7 +67,7 @@ class EikosUnfolder : public BCModel, public TObject
 
     SampleCollection_t                     m_samples;
     std::map< const std::string, int >     m_samples_index;
-    Sample * m_signal_sample;
+    std::string m_signal_sample;
  
     std::vector< BCMTFSystematic * >       m_systematics;
     std::map< const std::string, int >     m_systematics_index;

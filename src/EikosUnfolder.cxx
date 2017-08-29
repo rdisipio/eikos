@@ -4,7 +4,7 @@
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins(-1), m_signal_sample(NULL), m_h_data(NULL)
+  m_nbins(-1), m_h_data(NULL)
 {
 }
 
@@ -38,7 +38,7 @@ int EikosUnfolder::GetSystematicIndex( const std::string& name )
 /////////////////////////////////
 
 
-int EikosUnfolder::AddSample( const std::string& name, const std::string& latex, SAMPLE_TYPE type, int color, int fillstyle, int linestyle )
+int EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, const std::string& latex, int color, int fillstyle, int linestyle )
 {
   int index = -1;
 
@@ -46,9 +46,10 @@ int EikosUnfolder::AddSample( const std::string& name, const std::string& latex,
   Sample * sample = m_samples[name];
 
   sample->SetName( name );
-  sample->SetLatex( latex );
   sample->SetType( type );
   sample->SetIndex( m_samples.size() - 1 );
+
+  sample->SetLatex( latex );
 
   sample->SetColor( color );
   sample->SetFillStyle( fillstyle );
@@ -126,19 +127,36 @@ void EikosUnfolder::SetData( const TH1 * data )
 
 /////////////////////////////////
 
+void EikosUnfolder::SetSignalSample( const std::string& name )
+{
+   m_signal_sample = name; 
+}
+
+/////////////////////////////////
+
 
 void EikosUnfolder::PrepareForRun()
 {
+  // Print out summary of samples  
+  std::cout << "List of defined samples:" << std::endl;
+  for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
+     const std::string& sname = itr->first;
+     Sample * p_sample = itr->second; 
+
+     std::cout << "Sample " << sname << " :: type=" << p_sample->GetType() << std::endl;
+  }
+
   // 1) adjust posterior min/max
   Sample * nominal = GetSignalSample();
   if( nominal == NULL ) {
      std::cout << "ERROR: invalid signal sample" << std::endl;
      return;
   }
+  std::cout << "Using signal " << nominal->GetName() << std::endl;
 
   TH1D * h = nominal->GetNominalHistogramTruth();
   if( h == NULL ) {
-     std::cout << "ERROR: invalid signal sample histogram" << std::endl;
+     std::cout << "ERROR: invalid signal truth histogram" << std::endl;
      return;
   }
 

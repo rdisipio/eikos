@@ -18,8 +18,8 @@ class Sample : public TObject
    Sample( const std::string& name = "AnySample" );
    ~Sample();
 
-   void SetName( const std::string& name )  { m_name      = name;      };
-   void SetLatex( const std::string& tex )  { m_latex      = tex;      };
+   void SetName( const std::string& name )  { m_name  = name;    };
+   void SetLatex( const std::string& tex )  { m_latex = tex;     };
    void SetType( SAMPLE_TYPE type )   { m_type      = type;      };
    void SetIndex( int index )         { m_index     = index;     };
 

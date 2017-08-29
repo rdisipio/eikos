@@ -101,13 +101,10 @@ class EikosPrompt( Cmd, object ):
 
    #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   def add_sample( self, tokens ):
-      sname = tokens[0]
-      samples[sname] = SampleWrapper()
-      samples[sname].name = sname
-
+   def add_sample( self, sname ):
       unfolder.AddSample( sname )
       BCLog.OutSummary( "Added sample %s" % sname )
+
    #~
 
    def set_sample_type( self, sname, t ):
@@ -118,11 +115,9 @@ class EikosPrompt( Cmd, object ):
       elif t in [ 'datadriven', "DataDriven", "dd", "DD" ]: itype = 3
       else: itype = 2
 
-      samples[sname].type = itype
-
       sample = unfolder.GetSample(sname)
       sample.SetType( itype )
-      if itype == 1: unfolder.SetSignalSample( sample )
+      if itype == 1: unfolder.SetSignalSample( sname )
 
       BCLog.OutSummary( "Sample %s: type set to %i (%s)" % ( sname, unfolder.GetSample(sname).GetType(), t )  )
 
@@ -202,8 +197,10 @@ class EikosPrompt( Cmd, object ):
 
       what = tokens[0]
       if what == "sample":
-         self.add_sample( tokens[1:] )
+         sname = tokens[1]
+         self.add_sample( sname )
       elif what == "systematic":
+       	 sname = tokens[1]
          self.add_systematic( tokens[1:] )
 
    ###################
