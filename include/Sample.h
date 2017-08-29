@@ -33,6 +33,7 @@ class Sample : public TObject
    void SetLineStyle( int linestyle ) { m_linestyle = linestyle; };
 
    SAMPLE_TYPE GetType() { return m_type; };
+   std::string& GetName() { return this->m_name; };
    int GetIndex()       { return m_index; };
    int GetColor()       { return m_color; };
    int GetFillStyle()   { return m_fillstyle; };

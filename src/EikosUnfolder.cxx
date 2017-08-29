@@ -156,7 +156,6 @@ void EikosUnfolder::PrepareForRun()
      std::cout << "ERROR: invalid signal sample" << std::endl;
      return;
   }
-  std::cout << "Using signal " << nominal->GetName() << std::endl;
 
   pTH1D_t h = nominal->GetNominalHistogramTruth();
   if( h == NULL ) {

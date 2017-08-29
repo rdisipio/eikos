@@ -25,12 +25,6 @@ gparams['OBS']        = "t1_pt"
 gparams['ILUMI']      = 36074.6
 gparams['INPUTPATH']  = "$PWD/data/tt_allhad_boosted"
 
-class SampleWrapper( object ):
-   def __init__(self):
-      self.name = ""
-      
-samples = {}
-
 systematics = {}
 
 BCLog.OpenLog("log.txt")
@@ -103,7 +97,7 @@ class EikosPrompt( Cmd, object ):
 
    def add_sample( self, sname ):
       unfolder.AddSample( sname )
-      BCLog.OutSummary( "Added sample %s" % sname )
+      BCLog.OutSummary( "Added sample %s" % unfolder.GetSample(sname).GetName() )
 
    #~
 
