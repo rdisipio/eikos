@@ -3,8 +3,9 @@ set data   hpath @INPUTPATH@/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root:@
 add sample ttAH
 set sample ttAH type      signal
 add sample ttAH syst      nominal
-set sample ttAH detector  hpath 
-set sample ttAH	response  hpath
-set sample ttAH	truth     hpath
+set sample ttAH detector  hpath @INPUTPATH@/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.nominal.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH	response  hpath @INPUTPATH@/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.nominal.YearAll.histograms.root:response_singlespectrum_@PHSPACE@_@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH	truth     hpath @INPUTPATH@/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.particle.nominal.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
 add sample bkg
 set sample bkg type background
+set sample bkg detector   hpath @INPUTPATH@/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.nominal.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b 

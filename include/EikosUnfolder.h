@@ -33,7 +33,7 @@ class EikosUnfolder : public BCModel, public TObject
     int GetSystematicIndex( const std::string& name );
 
     int AddSample( const std::string& name, const std::string& latex = "Sample", SAMPLE_TYPE type = SAMPLE_TYPE::kSignal, int color = -1, int fillstyle = -1, int linestyle = -1 );
-    Sample * GetSample( const std::string& name ) { return &(m_samples[name]); };
+    Sample * GetSample( const std::string& name ) { return m_samples[name]; };
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );

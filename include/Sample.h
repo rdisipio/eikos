@@ -43,6 +43,6 @@ class Sample : public TObject
    SAMPLE_TYPE m_type;
 };
 
-typedef std::map< const std::string, Sample > SampleCollection_t;
-
+typedef std::map< const std::string, Sample * > SampleCollection_t;
+typedef SampleCollection_t::iterator            SampleCollection_itr_t;
 #endif /** __SAMPLE_H__ */

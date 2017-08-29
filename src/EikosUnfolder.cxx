@@ -11,6 +11,9 @@ EikosUnfolder::EikosUnfolder() :
 EikosUnfolder::~EikosUnfolder()
 {
 //  if( m_h_data ) delete m_h_data;
+  for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
+     delete itr->second;
+  }
 }
 
 int EikosUnfolder::GetSampleIndex( const std::string& name )
@@ -31,18 +34,17 @@ int EikosUnfolder::AddSample( const std::string& name, const std::string& latex,
 {
   int index = -1;
 
-  Sample sample;
+  m_samples[name] = new Sample();
+  Sample * sample = m_samples[name];
 
-  sample.SetName( name );
-  sample.SetLatex( latex );
-  sample.SetType( type );
-  sample.SetIndex( m_samples.size() );
+  sample->SetName( name );
+  sample->SetLatex( latex );
+  sample->SetType( type );
+  sample->SetIndex( m_samples.size() - 1 );
 
-  sample.SetColor( color );
-  sample.SetFillStyle( fillstyle );
-  sample.SetLineStyle( linestyle );
-
-  m_samples[name] = sample;
+  sample->SetColor( color );
+  sample->SetFillStyle( fillstyle );
+  sample->SetLineStyle( linestyle );
 
   return index;
 }
