@@ -116,15 +116,19 @@ class EikosPrompt( Cmd, object ):
    #~
 
    def set_sample_type( self, sname, t ):
-      itype = 1
+      itype = 2
       if t in [ 'data', 'Data' ]: itype = 0
       elif t in [ 'signal', 'Signal' ]: itype = 1
       elif t in [ 'background', "Background", 'bkg', 'Bkg' ]: itype = 2
       elif t in [ 'datadriven', "DataDriven", "dd", "DD" ]: itype = 3
-      else: itype = 1
+      else: itype = 2
 
       samples[sname].type = itype
-      unfolder.GetSample(sname).SetType( itype )
+
+      sample = unfolder.GetSample(sname)
+      sample.SetType( itype )
+      if itype == 1: unfolder.SetSignalSample( sample )
+
       BCLog.OutSummary( "Sample %s: type set to %i (%s)" % ( sname, unfolder.GetSample(sname).GetType(), t )  )
 
    #~
@@ -134,6 +138,28 @@ class EikosPrompt( Cmd, object ):
       unfolder.GetSample(sname).SetLatex( latex )
       BCLog.OutSummary(	"Sample %s: latex label = %s" % (sname, value ) )      
    #~
+
+   def set_sample_hpath( self, sname, syst, lvl, path ):
+      fpath, hpath = path.split(':')
+      f = TFile.Open( fpath )
+      if f.Get( hpath ) == None:
+          BCLog.OutSummary( "Sample %s: invalid histogram %s in file %s" % (hpath,fpath) )
+          return
+
+      h = f.Get( hpath )
+      sample = unfolder.GetSample(sname)
+
+      if syst == "nominal":
+         if lvl in [ "reco", "detector" ]: sample.SetNominalHistogramDetector( h )
+         elif lvl in [ "resp", "response" ]: sample.SetNominalHistogramResponse( h )
+         elif lvl in [ "gen", "truth", "particle", "parton" ]:
+            ilumi = float( gparams['ILUMI'] )
+            h.Scale( 1./ilumi )
+            sample.SetNominalHistogramTruth( h )
+            BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
+         else: BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
+      else:
+         BCLog.OutSummary( "Sample %s: systematics not yet implemented" )
 
    ###################
 
@@ -183,9 +209,11 @@ class EikosPrompt( Cmd, object ):
       elif what == "sample":
          sname = tokens[1]
          value = tokens[2]
-         if value == "hpath": #TODO
-            fpath, hpath = tokens[3].split(':')
-            self.set_sample_hpath( sname, fpath, hpath )
+         if value == "hpath": 
+            syst = tokens[4]
+            lvl  = tokens[5]
+            path = tokens[6]
+            self.set_sample_hpath( sname, syst, lvl, path )
          elif value == "type":
             self.set_sample_type( sname, tokens[3] )
          elif value == "latex":
@@ -220,6 +248,7 @@ class EikosPrompt( Cmd, object ):
    ###################
 
    def do_run( self, args ):
+     unfolder.PrepareForRun()
      unfolder.PrintSummary()
 
 

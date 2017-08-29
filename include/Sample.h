@@ -6,6 +6,8 @@
 
 #include <TObject.h>
 #include <TNamed.h>
+#include <TH1D.h>
+#include <TH2D.h>
 
 enum SAMPLE_TYPE { kData = 0, kSignal = 1, kBackground = 2, kDataDriven = 3, kNSampleTypes = 4 };
 
@@ -31,6 +33,15 @@ class Sample : public TObject
    int GetFillStyle()   { return m_fillstyle; };
    int GetLineStyle()   { return m_linestyle; };
 
+   void SetNominalHistogramDetector( TH1D * h ) { m_h_detector = (TH1D*)h->Clone(); };
+   TH1D * GetNominalHistogramDetector()         { return m_h_detector;       };
+
+   void	SetNominalHistogramResponse( TH2D * h ) { m_h_response = (TH2D*)h->Clone(); };
+   TH2D * GetNominalHistogramResponse()         { return m_h_response;       };
+
+   void	SetNominalHistogramTruth( TH1D * h )   { m_h_truth = (TH1D*)h->Clone();    };
+   TH1D * GetNominalHistogramTruth() 	       { return	m_h_truth;  	    };
+
    ClassDef( Sample, 1 )
 
  protected:
@@ -41,6 +52,10 @@ class Sample : public TObject
    int m_linestyle;
    int m_fillstyle;
    SAMPLE_TYPE m_type;
+
+   TH1D * m_h_detector;
+   TH2D * m_h_response;
+   TH1D * m_h_truth;
 };
 
 typedef std::map< const std::string, Sample * > SampleCollection_t;

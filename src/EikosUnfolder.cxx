@@ -4,7 +4,7 @@
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins(-1), m_h_data(NULL)
+  m_nbins(-1), m_signal_sample(NULL), m_h_data(NULL)
 {
 }
 
@@ -15,6 +15,10 @@ EikosUnfolder::~EikosUnfolder()
      delete itr->second;
   }
 }
+
+
+/////////////////////////////////
+
 
 int EikosUnfolder::GetSampleIndex( const std::string& name )
 {
@@ -29,6 +33,10 @@ int EikosUnfolder::GetSystematicIndex( const std::string& name )
 
   return index;
 }
+
+
+/////////////////////////////////
+
 
 int EikosUnfolder::AddSample( const std::string& name, const std::string& latex, SAMPLE_TYPE type, int color, int fillstyle, int linestyle )
 {
@@ -65,6 +73,10 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
   return index;
 }
 
+
+/////////////////////////////////
+
+
 int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n )
 {
   int index = -1;
@@ -78,6 +90,9 @@ int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const
 
    return index;
 }
+
+
+/////////////////////////////////
 
 
 void EikosUnfolder::SetDiffXsTemplate( const TH1 * h )
@@ -136,6 +151,41 @@ void EikosUnfolder::SetData( const TH1 * data )
       AddParameter( b_name, 0., 1., b_latex );
   }
 }
+
+
+/////////////////////////////////
+
+
+void EikosUnfolder::PrepareForRun()
+{
+  // 1) adjust posterior min/max
+  Sample * nominal = GetSignalSample();
+  if( nominal == NULL ) {
+     std::cout << "ERROR: invalid signal sample" << std::endl;
+     return;
+  }
+
+  TH1D * h = nominal->GetNominalHistogramTruth();
+  if( h == NULL ) {
+     std::cout << "ERROR: invalid signal sample histogram" << std::endl;
+     return;
+  }
+
+  char b_name[32];
+  for( int i = 0 ; i < m_nbins ; i++ ) {
+      double y = h->GetBinContent( i+1 );
+      double y_min = 0.2 * y;
+      double y_max = 2.0 * y;
+
+      sprintf( b_name, "bin_%i", i+1 );
+      BCParameter * np = &GetParameter( b_name );
+      np->SetLimits( y_min, y_max );
+  }
+
+}
+
+
+/////////////////////////////////
 
 
 double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )

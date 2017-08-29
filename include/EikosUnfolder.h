@@ -10,6 +10,7 @@
 #include <BAT/BCMTFTemplate.h>
 #include <BAT/BCMath.h>
 
+#include <iostream>
 #include <map>
 
 #include "Sample.h"
@@ -33,7 +34,9 @@ class EikosUnfolder : public BCModel, public TObject
     int GetSystematicIndex( const std::string& name );
 
     int AddSample( const std::string& name, const std::string& latex = "Sample", SAMPLE_TYPE type = SAMPLE_TYPE::kSignal, int color = -1, int fillstyle = -1, int linestyle = -1 );
+    void SetSignalSample( Sample * signal )       { m_signal_sample = signal; };
     Sample * GetSample( const std::string& name ) { return m_samples[name]; };
+    Sample * GetSignalSample() { return m_signal_sample; };
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );
@@ -42,6 +45,8 @@ class EikosUnfolder : public BCModel, public TObject
     void SetDiffXsTemplate( const TH1 * h );
     void SetData( const TH1 * data );
     TH1D * GetData() { return m_h_data; };
+
+    void PrepareForRun();
 
     double LogLikelihood( const std::vector<double>& parameters );
 //    void MCMCUserIterationinterface();
@@ -63,7 +68,8 @@ class EikosUnfolder : public BCModel, public TObject
 
     SampleCollection_t                     m_samples;
     std::map< const std::string, int >     m_samples_index;
-
+    Sample * m_signal_sample;
+ 
     std::vector< BCMTFSystematic * >       m_systematics;
     std::map< const std::string, int >     m_systematics_index;
 

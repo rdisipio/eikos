@@ -2,7 +2,8 @@
 
 ClassImp( Sample )
 
-Sample::Sample( const std::string& name ) 
+Sample::Sample( const std::string& name ) : 
+  m_h_detector(NULL), m_h_response(NULL), m_h_truth(NULL)
 {
   m_name      = name;
   m_latex     = name;
