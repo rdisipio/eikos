@@ -3,11 +3,16 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include <TObject.h>
 #include <TNamed.h>
 #include <TH1D.h>
 #include <TH2D.h>
+
+typedef std::shared_ptr<TH1>  pTH1_t;
+typedef std::shared_ptr<TH1D> pTH1D_t;
+typedef	std::shared_ptr<TH2D> pTH2D_t;
 
 enum SAMPLE_TYPE { kData = 0, kSignal = 1, kBackground = 2, kDataDriven = 3, kNSampleTypes = 4 };
 
@@ -33,14 +38,14 @@ class Sample : public TObject
    int GetFillStyle()   { return m_fillstyle; };
    int GetLineStyle()   { return m_linestyle; };
 
-   void SetNominalHistogramDetector( TH1D * h, const std::string& hname = "detector" );
-   inline TH1D * GetNominalHistogramDetector()         { return m_h_detector; };
+   void SetNominalHistogramDetector( const TH1 * h, const std::string& hname = "detector" );
+   inline pTH1D_t GetNominalHistogramDetector()         { return m_h_detector; };
 
-   void	SetNominalHistogramResponse( TH2D * h, const std::string& hname = "response" );
-   inline TH2D * GetNominalHistogramResponse()         { return m_h_response; };
+   void	SetNominalHistogramResponse( const TH1 * h, const std::string& hname = "response" );
+   inline pTH2D_t GetNominalHistogramResponse()         { return m_h_response; };
 
-   void	SetNominalHistogramTruth( TH1D * h, const std::string& hname = "truth" );
-   inline TH1D * GetNominalHistogramTruth() 	       { return	m_h_truth; };
+   void	SetNominalHistogramTruth( const TH1 * h, const std::string& hname = "truth" );
+   inline pTH1D_t GetNominalHistogramTruth() 	       { return	m_h_truth; };
 
    ClassDef( Sample, 1 )
 
@@ -53,11 +58,12 @@ class Sample : public TObject
    int m_fillstyle;
    SAMPLE_TYPE m_type;
 
-   TH1D * m_h_detector;
-   TH2D * m_h_response;
-   TH1D * m_h_truth;
+   pTH1D_t m_h_detector;
+   pTH2D_t m_h_response;
+   pTH1D_t m_h_truth;
 };
 
-typedef std::map< const std::string, Sample * > SampleCollection_t;
-typedef SampleCollection_t::iterator            SampleCollection_itr_t;
+typedef std::shared_ptr<Sample>                  pSample_t;
+typedef std::map< const std::string, pSample_t > SampleCollection_t;
+typedef SampleCollection_t::iterator             SampleCollection_itr_t;
 #endif /** __SAMPLE_H__ */

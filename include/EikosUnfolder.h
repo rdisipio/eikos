@@ -35,15 +35,15 @@ class EikosUnfolder : public BCModel, public TObject
 
     int AddSample( const std::string& name, SAMPLE_TYPE type = SAMPLE_TYPE::kBackground, const std::string& latex = "Sample", int color = -1, int fillstyle = -1, int linestyle = -1 );
     void SetSignalSample( const std::string& name );
-    Sample * GetSample( const std::string& name ) { return m_samples[name]; };
-    Sample * GetSignalSample() { return m_samples[m_signal_sample]; };
+    pSample_t GetSample( const std::string& name ) { return m_samples.at(name); };
+    pSample_t GetSignalSample();
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
-    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );
-    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const TH1D * h_n = NULL );
+    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const pTH1D_t h_u, const pTH1D_t h_d, const pTH1D_t h_n = NULL );
+    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const pTH1D_t h_n = NULL );
 
     void SetData( const TH1 * data );
-    TH1D * GetData() { return m_h_data; };
+    pTH1D_t GetData() { return m_h_data; };
 
     void PrepareForRun();
 
@@ -72,7 +72,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector< BCMTFSystematic * >       m_systematics;
     std::map< const std::string, int >     m_systematics_index;
 
-    TH1D * m_h_data;
+    pTH1D_t m_h_data;
 };
 
 //} // namespace Eikos

@@ -20,17 +20,20 @@ Sample::~Sample()
 {
 }
 
-void Sample::SetNominalHistogramDetector( TH1D * h, const std::string& hname ) 
+void Sample::SetNominalHistogramDetector( const TH1 * h, const std::string& hname ) 
 {
-   m_h_detector = (TH1D*)h->Clone( hname.c_str() ); 
+   m_h_detector = std::make_shared<TH1D>();
+   h->Copy( *m_h_detector );
 }
 
-void Sample::SetNominalHistogramResponse( TH2D * h, const std::string& hname ) 
+void Sample::SetNominalHistogramResponse( const TH1 * h, const std::string& hname ) 
 { 
-   m_h_response = (TH2D*)h->Clone( hname.c_str() ); 
+   m_h_response = std::make_shared<TH2D>();
+   h->Copy( *m_h_response );
 }
 
-void Sample::SetNominalHistogramTruth( TH1D * h, const std::string& hname )   
+void Sample::SetNominalHistogramTruth( const TH1 * h, const std::string& hname )   
 {
-   m_h_truth = (TH1D*)h->Clone( hname.c_str() );    
+   m_h_truth = std::make_shared<TH1D>();
+   h->Copy( *m_h_truth );
 }

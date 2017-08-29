@@ -10,10 +10,8 @@ EikosUnfolder::EikosUnfolder() :
 
 EikosUnfolder::~EikosUnfolder()
 {
-//  if( m_h_data ) delete m_h_data;
-  for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
-     delete itr->second;
-  }
+  m_samples.clear();
+
 }
 
 
@@ -42,18 +40,18 @@ int EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, const s
 {
   int index = -1;
 
-  m_samples[name] = new Sample();
-  Sample * sample = m_samples[name];
+  m_samples[name] = std::make_shared<Sample>();
+  pSample_t p_sample = m_samples[name];
 
-  sample->SetName( name );
-  sample->SetType( type );
-  sample->SetIndex( m_samples.size() - 1 );
+  p_sample->SetName( name );
+  p_sample->SetType( type );
+  p_sample->SetIndex( m_samples.size() - 1 );
 
-  sample->SetLatex( latex );
+  p_sample->SetLatex( latex );
 
-  sample->SetColor( color );
-  sample->SetFillStyle( fillstyle );
-  sample->SetLineStyle( linestyle );
+  p_sample->SetColor( color );
+  p_sample->SetFillStyle( fillstyle );
+  p_sample->SetLineStyle( linestyle );
 
   return index;
 }
@@ -78,14 +76,14 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
 /////////////////////////////////
 
 
-int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n )
+int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const pTH1D_t h_u, const pTH1D_t h_d, const pTH1D_t h_n )
 {
   int index = -1;
 
   return index;
 }
 
-int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const TH1D * h_n )
+int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const pTH1D_t h_n )
 {
    int index = -1;
 
@@ -98,9 +96,9 @@ int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const
 
 void EikosUnfolder::SetData( const TH1 * data )
 {
-  if( m_h_data != NULL ) delete m_h_data;
-
-  m_h_data = (TH1D*)data->Clone( "data" );
+  m_h_data = std::make_shared<TH1D>();
+  data->Copy( *m_h_data );
+//  m_h_data- (TH1D*)data->Clone( "data" ) );
 
   m_nbins = m_h_data->GetNbinsX();
 
@@ -130,6 +128,12 @@ void EikosUnfolder::SetData( const TH1 * data )
 void EikosUnfolder::SetSignalSample( const std::string& name )
 {
    m_signal_sample = name; 
+   std::cout << "Signal sample is " << m_signal_sample << std::endl;
+}
+
+pSample_t EikosUnfolder::GetSignalSample()
+{
+  return m_samples[m_signal_sample]; 
 }
 
 /////////////////////////////////
@@ -141,20 +145,20 @@ void EikosUnfolder::PrepareForRun()
   std::cout << "List of defined samples:" << std::endl;
   for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
      const std::string& sname = itr->first;
-     Sample * p_sample = itr->second; 
+     pSample_t p_sample = itr->second; 
 
-     std::cout << "Sample " << sname << " :: type=" << p_sample->GetType() << std::endl;
+     std::cout << "Sample " << p_sample->GetName() << " :: type=" << p_sample->GetType() << std::endl;
   }
 
   // 1) adjust posterior min/max
-  Sample * nominal = GetSignalSample();
+  pSample_t nominal = GetSignalSample();
   if( nominal == NULL ) {
      std::cout << "ERROR: invalid signal sample" << std::endl;
      return;
   }
   std::cout << "Using signal " << nominal->GetName() << std::endl;
 
-  TH1D * h = nominal->GetNominalHistogramTruth();
+  pTH1D_t h = nominal->GetNominalHistogramTruth();
   if( h == NULL ) {
      std::cout << "ERROR: invalid signal truth histogram" << std::endl;
      return;

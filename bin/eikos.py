@@ -115,8 +115,7 @@ class EikosPrompt( Cmd, object ):
       elif t in [ 'datadriven', "DataDriven", "dd", "DD" ]: itype = 3
       else: itype = 2
 
-      sample = unfolder.GetSample(sname)
-      sample.SetType( itype )
+      unfolder.GetSample(sname).SetType( itype )
       if itype == 1: unfolder.SetSignalSample( sname )
 
       BCLog.OutSummary( "Sample %s: type set to %i (%s)" % ( sname, unfolder.GetSample(sname).GetType(), t )  )
