@@ -1,0 +1,9 @@
+set data    hpath @INPUTPATH@/data/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+add sample ttAH
+set sample ttAH type      signal
+add sample ttAH syst      nominal
+set sample ttAH detector  hpath 
+set sample ttAH	response  hpath
+set sample ttAH	truth     hpath
+add sample bkg
+set sample bkg type background
