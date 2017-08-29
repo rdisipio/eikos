@@ -19,3 +19,18 @@ Sample::Sample( const std::string& name ) :
 Sample::~Sample()
 {
 }
+
+void Sample::SetNominalHistogramDetector( TH1D * h, const std::string& hname ) 
+{
+   m_h_detector = (TH1D*)h->Clone( hname.c_str() ); 
+}
+
+void Sample::SetNominalHistogramResponse( TH2D * h, const std::string& hname ) 
+{ 
+   m_h_response = (TH2D*)h->Clone( hname.c_str() ); 
+}
+
+void Sample::SetNominalHistogramTruth( TH1D * h, const std::string& hname )   
+{
+   m_h_truth = (TH1D*)h->Clone( hname.c_str() );    
+}

@@ -42,7 +42,6 @@ class EikosUnfolder : public BCModel, public TObject
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const TH1D * h_u, const TH1D * h_d, const TH1D * h_n = NULL );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const TH1D * h_n = NULL );
 
-    void SetDiffXsTemplate( const TH1 * h );
     void SetData( const TH1 * data );
     TH1D * GetData() { return m_h_data; };
 

@@ -33,14 +33,14 @@ class Sample : public TObject
    int GetFillStyle()   { return m_fillstyle; };
    int GetLineStyle()   { return m_linestyle; };
 
-   void SetNominalHistogramDetector( TH1D * h ) { m_h_detector = (TH1D*)h->Clone(); };
-   TH1D * GetNominalHistogramDetector()         { return m_h_detector;       };
+   void SetNominalHistogramDetector( TH1D * h, const std::string& hname = "detector" );
+   inline TH1D * GetNominalHistogramDetector()         { return m_h_detector; };
 
-   void	SetNominalHistogramResponse( TH2D * h ) { m_h_response = (TH2D*)h->Clone(); };
-   TH2D * GetNominalHistogramResponse()         { return m_h_response;       };
+   void	SetNominalHistogramResponse( TH2D * h, const std::string& hname = "response" );
+   inline TH2D * GetNominalHistogramResponse()         { return m_h_response; };
 
-   void	SetNominalHistogramTruth( TH1D * h )   { m_h_truth = (TH1D*)h->Clone();    };
-   TH1D * GetNominalHistogramTruth() 	       { return	m_h_truth;  	    };
+   void	SetNominalHistogramTruth( TH1D * h, const std::string& hname = "truth" );
+   inline TH1D * GetNominalHistogramTruth() 	       { return	m_h_truth; };
 
    ClassDef( Sample, 1 )
 

@@ -57,8 +57,11 @@ class EikosPrompt( Cmd, object ):
      pass
 
    def postloop( self ):
-     BCLog.OutSummary("Bye bye")
      super( EikosPrompt, self ).postloop()
+
+   def do_exit( self, args ):
+     BCLog.OutSummary("Bye bye")
+     return True
  
    #~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -84,14 +87,6 @@ class EikosPrompt( Cmd, object ):
    #~~~~~~~~~~~~~~~~~~~~~~~~
 
    def set_data( self, fpath, hpath ):
-      fpath = fpath.replace("@INPUTPATH@", gparams['INPUTPATH'] )
-      fpath = fpath.replace("@PHSPACE@",   gparams['PHSPACE'] )
-      fpath = fpath.replace("@OBS@",       gparams['OBS'] )
-      fpath = os.path.expandvars( fpath )
-
-      hpath = hpath.replace("@OBS@",       gparams['OBS'] )
-      hpath = hpath.replace("@PHSPACE@",   gparams['PHSPACE'] )   
-
       f = TFile.Open( fpath )
       h = f.Get( hpath )
       if h == None:
@@ -139,27 +134,51 @@ class EikosPrompt( Cmd, object ):
       BCLog.OutSummary(	"Sample %s: latex label = %s" % (sname, value ) )      
    #~
 
+   def unpack_path( self, path, separator=':' ):
+      fpath, hpath = path.split(separator)
+
+      fpath = fpath.replace("@INPUTPATH@", gparams['INPUTPATH'] )
+      fpath = fpath.replace("@PHSPACE@",   gparams['PHSPACE'] )
+      fpath = fpath.replace("@OBS@",       gparams['OBS'] )
+      fpath = os.path.expandvars( fpath )
+
+      hpath = hpath.replace("@OBS@",       gparams['OBS'] )
+      hpath = hpath.replace("@PHSPACE@",   gparams['PHSPACE'] )   
+
+      return ( fpath, hpath )
+
+   #~
+
    def set_sample_hpath( self, sname, syst, lvl, path ):
-      fpath, hpath = path.split(':')
+      fpath, hpath = self.unpack_path( path )
       f = TFile.Open( fpath )
       if f.Get( hpath ) == None:
           BCLog.OutSummary( "Sample %s: invalid histogram %s in file %s" % (hpath,fpath) )
           return
-
-      h = f.Get( hpath )
+         
       sample = unfolder.GetSample(sname)
 
       if syst == "nominal":
-         if lvl in [ "reco", "detector" ]: sample.SetNominalHistogramDetector( h )
-         elif lvl in [ "resp", "response" ]: sample.SetNominalHistogramResponse( h )
+         if lvl in [ "reco", "detector" ]: 
+            h = TH1D()
+            f.Get( hpath ).Copy( h )
+            sample.SetNominalHistogramDetector( h )
+         elif lvl in [ "resp", "response" ]:
+            h = TH2D()
+            f.Get( hpath ).Copy( h ) 
+            sample.SetNominalHistogramResponse( h )
          elif lvl in [ "gen", "truth", "particle", "parton" ]:
+            h = TH1D()
+            f.Get( hpath ).Copy( h )
             ilumi = float( gparams['ILUMI'] )
             h.Scale( 1./ilumi )
             sample.SetNominalHistogramTruth( h )
             BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
-         else: BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
+         else: 
+            BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
+            return False
       else:
-         BCLog.OutSummary( "Sample %s: systematics not yet implemented" )
+         BCLog.OutSummary( "Sample %s: systematics not yet implemented" % sname )
 
    ###################
 
@@ -198,8 +217,8 @@ class EikosPrompt( Cmd, object ):
       what = tokens[0]
       if what == "data":
          value = tokens[1]
-         if value == "hpath":
-            fpath, hpath = tokens[2].split(':')
+         if value == "path":
+            fpath, hpath = self.unpack_path( tokens[2] )
             self.set_data( fpath, hpath )
       elif what == "param":
          pname = tokens[1]
@@ -209,10 +228,10 @@ class EikosPrompt( Cmd, object ):
       elif what == "sample":
          sname = tokens[1]
          value = tokens[2]
-         if value == "hpath": 
-            syst = tokens[4]
-            lvl  = tokens[5]
-            path = tokens[6]
+         if value == "path":
+            syst = tokens[3]
+            lvl  = tokens[4]
+            path = tokens[5]
             self.set_sample_hpath( sname, syst, lvl, path )
          elif value == "type":
             self.set_sample_type( sname, tokens[3] )
