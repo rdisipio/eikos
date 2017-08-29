@@ -1,4 +1,5 @@
-set data    hpath @INPUTPATH@/data/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set param  INPUTPATH $PWD/data/tt_allhad_boosted
+set data   hpath @INPUTPATH@/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
 add sample ttAH
 set sample ttAH type      signal
 add sample ttAH syst      nominal

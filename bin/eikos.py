@@ -23,7 +23,7 @@ gparams['ACCURACY']   = 'low'
 gparams['PHSPACE']    = "particle"
 gparams['OBS']        = "t1_pt"
 gparams['ILUMI']      = 36074.6
-gparams['INPUTPATH']  = "/afs/cern.ch/work/d/disipio/public/ttbar_diffxs_13TeV/AnalysisTop/run/output"
+gparams['INPUTPATH']  = "$PWD/data/tt_allhad_boosted"
 
 class SampleWrapper( object ):
    def __init__(self):
@@ -62,10 +62,9 @@ class EikosPrompt( Cmd, object ):
  
    #~~~~~~~~~~~~~~~~~~~~~~~
 
-   def set_param( self, args ):
-      key   = args.split(':')[0]
-      value = args.split(':')[1] 
+   def set_param( self, key, value ):
       gparams[key] = value
+      value = os.path.expandvars( value )
       BCLog.OutSummary("Global parameter: %-15s = %s" % (key,value) )
 
    def get_param( self, k ):
@@ -88,6 +87,7 @@ class EikosPrompt( Cmd, object ):
       fpath = fpath.replace("@INPUTPATH@", gparams['INPUTPATH'] )
       fpath = fpath.replace("@PHSPACE@",   gparams['PHSPACE'] )
       fpath = fpath.replace("@OBS@",       gparams['OBS'] )
+      fpath = os.path.expandvars( fpath )
 
       hpath = hpath.replace("@OBS@",       gparams['OBS'] )
       hpath = hpath.replace("@PHSPACE@",   gparams['PHSPACE'] )   
@@ -178,7 +178,7 @@ class EikosPrompt( Cmd, object ):
       elif what == "param":
          pname = tokens[1]
          value = tokens[2]
-         self.set_param( sname, value )
+         self.set_param( pname, value )
 
       elif what == "sample":
          sname = tokens[1]
