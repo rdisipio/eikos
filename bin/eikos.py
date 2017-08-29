@@ -94,7 +94,14 @@ class EikosPrompt( Cmd, object ):
 
       f = TFile.Open( fpath )
       h = f.Get( hpath )
+      if h == None:
+         BCLog.OutSummary("Invalid histogram %s in file %s" % ( hpath, fpath ) )
+      else:
+         BCLog.OutSummary("Data file:      %s" % fpath )
+         BCLog.OutSummary("Data histogram: %s" % hpath )
+
       unfolder.SetData( h )
+
       f.Close()
 
    #~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,6 +134,20 @@ class EikosPrompt( Cmd, object ):
       unfolder.GetSample(sname).SetLatex( latex )
       BCLog.OutSummary(	"Sample %s: latex label = %s" % (sname, value ) )      
    #~
+
+   ###################
+
+   def add_systematic( self, tokens ):
+      sname = tokens[0]
+      xmin = -5.0
+      if len(tokens) > 1: xmin = float(tokens[1])
+      xmax =  5.0
+      if len(tokens) > 2: xmax = float(tokens[2])
+
+      unfolder.AddSystematic( sname, xmin, xmax )
+      
+
+   ###################
 
    def do_add( self, args ):
       tokens = args.split()
@@ -195,6 +216,12 @@ class EikosPrompt( Cmd, object ):
          self.print_params()
       elif what == "param":
          self.print_param( tokens[1] )
+
+   ###################
+
+   def do_run( self, args ):
+     unfolder.PrintSummary()
+
 
 ##############################
 

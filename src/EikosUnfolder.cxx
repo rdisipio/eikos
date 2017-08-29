@@ -112,6 +112,27 @@ void EikosUnfolder::SetData( const TH1 * data )
   if( m_h_data != NULL ) delete m_h_data;
 
   m_h_data = (TH1D*)data->Clone( "data" );
+
+  m_nbins = m_h_data->GetNbinsX();
+
+  m_xedges.clear();
+  for( int i = 0 ; i <= m_nbins ; i++ ) {
+     m_xedges.push_back( m_h_data->GetBinLowEdge(i+1) );
+  }
+
+  m_bw.clear();
+  for( int i = 0 ; i < m_nbins ; i++ ) {
+     m_bw.push_back( m_h_data->GetBinWidth(i+1) );
+  }
+
+  // set params
+  char b_name[32];
+  char b_latex[32];
+  for( int i = 0 ; i < m_nbins ; i++ ) {
+      sprintf( b_name, "bin_%i", i+1 );
+      sprintf( b_latex, "Bin %i", i+1 );
+      AddParameter( b_name, 0., 1., b_latex );
+  }
 }
 
 
