@@ -260,7 +260,7 @@ class EikosPrompt( Cmd, object ):
    def do_run( self, args ):
      unfolder.PrepareForRun()
      unfolder.PrintSummary()
-
+     unfolder.MarginalizeAll()
 
 ##############################
 
