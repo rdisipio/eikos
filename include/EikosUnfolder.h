@@ -43,7 +43,8 @@ class EikosUnfolder : public BCModel, public TObject
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const pTH1D_t h_n = NULL );
 
     void SetData( const TH1 * data );
-    pTH1D_t GetData() { return m_h_data; };
+    pTH1D_t     GetData_histogram() { return m_h_data; };
+    pTMatrixD_t GetData_vector()    { return m_v_data; };
 
     void PrepareForRun();
 
@@ -72,7 +73,8 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector< BCMTFSystematic * >       m_systematics;
     std::map< const std::string, int >     m_systematics_index;
 
-    pTH1D_t m_h_data;
+    pTH1D_t     m_h_data;
+    pTMatrixD_t m_v_data;
 };
 
 //} // namespace Eikos

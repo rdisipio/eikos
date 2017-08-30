@@ -102,6 +102,8 @@ void EikosUnfolder::SetData( const TH1 * data )
 
   m_nbins = m_h_data->GetNbinsX();
 
+  m_v_data = std::make_shared<TMatrixD>( m_nbins, 1, m_h_data->GetArray(), "D" );
+
   m_xedges.clear();
   for( int i = 0 ; i <= m_nbins ; i++ ) {
      m_xedges.push_back( m_h_data->GetBinLowEdge(i+1) );
@@ -188,7 +190,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
   for( int r = 0 ; r < m_nbins ; ++r ) {
        
-       const double D   = m_h_data->GetBinContent( r+1 ); 
+       const double D   = (*m_v_data)(r,0);
        
        const float mu   = ExpectationValue( r );
        
