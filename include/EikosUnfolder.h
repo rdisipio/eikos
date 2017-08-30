@@ -33,10 +33,12 @@ class EikosUnfolder : public BCModel, public TObject
     int GetSampleIndex( const std::string& name );
     int GetSystematicIndex( const std::string& name );
 
-    int AddSample( const std::string& name, SAMPLE_TYPE type = SAMPLE_TYPE::kBackground, const std::string& latex = "Sample", int color = -1, int fillstyle = -1, int linestyle = -1 );
+    pSample_t AddSample( const pSample_t sample );
+    pSample_t AddSample( const std::string& name, SAMPLE_TYPE type = SAMPLE_TYPE::kBackground, const std::string& latex = "Sample", int color = -1, int fillstyle = -1, int linestyle = -1 );
     void SetSignalSample( const std::string& name );
     pSample_t GetSample( const std::string& name ) { return m_samples.at(name); };
     pSample_t GetSignalSample();
+    pSample_t GetBackgroundSample();
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const pTH1D_t h_u, const pTH1D_t h_d, const pTH1D_t h_n = NULL );
@@ -48,6 +50,7 @@ class EikosUnfolder : public BCModel, public TObject
 
     void PrepareForRun();
 
+    double RecoProb( const int r, const int t );
     double LogLikelihood( const std::vector<double>& parameters );
 //    void MCMCUserIterationinterface();
 

@@ -151,6 +151,7 @@ class EikosPrompt( Cmd, object ):
             h = TH1D()
             f.Get( hpath ).Copy( h )
             sample.SetNominalDetector( h )
+            BCLog.OutSummary( "Sample %s: reco histogram %s : %s" %(sname,fpath,hpath) )
          elif lvl in [ "resp", "response" ]:
             h = TH2D()
             f.Get( hpath ).Copy( h ) 

@@ -35,8 +35,16 @@ int EikosUnfolder::GetSystematicIndex( const std::string& name )
 
 /////////////////////////////////
 
+pSample_t EikosUnfolder::AddSample( const pSample_t sample )
+{
+   const std::string& name = sample->GetName();
+   m_samples[name] = sample;
+   return m_samples[name];
+}
 
-int EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, const std::string& latex, int color, int fillstyle, int linestyle )
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+pSample_t EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, const std::string& latex, int color, int fillstyle, int linestyle )
 {
   int index = -1;
 
@@ -53,7 +61,7 @@ int EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, const s
   p_sample->SetFillStyle( fillstyle );
   p_sample->SetLineStyle( linestyle );
 
-  return index;
+  return m_samples[name];
 }
 
 
@@ -143,15 +151,30 @@ pSample_t EikosUnfolder::GetSignalSample()
 
 void EikosUnfolder::PrepareForRun()
 {
+  // Create background sample
+  pSample_t background = std::make_shared<Sample>( "background", SAMPLE_TYPE::kBackground, "Total background" );    
+  pTH1D_t h_bkg = std::make_shared<TH1D>();
+  m_h_data->Copy(*h_bkg);
+  h_bkg->Reset();
+  h_bkg->SetName( "background" );
+
   // Print out summary of samples  
   std::cout << "List of defined samples:" << std::endl;
   for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
-     const std::string& sname = itr->first;
+//     const std::string& sname = itr->first;
      pSample_t p_sample = itr->second; 
+     SAMPLE_TYPE type = p_sample->GetType();
 
-     std::cout << "Sample " << p_sample->GetName() << " :: type=" << p_sample->GetType() << std::endl;
+     std::cout << "Sample " << p_sample->GetName() << " :: type=" << type << std::endl;
+
+     if( (type==SAMPLE_TYPE::kBackground) || (type==SAMPLE_TYPE::kDataDriven) ) {
+        pTH1D_t h_sample = p_sample->GetNominalDetector_histogram();
+        h_bkg->Add( h_sample.get() );
+     }
   }
-
+  background->SetNominalDetector(h_bkg.get());
+  AddSample( background );
+  
   // 1) adjust posterior min/max
   pSample_t nominal = GetSignalSample();
   if( nominal == NULL ) {
@@ -203,9 +226,37 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 }
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 double EikosUnfolder::ExpectationValue( int r )
 {
   double mu = 0.;
 
+  float S = 0.;
+  for( int t = 0 ; t < m_nbins ; ++t ) {
+     const float eff = RecoProb( r, t );
+     S += m_parameters.at( t ) * eff;
+  }
+  S = ( S >= 0. ) ? S : 0.;
+
+  pTMatrixD_t bkg = GetBackgroundSample()->GetNominalDetector_vector();  
+  double B = 0.;
+  B = (*bkg)(r,0);
+  B = ( B >= 0. ) ? B : 0.;
+
+  mu = S + B;
+
   return mu;
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+double RecoProb( const int r, const int t )
+{   
+   double p = 1.;
+
+   return p;
 }

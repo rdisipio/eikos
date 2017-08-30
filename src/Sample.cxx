@@ -2,13 +2,13 @@
 
 ClassImp( Sample )
 
-Sample::Sample( const std::string& name ) : 
+Sample::Sample( const std::string& name, const SAMPLE_TYPE type, const std::string& latex ) : 
   m_h_detector(NULL), m_h_response(NULL), m_h_truth(NULL)
 {
   m_name      = name;
-  m_latex     = name;
+  m_latex     = latex;
   m_index     = -1;
-  m_type      = SAMPLE_TYPE::kSignal;
+  m_type      = type;
   m_color     = -1;
   m_linestyle = -1;
   m_fillstyle = -1;

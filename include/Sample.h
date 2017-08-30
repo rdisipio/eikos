@@ -22,7 +22,7 @@ class Sample : public TObject
 {
  public:
  
-   Sample( const std::string& name = "AnySample" );
+   Sample( const std::string& name = "AnySample", const SAMPLE_TYPE type = SAMPLE_TYPE::kBackground, const std::string& latex = "Any sample you like" );
    ~Sample();
 
    void SetName( const std::string& name )  { m_name  = name;    };
