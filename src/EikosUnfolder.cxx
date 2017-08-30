@@ -157,7 +157,7 @@ void EikosUnfolder::PrepareForRun()
      return;
   }
 
-  pTH1D_t h = nominal->GetNominalHistogramTruth();
+  pTH1D_t h = nominal->GetNominalTruth_histogram();
   if( h == NULL ) {
      std::cout << "ERROR: invalid signal truth histogram" << std::endl;
      return;
@@ -192,7 +192,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        
        const float mu   = ExpectationValue( r );
        
-       logL += BCMath::LogPoisson( D, mu ); // faster!
+       logL += BCMath::LogPoisson( D, mu );
        
        //m_posteriors_tmp[r] = mu;
   }

@@ -150,17 +150,17 @@ class EikosPrompt( Cmd, object ):
          if lvl in [ "reco", "detector" ]: 
             h = TH1D()
             f.Get( hpath ).Copy( h )
-            sample.SetNominalHistogramDetector( h )
+            sample.SetNominalDetector( h )
          elif lvl in [ "resp", "response" ]:
             h = TH2D()
             f.Get( hpath ).Copy( h ) 
-            sample.SetNominalHistogramResponse( h )
+            sample.SetNominalResponse( h )
          elif lvl in [ "gen", "truth", "particle", "parton" ]:
             h = TH1D()
             f.Get( hpath ).Copy( h )
             ilumi = float( gparams['ILUMI'] )
             h.Scale( 1./ilumi )
-            sample.SetNominalHistogramTruth( h )
+            sample.SetNominalTruth( h )
             BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
          else: 
             BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )

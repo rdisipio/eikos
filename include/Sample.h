@@ -9,10 +9,12 @@
 #include <TNamed.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TMatrixD.h>
 
 typedef std::shared_ptr<TH1>  pTH1_t;
 typedef std::shared_ptr<TH1D> pTH1D_t;
 typedef	std::shared_ptr<TH2D> pTH2D_t;
+typedef std::shared_ptr<TMatrixD> pTMatrixD_t;
 
 enum SAMPLE_TYPE { kData = 0, kSignal = 1, kBackground = 2, kDataDriven = 3, kNSampleTypes = 4 };
 
@@ -39,14 +41,17 @@ class Sample : public TObject
    int GetFillStyle()   { return m_fillstyle; };
    int GetLineStyle()   { return m_linestyle; };
 
-   void SetNominalHistogramDetector( const TH1 * h, const std::string& hname = "detector" );
-   inline pTH1D_t GetNominalHistogramDetector()         { return m_h_detector; };
+   void SetNominalDetector( const TH1 * h, const std::string& hname = "detector" );
+   inline pTH1D_t     GetNominalDetector_histogram()         { return m_h_detector; };
+   inline pTMatrixD_t GetNominalDetector_vector()        { return m_v_detector; };
 
-   void	SetNominalHistogramResponse( const TH1 * h, const std::string& hname = "response" );
-   inline pTH2D_t GetNominalHistogramResponse()         { return m_h_response; };
+   void	SetNominalResponse( const TH1 * h, const std::string& hname = "response" );
+   inline pTH2D_t     GetNominalResponse_histogram()     { return m_h_response; };
+   inline pTMatrixD_t GetNominalResponse_matrix()        { return m_M_response; };
 
-   void	SetNominalHistogramTruth( const TH1 * h, const std::string& hname = "truth" );
-   inline pTH1D_t GetNominalHistogramTruth() 	       { return	m_h_truth; };
+   void	SetNominalTruth( const TH1 * h, const std::string& hname = "truth" );
+   inline pTH1D_t     GetNominalTruth_histogram()      { return	m_h_truth; };
+   inline pTMatrixD_t GetNominalTruth_vector()         { return m_v_truth; };
 
    ClassDef( Sample, 1 )
 
@@ -62,6 +67,11 @@ class Sample : public TObject
    pTH1D_t m_h_detector;
    pTH2D_t m_h_response;
    pTH1D_t m_h_truth;
+
+   pTMatrixD_t m_v_detector;
+   pTMatrixD_t m_M_response;
+   pTMatrixD_t m_v_truth;
+
 };
 
 typedef std::shared_ptr<Sample>                  pSample_t;
