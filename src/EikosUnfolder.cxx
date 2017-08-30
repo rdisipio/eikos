@@ -10,8 +10,7 @@ EikosUnfolder::EikosUnfolder() :
 
 EikosUnfolder::~EikosUnfolder()
 {
-  m_samples.clear();
-
+//  m_samples.clear();
 }
 
 
@@ -129,6 +128,7 @@ void EikosUnfolder::SetData( const TH1 * data )
       sprintf( b_name, "bin_%i", i+1 );
       sprintf( b_latex, "Bin %i", i+1 );
       AddParameter( b_name, 0., 1., b_latex );
+      SetPriorConstant( i );
   }
 }
 
@@ -144,6 +144,11 @@ void EikosUnfolder::SetSignalSample( const std::string& name )
 pSample_t EikosUnfolder::GetSignalSample()
 {
   return m_samples[m_signal_sample]; 
+}
+
+pSample_t EikosUnfolder::GetBackgroundSample()
+{
+  return m_samples["background"];
 }
 
 /////////////////////////////////
@@ -213,9 +218,8 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
   for( int r = 0 ; r < m_nbins ; ++r ) {
        
-       const double D   = (*m_v_data)(r,0);
-       
-       const float mu   = ExpectationValue( r );
+       const double D  = (*m_v_data)( r, 0 );
+       const double mu = ExpectationValue( r );
        
        logL += BCMath::LogPoisson( D, mu );
        
@@ -254,9 +258,21 @@ double EikosUnfolder::ExpectationValue( int r )
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-double RecoProb( const int r, const int t )
+double EikosUnfolder::RecoProb( const int r, const int t )
 {   
    double p = 1.;
+
+   pSample_t nominal = GetSignalSample();
+   pTMatrixD_t M = nominal->GetNominalResponse_matrix();
+   
+   double m = (*M)(t,r);
+
+   float sumD = 0.;
+   for(unsigned int k = 0 ; k < m_nbins ; k++ ) {
+      sumD += (*M)(t,k);
+   }
+
+   p = m / sumD;
 
    return p;
 }
