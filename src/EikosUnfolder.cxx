@@ -239,7 +239,7 @@ double EikosUnfolder::ExpectationValue( int r )
 
   float S = 0.;
   for( int t = 0 ; t < m_nbins ; ++t ) {
-     const float eff = RecoProb( r, t );
+     const double eff = RecoProb( r, t );
      S += m_parameters.at( t ) * eff;
   }
   S = ( S >= 0. ) ? S : 0.;
@@ -267,7 +267,7 @@ double EikosUnfolder::RecoProb( const int r, const int t )
    
    double m = (*M)(t,r);
 
-   float sumD = 0.;
+   double sumD = 0.;
    for(unsigned int k = 0 ; k < m_nbins ; k++ ) {
       sumD += (*M)(t,k);
    }
