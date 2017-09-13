@@ -211,7 +211,7 @@ void EikosUnfolder::PrepareForRun()
 
   char b_name[32];
   for( int i = 0 ; i < m_nbins ; i++ ) {
-      double y = h->GetBinContent( i+1 );
+      double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0.2 * y;
       double y_max = 2.0 * y;
 

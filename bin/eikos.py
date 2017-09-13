@@ -160,10 +160,11 @@ class EikosPrompt( Cmd, object ):
          elif lvl in [ "gen", "truth", "particle", "parton" ]:
             h = TH1D()
             f.Get( hpath ).Copy( h )
-            ilumi = float( gparams['LUMI'] )
-            h.Scale( 1./ilumi )
+            #ilumi = float( gparams['LUMI'] )
+            #h.Scale( 1./ilumi )
             sample.SetTruth( h, syst )
-            BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
+            #BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
+            BCLog.OutSummary( "Sample %s: truth histogram %s : %s" %(sname,fpath,hpath) )
          else: 
             BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
             return False
