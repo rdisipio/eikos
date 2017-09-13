@@ -2,8 +2,7 @@
 
 ClassImp( Sample )
 
-Sample::Sample( const std::string& name, const SAMPLE_TYPE type, const std::string& latex ) : 
-  m_h_detector(NULL), m_h_response(NULL), m_h_truth(NULL)
+Sample::Sample( const std::string& name, const SAMPLE_TYPE type, const std::string& latex ) 
 {
   m_name      = name;
   m_latex     = latex;
@@ -20,38 +19,126 @@ Sample::~Sample()
 {
 }
 
-void Sample::SetNominalDetector( const TH1 * h, const std::string& hname ) 
+void Sample::SetDetector( const TH1 * h, const std::string& syst_name, const std::string& hname ) 
 {
-   m_h_detector = std::make_shared<TH1D>();
-   h->Copy( *m_h_detector );
-
-   const int Nbinsx = m_h_detector->GetNbinsX();
-   m_v_detector = std::make_shared<TMatrixD>( Nbinsx, 1 );
-   for( int i = 0 ; i < Nbinsx ; ++i ) (*m_v_detector)[i] = h->GetBinContent(i+1);
+   pTH1D_t p_h = std::make_shared<TH1D>();
+   h->Copy( *p_h );
+   SetDetector( p_h, syst_name, hname );
 }
 
-void Sample::SetNominalResponse( const TH1 * h, const std::string& hname ) 
+void Sample::SetDetector( pTH1D_t h, const std::string& syst_name, const std::string& hname )
+{
+   m_h_detector[syst_name] = std::make_shared<TH1D>();
+   h->Copy( (*m_h_detector[syst_name]) );
+}
+
+pTH1D_t Sample::GetDetector( const std::string& syst_name )  
 { 
-   m_h_response = std::make_shared<TH2D>();
-   h->Copy( *m_h_response );
+  if( m_h_detector.count(syst_name) == 0 ) {
+     std::cout << "ERROR: sample " << GetName() << " has no detector histogram set for systematic " << syst_name << std::endl;
+     return NULL;
+  }
 
-   const int Nbinsx = m_h_response->GetNbinsX() + 1;
-   const int Nbinsy = m_h_response->GetNbinsY() + 1;
-
-   m_M_response = std::make_shared<TMatrixD>( Nbinsx, Nbinsy );
-   for( int i = 0 ; i < Nbinsx ; ++i ) {
-     for( int j = 0 ; j < Nbinsy ; ++j ) { 
-       (*m_M_response)(i,j) = h->GetBinContent(i+1, j+1 );
-     }
-   }
+//  h = m_h_detector[syst_name]; 
+//  h->Print("all");
+  return m_h_detector[syst_name]; 
 }
 
-void Sample::SetNominalTruth( const TH1 * h, const std::string& hname )   
+//////////////////////////////////////////
+
+void Sample::SetResponse( const TH1 * h, const std::string& syst_name, const std::string& hname ) 
+{ 
+   m_h_response[syst_name] = std::make_shared<TH2D>();
+   h->Copy( (*m_h_response[syst_name]) );
+}
+
+
+pTH2D_t Sample::GetResponse( const std::string& syst_name )
 {
-   m_h_truth = std::make_shared<TH1D>();
-   h->Copy( *m_h_truth );
+  if( m_h_response.count(syst_name) == 0 ) {
+     std::cout << "ERROR: sample " << GetName() << " has no response matrix histogram set for systematic " << syst_name << std::endl;
+     return NULL;
+  }
 
-   const int Nbinsx = m_h_truth->GetNbinsX() + 1;
-   m_v_truth  = std::make_shared<TMatrixD>( Nbinsx, 1 );
-   for( int i = 0 ; i < Nbinsx ; ++i ) (*m_v_truth)[i] = h->GetBinContent(i);
+  return m_h_response[syst_name];    
 }
+
+//////////////////////////////////////////
+
+void Sample::SetTruth( const TH1 * h, const std::string& syst_name, const std::string& hname )   
+{
+   m_h_truth[syst_name] = std::make_shared<TH1D>();
+   h->Copy( (*m_h_truth[syst_name]) );
+}
+
+pTH1D_t Sample::GetTruth( const std::string& syst_name )
+{
+  if( m_h_truth.count(syst_name) == 0 ) {
+     std::cout << "ERROR: sample " << GetName() << " has no truth histogram set for systematic " << syst_name << std::endl;
+     return NULL;
+  }
+
+  return m_h_truth[syst_name];
+}
+
+
+//////////////////////////////////////////
+
+
+void Sample::CalculateAcceptance( const std::string& syst_name )
+{
+   pTH2D_t h_resp = GetResponse( syst_name );
+   pTH1D_t h_sig  = GetDetector( syst_name );
+
+   TH1D * h_acc = (TH1D*)h_resp->ProjectionX( "acceptance" );
+   h_acc->Divide( h_sig.get() );
+
+   std::cout <<	"INFO: acceptance " << syst_name << ":"	<< std::endl;
+   h_acc->Print("all");
+
+   m_h_acceptance[syst_name] = std::make_shared<TH1D>();
+   h_acc->Copy( *(m_h_acceptance[syst_name].get()) );
+}
+
+
+pTH1D_t Sample::GetAcceptance( const std::string& syst_name )
+{
+  if( m_h_acceptance.count(syst_name) == 0 ) {
+     std::cout << "ERROR: sample " << GetName() << " has no acceptance histogram set for systematic " << syst_name << std::endl;
+     return NULL;
+  }
+
+  return m_h_acceptance[syst_name];
+}
+
+
+//////////////////////////////////////////
+
+
+void Sample::CalculateEfficiency( const std::string& syst_name )
+{
+   pTH2D_t h_resp = GetResponse( syst_name );
+   pTH1D_t h_gen  = GetTruth( syst_name );
+
+   TH1D	* h_eff	= (TH1D*)h_resp->ProjectionY( "efficiency" );
+   h_eff->Divide( h_gen.get() );
+
+   std::cout << "INFO: efficiency " << syst_name << ":" << std::endl;
+   h_eff->Print("all");
+
+   m_h_efficiency[syst_name] = std::make_shared<TH1D>();
+   h_eff->Copy( *(m_h_efficiency[syst_name].get()) );
+}
+
+pTH1D_t Sample::GetEfficiency( const std::string& syst_name )
+{
+  if( m_h_efficiency.count(syst_name) == 0 ) {
+     std::cout << "ERROR: sample " << GetName() << " has no efficiency histogram set for systematic " << syst_name << std::endl;
+     return NULL;
+  }
+
+  return m_h_efficiency[syst_name];
+}
+
+//////////////////////////////////////////
+

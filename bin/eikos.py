@@ -22,7 +22,7 @@ gparams = {}
 gparams['ACCURACY']   = 'low'
 gparams['PHSPACE']    = "particle"
 gparams['OBS']        = "t1_pt"
-gparams['ILUMI']      = 36074.6
+gparams['LUMI']       = 36074.6
 gparams['INPUTPATH']  = "$PWD/data/tt_allhad_boosted"
 
 systematics = {}
@@ -150,18 +150,19 @@ class EikosPrompt( Cmd, object ):
          if lvl in [ "reco", "detector" ]: 
             h = TH1D()
             f.Get( hpath ).Copy( h )
-            sample.SetNominalDetector( h )
+#            h.Print("all")     
+            sample.SetDetector( h, syst )
             BCLog.OutSummary( "Sample %s: reco histogram %s : %s" %(sname,fpath,hpath) )
          elif lvl in [ "resp", "response" ]:
             h = TH2D()
             f.Get( hpath ).Copy( h ) 
-            sample.SetNominalResponse( h )
+            sample.SetResponse( h, syst )
          elif lvl in [ "gen", "truth", "particle", "parton" ]:
             h = TH1D()
             f.Get( hpath ).Copy( h )
-            ilumi = float( gparams['ILUMI'] )
+            ilumi = float( gparams['LUMI'] )
             h.Scale( 1./ilumi )
-            sample.SetNominalTruth( h )
+            sample.SetTruth( h, syst )
             BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
          else: 
             BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
@@ -258,8 +259,12 @@ class EikosPrompt( Cmd, object ):
    ###################
 
    def do_run( self, args ):
+     unfolder.SetLuminosity( float(gparams['LUMI']) )
+
      unfolder.PrepareForRun()
+
      unfolder.PrintSummary()
+
      unfolder.MarginalizeAll()
 
 ##############################

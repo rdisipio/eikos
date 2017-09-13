@@ -4,14 +4,19 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <iostream>
 
 #include <TObject.h>
 #include <TNamed.h>
+#include <TH1F.h>
+#include <TH2F.h>
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TMatrixD.h>
 
 typedef std::shared_ptr<TH1>  pTH1_t;
+typedef std::shared_ptr<TH1D> pTH1F_t;
+typedef std::shared_ptr<TH2D> pTH2F_t;
 typedef std::shared_ptr<TH1D> pTH1D_t;
 typedef	std::shared_ptr<TH2D> pTH2D_t;
 typedef std::shared_ptr<TMatrixD> pTMatrixD_t;
@@ -41,17 +46,23 @@ class Sample : public TObject
    int GetFillStyle()   { return m_fillstyle; };
    int GetLineStyle()   { return m_linestyle; };
 
-   void SetNominalDetector( const TH1 * h, const std::string& hname = "detector" );
-   inline pTH1D_t     GetNominalDetector_histogram()         { return m_h_detector; };
-   inline pTMatrixD_t GetNominalDetector_vector()        { return m_v_detector; };
+   void    SetDetector( const TH1 * h, const std::string& syst_name = "nominal", const std::string& hname = "detector" );
+   void    SetDetector( pTH1D_t     h, const std::string& syst_name = "nominal", const std::string& hname = "detector" );
+   pTH1D_t GetDetector( const std::string& syst_name = "nominal" );
 
-   void	SetNominalResponse( const TH1 * h, const std::string& hname = "response" );
-   inline pTH2D_t     GetNominalResponse_histogram()     { return m_h_response; };
-   inline pTMatrixD_t GetNominalResponse_matrix()        { return m_M_response; };
+   void	   SetResponse( const TH1 * h, const std::string& syst_name = "nominal", const std::string& hname = "response" );
+   void    SetResponse( pTH2D_t     h, const std::string& syst_name = "nominal", const std::string& hname = "response" );
+   pTH2D_t GetResponse( const std::string& syst_name = "nominal" );
 
-   void	SetNominalTruth( const TH1 * h, const std::string& hname = "truth" );
-   inline pTH1D_t     GetNominalTruth_histogram()      { return	m_h_truth; };
-   inline pTMatrixD_t GetNominalTruth_vector()         { return m_v_truth; };
+   void	   SetTruth( const TH1 * h, const std::string& syst_name = "nominal", const std::string& hname = "truth" );
+   void    SetTruth( pTH1D_t     h, const std::string& syst_name = "nominal", const std::string& hname = "truth" );
+   pTH1D_t GetTruth( const std::string& syst_name = "nominal" );
+
+   void    CalculateAcceptance( const std::string& syst_name = "nominal" );
+   pTH1D_t GetAcceptance( const std::string& syst_name = "nominal" );
+
+   void    CalculateEfficiency( const std::string& syst_name = "nominal" );
+   pTH1D_t GetEfficiency( const std::string& syst_name = "nominal" );
 
    ClassDef( Sample, 1 )
 
@@ -64,14 +75,11 @@ class Sample : public TObject
    int m_fillstyle;
    SAMPLE_TYPE m_type;
 
-   pTH1D_t m_h_detector;
-   pTH2D_t m_h_response;
-   pTH1D_t m_h_truth;
-
-   pTMatrixD_t m_v_detector;
-   pTMatrixD_t m_M_response;
-   pTMatrixD_t m_v_truth;
-
+   std::map< const std::string, pTH1D_t >      m_h_detector;
+   std::map< const std::string, pTH2D_t >      m_h_response; 
+   std::map< const std::string, pTH1D_t >      m_h_truth;
+   std::map< const std::string, pTH1D_t >      m_h_acceptance;
+   std::map< const std::string, pTH1D_t >      m_h_efficiency;
 };
 
 typedef std::shared_ptr<Sample>                  pSample_t;

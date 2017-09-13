@@ -38,26 +38,27 @@ class EikosUnfolder : public BCModel, public TObject
     void SetSignalSample( const std::string& name );
     pSample_t GetSample( const std::string& name ) { return m_samples.at(name); };
     pSample_t GetSignalSample();
-    pSample_t GetBackgroundSample();
+    pSample_t GetBackgroundSample( const std::string& name = "background" );
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const pTH1D_t h_u, const pTH1D_t h_d, const pTH1D_t h_n = NULL );
     int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const pTH1D_t h_n = NULL );
 
-    void SetData( const TH1 * data );
-    pTH1D_t     GetData_histogram() { return m_h_data; };
-    pTMatrixD_t GetData_vector()    { return m_v_data; };
+    void    SetData( const TH1 * data );
+    pTH1D_t GetData() { return m_h_data; };
+
+    void   SetLuminosity( double lumi ) { m_lumi = lumi; };
+    double GetLuminosity()              { return m_lumi; };
 
     void PrepareForRun();
 
-    double RecoProb( const int r, const int t );
     double LogLikelihood( const std::vector<double>& parameters );
 //    void MCMCUserIterationinterface();
 
     ClassDef( EikosUnfolder, 1 )
 
  protected:
-    double ExpectationValue( int r );
+    pTH1D_t MakeUnfolded();
 
  //~~~~~~~~~~~~~~~~~~~~~
 
@@ -66,6 +67,7 @@ class EikosUnfolder : public BCModel, public TObject
     int         m_nbins;
     std::vector<double> m_parameters;
 
+    double              m_lumi;
     std::vector<double> m_xedges;
     std::vector<double>	m_bw;
 
