@@ -268,6 +268,16 @@ class EikosPrompt( Cmd, object ):
 
      unfolder.MarginalizeAll()
 
+     unfolder.FindMode( unfolder.GetBestFitParameters() )
+
+     gROOT.SetBatch(True)
+
+     unfolder.PrintParameterPlot( "output/parameters.pdf" )
+     unfolder.PrintCorrelationPlot( "output/correlations.pdf" )
+     unfolder.PrintKnowledgeUpdatePlots( "output/update.pdf" )
+     unfolder.PrintAllMarginalized( "output/marginalized.pdf" )
+
+
 ##############################
 
 if __name__ == '__main__':
