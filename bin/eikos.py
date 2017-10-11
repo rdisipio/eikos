@@ -260,7 +260,9 @@ class EikosPrompt( Cmd, object ):
    ###################
 
    def do_run( self, args ):
-     unfolder.SetLuminosity( float(gparams['LUMI']) )
+     lumi = float(gparams['LUMI'])
+
+     unfolder.SetLuminosity( lumi )
 
      unfolder.PrepareForRun()
 
@@ -268,7 +270,26 @@ class EikosPrompt( Cmd, object ):
 
      unfolder.MarginalizeAll()
 
-     unfolder.FindMode( unfolder.GetBestFitParameters() )
+     bestfit = unfolder.GetBestFitParameters()
+     unfolder.FindMode( bestfit )
+
+     outfile = TFile.Open( "output/diffxs.root", "RECREATE" )
+
+     n = bestfit.size()
+     for i in range(n):
+       print "%-2i) %f" % ( i, bestfit[i] )
+
+     diffxs_abs = unfolder.GetDiffxsAbs()
+     theory_abs = unfolder.GetSignalSample().GetTruth()
+
+     theory_abs.Scale( 1./lumi )
+
+     outfile.cd()
+
+     theory_abs.get().Write( "theory_abs" )
+     diffxs_abs.get().Write( "diffxs_abs" )
+
+     outfile.Close()
 
      gROOT.SetBatch(True)
 

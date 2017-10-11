@@ -129,7 +129,7 @@ void EikosUnfolder::SetData( const TH1 * data )
       sprintf( b_name, "bin_%i", i+1 );
       sprintf( b_latex, "Bin %i", i+1 );
       AddParameter( b_name, 0., 1., b_latex );
-      SetPriorConstant( i );
+//      SetPriorConstant( i );
   }
 }
 
@@ -214,10 +214,13 @@ void EikosUnfolder::PrepareForRun()
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0.2 * y;
       double y_max = 2.0 * y;
+      double dy    = ( y_max - y_min ) / 2.;
 
       sprintf( b_name, "bin_%i", i+1 );
       BCParameter * np = &GetParameter( b_name );
       np->SetLimits( y_min, y_max );
+
+      SetPriorGauss( i, y, dy );
   }
 
 }
@@ -273,4 +276,23 @@ pTH1D_t EikosUnfolder::MakeUnfolded()
    for( int i = 0 ; i < m_nbins ; ++i ) p_unf->SetBinContent( i+1, m_parameters.at(i) ); 
 
    return p_unf;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+pTH1D_t EikosUnfolder::GetDiffxsAbs()
+{
+   std::vector<double> bestfit = GetBestFitParameters();
+
+   pTH1D_t p_diffxs = std::make_shared<TH1D>();
+   pTH1D_t p_gen = GetSignalSample()->GetTruth();
+
+   p_gen->Copy( *(p_diffxs.get()) );
+   p_diffxs->Reset();
+
+   for( int i = 0 ; i < m_nbins ; i++ ) {
+       p_diffxs->SetBinContent( i+1, bestfit.at(i) );
+   }
+
+   return p_diffxs;
 }
