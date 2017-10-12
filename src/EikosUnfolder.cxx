@@ -129,7 +129,6 @@ void EikosUnfolder::SetData( const TH1 * data )
       sprintf( b_name, "bin_%i", i+1 );
       sprintf( b_latex, "Bin %i", i+1 );
       AddParameter( b_name, 0., 1., b_latex );
-//      SetPriorConstant( i );
   }
 }
 
@@ -214,15 +213,14 @@ void EikosUnfolder::PrepareForRun()
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
-      double y_max = 3.0 * y;
-      double dy    = 0.2*( y_max - y_min );
-//      double dy = h->GetBinError( i+1 ) / m_lumi;
+      double y_max = 5.0 * y;
+//      double dy    = 0.2*( y_max - y_min );
+      double dy = h->GetBinError( i+1 ) / m_lumi;
 
       sprintf( b_name, "bin_%i", i+1 );
       BCParameter * np = &GetParameter( b_name );
       np->SetLimits( 0., y_max );
 
-//      SetPriorGauss( i, y, dy );
       GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
 
   }
