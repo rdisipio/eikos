@@ -149,9 +149,8 @@ class EikosPrompt( Cmd, object ):
       if lvl in [ "reco", "detector" ]: 
             h = TH1D()
             f.Get( hpath ).Copy( h )
-#            h.Print("all")     
             sample.SetDetector( h, syst )
-            BCLog.OutSummary( "Sample %s: reco histogram %s : %s" %(sname,fpath,hpath) )
+#            BCLog.OutSummary( "Sample %s: reco histogram %s : %s" %(sname,fpath,hpath) )
       elif lvl in [ "resp", "response" ]:
             h = TH2D()
             f.Get( hpath ).Copy( h ) 
@@ -163,7 +162,7 @@ class EikosPrompt( Cmd, object ):
             #h.Scale( 1./ilumi )
             sample.SetTruth( h, syst )
             #BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
-            BCLog.OutSummary( "Sample %s: truth histogram %s : %s" %(sname,fpath,hpath) )
+#            BCLog.OutSummary( "Sample %s: truth histogram %s : %s" %(sname,fpath,hpath) )
       else: 
             BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
             return False

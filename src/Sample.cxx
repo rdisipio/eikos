@@ -36,11 +36,9 @@ pTH1D_t Sample::GetDetector( const std::string& syst_name )
 { 
   if( m_h_detector.count(syst_name) == 0 ) {
      std::cout << "ERROR: sample " << GetName() << " has no detector histogram set for systematic " << syst_name << std::endl;
-     return NULL;
+     throw std::runtime_error( "no detector histogram set" );
   }
 
-//  h = m_h_detector[syst_name]; 
-//  h->Print("all");
   return m_h_detector[syst_name]; 
 }
 
@@ -93,8 +91,8 @@ void Sample::CalculateAcceptance( const std::string& syst_name )
    TH1D * h_acc = (TH1D*)h_resp->ProjectionX( "acceptance" );
    h_acc->Divide( h_sig.get() );
 
-   std::cout <<	"INFO: acceptance " << syst_name << ":"	<< std::endl;
-   h_acc->Print("all");
+//   std::cout <<	"INFO: acceptance " << syst_name << ":"	<< std::endl;
+//   h_acc->Print("all");
 
    m_h_acceptance[syst_name] = std::make_shared<TH1D>();
    h_acc->Copy( *(m_h_acceptance[syst_name].get()) );
@@ -123,8 +121,8 @@ void Sample::CalculateEfficiency( const std::string& syst_name )
    TH1D	* h_eff	= (TH1D*)h_resp->ProjectionY( "efficiency" );
    h_eff->Divide( h_gen.get() );
 
-   std::cout << "INFO: efficiency " << syst_name << ":" << std::endl;
-   h_eff->Print("all");
+//   std::cout << "INFO: efficiency " << syst_name << ":" << std::endl;
+//   h_eff->Print("all");
 
    m_h_efficiency[syst_name] = std::make_shared<TH1D>();
    h_eff->Copy( *(m_h_efficiency[syst_name].get()) );

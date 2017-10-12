@@ -69,8 +69,6 @@ pSample_t EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, c
 
 int EikosUnfolder::AddSystematic( const std::string& sname, double min, double max, const std::string & latexname, const std::string & unitstring )
 {
-//  m_systematics.push_back( new BCMTFSystematic( sname ) );
-//  BCMTFSystematic * p_syst = (*m_systematics.end());
 
   AddParameter( sname, min, max, latexname, unitstring );
 
@@ -79,7 +77,7 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
   int index = GetNParameters() - 1;
 
   m_syst_index[sname] = index;
-  m_syst_pairs.push_back( SystPair_t( "none", "none" ) );
+  m_syst_pairs.push_back( SystPair_t( "none_u", "none_d" ) );
 
   GetParameter(index).SetPrior(new BCGaussianPrior( 0., 1. ) );
 
@@ -98,12 +96,12 @@ void EikosUnfolder::SetSystematicVariations( const std::string& sname, const std
       throw std::runtime_error( "unknown systematic" );
    }
 
-   const int i = m_syst_index[sname] - GetNParameters() + 1; 
+   const int i = m_syst_index[sname] - m_nbins; 
 
    m_syst_pairs[i].first  = var_u;
    m_syst_pairs[i].second = var_d;
 
-   std::cout << "Systematic " << sname << " :: up = " << m_syst_pairs[i].first << " :: down = " << m_syst_pairs[i].second << std::endl;
+   std::cout << "Systematic " << sname << "(" << i << ") :: up = " << m_syst_pairs[i].first << " :: down = " << m_syst_pairs[i].second << std::endl;
 }
 
 
