@@ -220,7 +220,7 @@ void EikosUnfolder::PrepareForRun()
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
-      double y_max = 3.0 * y;
+      double y_max = 2.0 * y;
       double dy    = 0.1*( y_max - y_min );
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
 
