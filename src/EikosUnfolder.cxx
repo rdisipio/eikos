@@ -214,13 +214,14 @@ void EikosUnfolder::PrepareForRun()
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
       double y_max = 5.0 * y;
-      double dy    = 0.2*( y_max - y_min );
+      double dy    = 0.1*( y_max - y_min );
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
 
       sprintf( b_name, "bin_%i", i+1 );
       BCParameter * np = &GetParameter( b_name );
       np->SetLimits( 0., y_max );
 
+ //     GetParameter(i).SetPriorConstant();
       GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
 
   }
@@ -242,16 +243,17 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
   pTH1D_t p_eff = GetSignalSample()->GetEfficiency();
   pTH1D_t p_acc = GetSignalSample()->GetAcceptance();
   pTH2D_t p_mig = GetSignalSample()->GetMigrations();
-  pTH1D_t p_bkg = GetBackgroundSample()->GetDetector();
+  pTH1D_t p_bkg = GetBackgroundSample() ? GetBackgroundSample()->GetDetector() : NULL;
 
   p_exp->Scale( m_lumi );
   p_exp->Multiply( p_eff.get() );
 
   // migrations here
   TH1D * h_tmp = (TH1D*)p_exp->Clone( "h_tmp" );
-/*
+
   for( int i = 0 ; i < p_mig->GetNbinsX() ; ++i ) {
      double x = 0; 
+
      for( int j = 0 ; j < p_mig->GetNbinsY() ; ++j ) {
         double m = p_mig->GetBinContent( i+1, j+1 );
  
@@ -259,37 +261,26 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
      }
      h_tmp->SetBinContent( i+1, x );
   }
-*/
-
-  for( int j = 0 ; j < p_mig->GetNbinsY() ; ++j ) {
-     double x = 0;
-     for( int i = 0 ; i < p_mig->GetNbinsX() ; ++i ) {
-        double m = p_mig->GetBinContent( i+1, j+1 );
-
-        x += p_exp->GetBinContent(i+1) * m;
-     }
-     h_tmp->SetBinContent( j+1, x );
-  }
-
-  for( int i = 0 ; i < p_exp->GetNbinsX() ; ++i ) {
+  for( int i = 0 ; i < m_nbins ; ++i ) {
      p_exp->SetBinContent( i+1, h_tmp->GetBinContent(i+1) );
   }
   delete h_tmp;
 
-  p_exp->Multiply( p_acc.get() );
+  p_exp->Divide( p_acc.get() );
 
   for( int r = 0 ; r < m_nbins ; ++r ) {
        
        const double D = m_h_data->GetBinContent( r+1 );
        const double S = p_exp->GetBinContent( r+1 );
-       const double B = p_bkg->GetBinContent( r+1 );
+       const double B = p_bkg ? p_bkg->GetBinContent( r+1 ) : 0.;
 
        const double mu = S + B;
 
-//       std::cout << "r =" << r << " D = " << D << " S = " << S << " B = " << B << " :: mu = " << mu << std::endl; 
+ //      std::cout << "r=" << r << " D=" << D << " S=" << S << " B=" << B << " :: mu=" << mu << std::endl; 
        
        logL += BCMath::LogPoisson( D, mu );
   }
+//  std::cout << "logL = " << logL << std::endl;
 
   return logL;
 }

@@ -299,13 +299,73 @@ class EikosPrompt( Cmd, object ):
      theory_abs.SetMarkerColor(kRed)
      theory_abs.SetLineWidth(2)
 
+     migrations.SetMinimum( 0. )
+     migrations.SetMaximum( 1.0 )
+
+     efficiency.SetMinimum( 0. )
+     efficiency.SetMaximum( 1.0 )
+     efficiency.SetLineColor(kRed)
+     efficiency.SetMarkerColor(kRed)
+     efficiency.SetLineWidth(2)
+
+     acceptance.SetMinimum( 0. )
+     acceptance.SetMaximum( 1.0	)
+     acceptance.SetLineColor(kBlue)
+     acceptance.SetMarkerColor(kBlue)
+     acceptance.SetLineWidth(2)
+
+     data       = unfolder.GetData()
+     signal     = unfolder.GetSignalSample().GetDetector()
+
+     prediction = signal.Clone( "prediction" )
+     dataminusbkg = data.Clone( "dataminusbkg" )
+
+     isClosureTest = True
+     if unfolder.GetBackgroundSample().get() != None: isClosureTest = False 
+
+     if isClosureTest == False:
+       BCLog.OutSummary( "Background found: this is a data-bkg unfolding" )
+       background = unfolder.GetBackgroundSample().GetDetector()
+       prediction.Add( background.get() )
+       dataminusbkg.Add( background.get(), -1.0 )
+     else:
+        BCLog.OutSummary( "No background: this is a closure test" ) 
+
+     data.SetLineColor( kBlack )
+     data.SetMarkerColor( kBlack )
+     data.SetLineWidth(2)
+
+     prediction.SetLineColor( kGreen+2 )
+     prediction.SetMarkerSize(0)
+     prediction.SetFillStyle(1001)
+     prediction.SetFillColor( kGreen+2 )
+
+     dataminusbkg.SetLineColor(	kRed )
+     dataminusbkg.SetMarkerColor( kRed )
+     dataminusbkg.SetLineWidth(2)
+
+     closure = diffxs_abs.get().Clone( "closure" )
+     closure.Divide( theory_abs.get() )
+
+     closure.SetLineColor( kBlack )
+     closure.SetMarkerColor( kBlack )
+     closure.SetLineWidth(2)
+
      outfile.cd()
 
+     data.get().Write( "data" )
+
+     if	isClosureTest == False:
+        background.get().Write( "background" )
+     signal.get().Write( "signal" )
+     prediction.Write( "prediction" )
+     dataminusbkg.Write( "dataminusbkg" )
      theory_abs.get().Write( "theory_abs" )
      diffxs_abs.get().Write( "diffxs_abs" )
      migrations.get().Write( "migrations" )
      efficiency.get().Write( "efficiency" )
      acceptance.get().Write( "acceptance" )
+     closure.Write( "closure" )
 
      outfile.Close()
 
