@@ -261,10 +261,13 @@ class EikosPrompt( Cmd, object ):
 
    def do_run( self, args ):
      lumi = float(gparams['LUMI'])
-
      unfolder.SetLuminosity( lumi )
 
      unfolder.PrepareForRun()
+
+#     unfolder.SetPrecision( BCEngineMCMC.kMedium )
+#     unfolder.SetPrecision( BCEngineMCMC.kHigh )
+     unfolder.SetPrecision( int(gparams['PRECISION']) )
 
      unfolder.PrintSummary()
 
@@ -280,14 +283,21 @@ class EikosPrompt( Cmd, object ):
        print "%-2i) %f" % ( i, bestfit[i] )
 
      diffxs_abs = unfolder.GetDiffxsAbs()
-     theory_abs = unfolder.GetSignalSample().GetTruth()
 
+     theory_abs = unfolder.GetSignalSample().GetTruth()
      theory_abs.Scale( 1./lumi )
+
+     migrations = unfolder.GetSignalSample().GetMigrations()
+     efficiency = unfolder.GetSignalSample().GetEfficiency()
+     acceptance = unfolder.GetSignalSample().GetAcceptance()
 
      outfile.cd()
 
      theory_abs.get().Write( "theory_abs" )
      diffxs_abs.get().Write( "diffxs_abs" )
+     migrations.get().Write( "migrations" )
+     efficiency.get().Write( "efficiency" )
+     acceptance.get().Write( "acceptance" )
 
      outfile.Close()
 

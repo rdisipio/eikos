@@ -180,6 +180,7 @@ void EikosUnfolder::PrepareForRun()
      if( type==SAMPLE_TYPE::kSignal ) {
         p_sample->CalculateAcceptance();
         p_sample->CalculateEfficiency();
+        p_sample->CalculateMigrations();
      } 
 
 /*
@@ -212,15 +213,18 @@ void EikosUnfolder::PrepareForRun()
   char b_name[32];
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = h->GetBinContent( i+1 ) / m_lumi;
-      double y_min = 0.2 * y;
-      double y_max = 2.0 * y;
-      double dy    = ( y_max - y_min ) / 2.;
+      double y_min = 0. * y;
+      double y_max = 3.0 * y;
+      double dy    = 0.2*( y_max - y_min );
+//      double dy = h->GetBinError( i+1 ) / m_lumi;
 
       sprintf( b_name, "bin_%i", i+1 );
       BCParameter * np = &GetParameter( b_name );
-      np->SetLimits( y_min, y_max );
+      np->SetLimits( 0., y_max );
 
-      SetPriorGauss( i, y, dy );
+//      SetPriorGauss( i, y, dy );
+      GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
+
   }
 
 }
@@ -233,16 +237,34 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 {
   double logL = 0.;
 
-  copy( parameters.begin(), parameters.end(), back_inserter(m_parameters) );
+//  std::cout << "p1=" << parameters.at(0) << " p2=" << parameters.at(1) << " p3=" << parameters.at(2) << std::endl;
+//  copy( parameters.begin(), parameters.end(), back_inserter(m_parameters) );
 
-  pTH1D_t p_exp = MakeUnfolded();
+  pTH1D_t p_exp = MakeUnfolded( parameters );
   pTH1D_t p_eff = GetSignalSample()->GetEfficiency();
   pTH1D_t p_acc = GetSignalSample()->GetAcceptance();
+  pTH2D_t p_mig = GetSignalSample()->GetMigrations();
   pTH1D_t p_bkg = GetBackgroundSample()->GetDetector();
 
   p_exp->Scale( m_lumi );
   p_exp->Multiply( p_eff.get() );
+
   // migrations here
+  TH1D * h_tmp = (TH1D*)p_exp->Clone( "h_tmp" );
+  for( int i = 0 ; i < p_mig->GetNbinsX() ; ++i ) {
+     double x = 0; 
+     for( int j = 0 ; j < p_mig->GetNbinsY() ; ++j ) {
+        double m = p_mig->GetBinContent( i+1, j+1 );
+ 
+        x += p_exp->GetBinContent(j+1) * m;
+     }
+     h_tmp->SetBinContent( i+1, x );
+  }
+  for( int i = 0 ; i < p_exp->GetNbinsX() ; ++i ) {
+     p_exp->SetBinContent( i+1, h_tmp->GetBinContent(i+1) );
+  }
+  delete h_tmp;
+
   p_exp->Multiply( p_acc.get() );
 
   for( int r = 0 ; r < m_nbins ; ++r ) {
@@ -253,11 +275,9 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
        const double mu = S + B;
 
-//       std::cout << "r =" << r << " D = " << D << " :: mu = " << mu << std::endl; 
+//       std::cout << "r =" << r << " D = " << D << " S = " << S << " B = " << B << " :: mu = " << mu << std::endl; 
        
        logL += BCMath::LogPoisson( D, mu );
-       
-       //m_posteriors_tmp[r] = mu;
   }
 
   return logL;
@@ -266,14 +286,14 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-pTH1D_t EikosUnfolder::MakeUnfolded()
+pTH1D_t EikosUnfolder::MakeUnfolded( const std::vector<double>& parameters )
 {
    pTH1D_t p_unf = std::make_shared<TH1D>();
    pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
    p_gen->Copy( *(p_unf.get()) );
    p_unf->Reset();
-   for( int i = 0 ; i < m_nbins ; ++i ) p_unf->SetBinContent( i+1, m_parameters.at(i) ); 
+   for( int i = 0 ; i < m_nbins ; ++i ) p_unf->SetBinContent( i+1, parameters.at(i) ); 
 
    return p_unf;
 }
@@ -282,16 +302,20 @@ pTH1D_t EikosUnfolder::MakeUnfolded()
 
 pTH1D_t EikosUnfolder::GetDiffxsAbs()
 {
-   std::vector<double> bestfit = GetBestFitParameters();
+//   std::vector<double> bestfit = GetBestFitParameters();
 
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
    pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
    p_gen->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
-
+ 
    for( int i = 0 ; i < m_nbins ; i++ ) {
-       p_diffxs->SetBinContent( i+1, bestfit.at(i) );
+      BCH1D h_post = GetMarginalized(i);
+      double mean = h_post.GetHistogram()->GetMean();
+      double rms  = h_post.GetHistogram()->GetRMS();
+      p_diffxs->SetBinContent( i+1, mean );
+      p_diffxs->SetBinError( i+1, rms );
    }
 
    return p_diffxs;

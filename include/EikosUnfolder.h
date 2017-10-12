@@ -5,6 +5,8 @@
 #include <TH1D.h>
 
 #include <BAT/BCModel.h>
+#include <BAT/BCGaussianPrior.h>
+#include <BAT/BCPositiveDefinitePrior.h>
 #include <BAT/BCMTFSystematic.h>
 #include <BAT/BCMTFSystematicVariation.h>
 #include <BAT/BCMTFTemplate.h>
@@ -60,7 +62,7 @@ class EikosUnfolder : public BCModel, public TObject
     ClassDef( EikosUnfolder, 1 )
 
  protected:
-    pTH1D_t MakeUnfolded();
+    pTH1D_t MakeUnfolded( const std::vector<double>& parameters );
 
  //~~~~~~~~~~~~~~~~~~~~~
 

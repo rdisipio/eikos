@@ -64,6 +64,9 @@ class Sample : public TObject
    void    CalculateEfficiency( const std::string& syst_name = "nominal" );
    pTH1D_t GetEfficiency( const std::string& syst_name = "nominal" );
 
+   void    CalculateMigrations( const std::string& syst_name = "nominal" );
+   pTH2D_t GetMigrations( const std::string& syst_name = "nominal" );
+
    ClassDef( Sample, 1 )
 
  protected:
@@ -80,6 +83,7 @@ class Sample : public TObject
    std::map< const std::string, pTH1D_t >      m_h_truth;
    std::map< const std::string, pTH1D_t >      m_h_acceptance;
    std::map< const std::string, pTH1D_t >      m_h_efficiency;
+   std::map< const std::string, pTH2D_t >      m_h_migrations;
 };
 
 typedef std::shared_ptr<Sample>                  pSample_t;
