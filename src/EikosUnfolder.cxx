@@ -214,8 +214,8 @@ void EikosUnfolder::PrepareForRun()
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
       double y_max = 5.0 * y;
-//      double dy    = 0.2*( y_max - y_min );
-      double dy = h->GetBinError( i+1 ) / m_lumi;
+      double dy    = 0.2*( y_max - y_min );
+//      double dy = h->GetBinError( i+1 ) / m_lumi;
 
       sprintf( b_name, "bin_%i", i+1 );
       BCParameter * np = &GetParameter( b_name );
@@ -249,6 +249,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
   // migrations here
   TH1D * h_tmp = (TH1D*)p_exp->Clone( "h_tmp" );
+/*
   for( int i = 0 ; i < p_mig->GetNbinsX() ; ++i ) {
      double x = 0; 
      for( int j = 0 ; j < p_mig->GetNbinsY() ; ++j ) {
@@ -258,6 +259,18 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
      }
      h_tmp->SetBinContent( i+1, x );
   }
+*/
+
+  for( int j = 0 ; j < p_mig->GetNbinsY() ; ++j ) {
+     double x = 0;
+     for( int i = 0 ; i < p_mig->GetNbinsX() ; ++i ) {
+        double m = p_mig->GetBinContent( i+1, j+1 );
+
+        x += p_exp->GetBinContent(i+1) * m;
+     }
+     h_tmp->SetBinContent( j+1, x );
+  }
+
   for( int i = 0 ; i < p_exp->GetNbinsX() ; ++i ) {
      p_exp->SetBinContent( i+1, h_tmp->GetBinContent(i+1) );
   }

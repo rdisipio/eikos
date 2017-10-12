@@ -291,6 +291,14 @@ class EikosPrompt( Cmd, object ):
      efficiency = unfolder.GetSignalSample().GetEfficiency()
      acceptance = unfolder.GetSignalSample().GetAcceptance()
 
+     diffxs_abs.SetLineColor(kBlack)
+     diffxs_abs.SetMarkerColor(kBlack)
+     diffxs_abs.SetLineWidth(2)
+
+     theory_abs.SetLineColor(kRed)
+     theory_abs.SetMarkerColor(kRed)
+     theory_abs.SetLineWidth(2)
+
      outfile.cd()
 
      theory_abs.get().Write( "theory_abs" )
