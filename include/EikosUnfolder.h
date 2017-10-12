@@ -3,6 +3,7 @@
 
 #include <TObject.h>
 #include <TH1D.h>
+#include <TMath.h>
 
 #include <BAT/BCModel.h>
 #include <BAT/BCGaussianPrior.h>
@@ -14,8 +15,11 @@
 
 #include <iostream>
 #include <map>
+#include <algorithm>
 
 #include "Sample.h"
+
+typedef std::pair< std::string, std::string >  SystPair_t;
 
 //enum StatusCode { kSuccess = 0, kWarning = 1, kError = 2 };
 
@@ -30,7 +34,7 @@ class EikosUnfolder : public BCModel, public TObject
     ~EikosUnfolder();
 
     inline size_t GetNSamples()       { return m_samples.size(); };
-    inline size_t GetNSystematics()   { return m_systematics.size(); };
+    inline size_t GetNSystematics()   { return m_syst_index.size(); };
 
     int GetSampleIndex( const std::string& name );
     int GetSystematicIndex( const std::string& name );
@@ -43,8 +47,7 @@ class EikosUnfolder : public BCModel, public TObject
     pSample_t GetBackgroundSample( const std::string& name = "background" );
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
-    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const pTH1D_t h_u, const pTH1D_t h_d, const pTH1D_t h_n = NULL );
-    int AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const pTH1D_t h_n = NULL );
+    void SetSystematicVariations( const std::string& sname, const std::string& var_u, const std::string& var_d );
 
     void    SetData( const TH1 * data );
     pTH1D_t GetData() { return m_h_data; };
@@ -79,11 +82,12 @@ class EikosUnfolder : public BCModel, public TObject
     std::map< const std::string, int >     m_samples_index;
     std::string m_signal_sample;
  
-    std::vector< BCMTFSystematic * >       m_systematics;
-    std::map< const std::string, int >     m_systematics_index;
+    std::map< const std::string, int >           m_syst_index;
+    std::vector<std::string>                     m_syst_names;
+    std::vector<SystPair_t>                      m_syst_pairs;
 
     pTH1D_t     m_h_data;
-    pTMatrixD_t m_v_data;
+//    pTMatrixD_t m_v_data;
 };
 
 //} // namespace Eikos

@@ -69,12 +69,21 @@ pSample_t EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, c
 
 int EikosUnfolder::AddSystematic( const std::string& sname, double min, double max, const std::string & latexname, const std::string & unitstring )
 {
-  int index = -1;
-
-  m_systematics.push_back( new BCMTFSystematic( sname ) );
-  BCMTFSystematic * p_syst = (*m_systematics.end());
+//  m_systematics.push_back( new BCMTFSystematic( sname ) );
+//  BCMTFSystematic * p_syst = (*m_systematics.end());
 
   AddParameter( sname, min, max, latexname, unitstring );
+
+  m_syst_names.push_back( sname );
+
+  int index = GetNParameters() - 1;
+
+  m_syst_index[sname] = index;
+  m_syst_pairs.push_back( SystPair_t( "none", "none" ) );
+
+  GetParameter(index).SetPrior(new BCGaussianPrior( 0., 1. ) );
+
+  std::cout << "Added systematic " << sname << " with index " << index << std::endl;
 
   return index;
 }
@@ -82,19 +91,19 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
 
 /////////////////////////////////
 
-
-int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, const pTH1D_t h_u, const pTH1D_t h_d, const pTH1D_t h_n )
+void EikosUnfolder::SetSystematicVariations( const std::string& sname, const std::string& var_u, const std::string& var_d )
 {
-  int index = -1;
+   if( m_syst_index.find(sname) == m_syst_index.end() ) {
+      std::cout << "ERROR: unknown systematic" << sname << std::endl;
+      throw std::runtime_error( "unknown systematic" );
+   }
 
-  return index;
-}
+   const int i = m_syst_index[sname] - GetNParameters() + 1; 
 
-int EikosUnfolder::AddSystematicVariation( const std::string& sample_name, const std::string& systematic_name, double k_u, double k_d, const pTH1D_t h_n )
-{
-   int index = -1;
+   m_syst_pairs[i].first  = var_u;
+   m_syst_pairs[i].second = var_d;
 
-   return index;
+   std::cout << "Systematic " << sname << " :: up = " << m_syst_pairs[i].first << " :: down = " << m_syst_pairs[i].second << std::endl;
 }
 
 
@@ -109,8 +118,8 @@ void EikosUnfolder::SetData( const TH1 * data )
 
   m_nbins = m_h_data->GetNbinsX();
 
-  m_v_data = std::make_shared<TMatrixD>( m_nbins, 1 );
-  for( int i = 0 ; i < m_nbins ; ++i ) (*m_v_data)[i][0] = data->GetBinContent(i+1);
+//  m_v_data = std::make_shared<TMatrixD>( m_nbins, 1 );
+//  for( int i = 0 ; i < m_nbins ; ++i ) (*m_v_data)[i][0] = data->GetBinContent(i+1);
 
   m_xedges.clear();
   for( int i = 0 ; i <= m_nbins ; i++ ) {
@@ -213,7 +222,7 @@ void EikosUnfolder::PrepareForRun()
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
-      double y_max = 5.0 * y;
+      double y_max = 3.0 * y;
       double dy    = 0.1*( y_max - y_min );
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
 
@@ -244,8 +253,10 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
   pTH1D_t p_acc = GetSignalSample()->GetAcceptance();
   pTH2D_t p_mig = GetSignalSample()->GetMigrations();
   pTH1D_t p_bkg = GetBackgroundSample() ? GetBackgroundSample()->GetDetector() : NULL;
+  pTH1D_t p_nominal = GetSignalSample()->GetDetector();
 
   p_exp->Scale( m_lumi );
+
   p_exp->Multiply( p_eff.get() );
 
   // migrations here
@@ -271,9 +282,45 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
   for( int r = 0 ; r < m_nbins ; ++r ) {
        
        const double D = m_h_data->GetBinContent( r+1 );
-       const double S = p_exp->GetBinContent( r+1 );
-       const double B = p_bkg ? p_bkg->GetBinContent( r+1 ) : 0.;
 
+       double S = p_exp->GetBinContent( r+1 );
+
+       for( int i = 0 ; i < m_syst_index.size() ; ++i ) {
+          int k = i + m_nbins;
+
+          const std::string& sname   = m_syst_names.at(i);
+          SystPair_t spair           = m_syst_pairs.at(i); 
+          const std::string& sname_u = spair.first;
+          const	std::string& sname_d = spair.second;
+
+          pTH1D_t p_sig_u = GetSignalSample()->GetDetector(sname_u);
+          pTH1D_t p_sig_d = GetSignalSample()->GetDetector(sname_d);
+
+          double sigma_u = p_sig_u->GetBinContent(r+1)   - p_nominal->GetBinContent(r+1);
+          double sigma_d = p_nominal->GetBinContent(r+1) - p_sig_d->GetBinContent(r+1);
+
+          if( (sigma_u>0.) && (sigma_d>0.) ) {
+             sigma_u = std::max( sigma_u, sigma_d );
+             sigma_d = -sigma_u;
+          }
+          if( (sigma_u<0.) && (sigma_d<0.) ) { 
+             sigma_d = std::min( sigma_u, sigma_d );
+             sigma_u = -sigma_d; 
+          }
+
+//          double A = TMath::Sqrt( 1./ TMath::PiOver2 ) / ( fabs(sigma_u) + fabs(sigma_d) );
+          double A = TMath::Sqrt( 0.7978845608 ) / ( fabs(sigma_u) + fabs(sigma_d) );
+          double lambda = A * parameters.at(k);
+
+          if( lambda > 0 ) S += fabs(lambda)*sigma_u;
+          else             S += fabs(lambda)*sigma_d;
+
+       }
+
+       double B = p_bkg ? p_bkg->GetBinContent( r+1 ) : 0.;
+
+       S = ( S > 0. ) ? S : 0.;
+       B = ( B > 0. ) ? B : 0.;
        const double mu = S + B;
 
  //      std::cout << "r=" << r << " D=" << D << " S=" << S << " B=" << B << " :: mu=" << mu << std::endl; 

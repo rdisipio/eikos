@@ -141,23 +141,22 @@ class EikosPrompt( Cmd, object ):
       fpath, hpath = self.unpack_path( path )
       f = TFile.Open( fpath )
       if f.Get( hpath ) == None:
-          BCLog.OutSummary( "Sample %s: invalid histogram %s in file %s" % (hpath,fpath) )
-          return
+          BCLog.OutSummary( "Sample %s: invalid histogram %s in file %s" % (sname,hpath,fpath) )
+          exit(1)
          
       sample = unfolder.GetSample(sname)
 
-      if syst == "nominal":
-         if lvl in [ "reco", "detector" ]: 
+      if lvl in [ "reco", "detector" ]: 
             h = TH1D()
             f.Get( hpath ).Copy( h )
 #            h.Print("all")     
             sample.SetDetector( h, syst )
             BCLog.OutSummary( "Sample %s: reco histogram %s : %s" %(sname,fpath,hpath) )
-         elif lvl in [ "resp", "response" ]:
+      elif lvl in [ "resp", "response" ]:
             h = TH2D()
             f.Get( hpath ).Copy( h ) 
             sample.SetResponse( h, syst )
-         elif lvl in [ "gen", "truth", "particle", "parton" ]:
+      elif lvl in [ "gen", "truth", "particle", "parton" ]:
             h = TH1D()
             f.Get( hpath ).Copy( h )
             #ilumi = float( gparams['LUMI'] )
@@ -165,23 +164,25 @@ class EikosPrompt( Cmd, object ):
             sample.SetTruth( h, syst )
             #BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
             BCLog.OutSummary( "Sample %s: truth histogram %s : %s" %(sname,fpath,hpath) )
-         else: 
+      else: 
             BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
             return False
-      else:
-         BCLog.OutSummary( "Sample %s: systematics not yet implemented" % sname )
 
    ###################
 
    def add_systematic( self, tokens ):
       sname = tokens[0]
       xmin = -5.0
-      if len(tokens) > 1: xmin = float(tokens[1])
       xmax =  5.0
+      if len(tokens) > 1: xmin = float(tokens[1])
       if len(tokens) > 2: xmax = float(tokens[2])
 
       unfolder.AddSystematic( sname, xmin, xmax )
       
+   ###################
+
+   def set_systematic( self, tokens ):
+      pass      
 
    ###################
 
@@ -231,6 +232,16 @@ class EikosPrompt( Cmd, object ):
          elif value == "latex":
             self.set_sample_latex( sname, tokens[3] )
 
+      elif what == "systematic":
+         sname = tokens[1]
+         param = tokens[2]
+         if param == "limits":
+            pass
+         elif param == "variations":
+            var_u = tokens[3]
+            var_d = tokens[4]
+            unfolder.SetSystematicVariations( sname, var_u, var_d )
+ 
    ###################
 
    def do_get( self, args ):
