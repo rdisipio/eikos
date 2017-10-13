@@ -282,10 +282,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        const double D = m_h_data->GetBinContent( r+1 );
 
        double S = p_exp->GetBinContent( r+1 );
-
        for( int i = 0 ; i < m_syst_index.size() ; ++i ) {
-          int k = i + m_nbins;
-
           const std::string& sname   = m_syst_names.at(i);
           SystPair_t spair           = m_syst_pairs.at(i); 
           const std::string& sname_u = spair.first;
@@ -294,8 +291,8 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
           pTH1D_t p_sig_u = GetSignalSample()->GetDetector(sname_u);
           pTH1D_t p_sig_d = GetSignalSample()->GetDetector(sname_d);
 
-          double sigma_u = p_sig_u->GetBinContent(r+1)   - p_nominal->GetBinContent(r+1);
-          double sigma_d = p_nominal->GetBinContent(r+1) - p_sig_d->GetBinContent(r+1);
+          double sigma_u = p_sig_u->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
+          double sigma_d = p_sig_d->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
 
           if( (sigma_u>0.) && (sigma_d>0.) ) {
              sigma_u = std::max( sigma_u, sigma_d );
@@ -307,9 +304,12 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
           }
 
 //          double A = TMath::Sqrt( 1./ TMath::PiOver2 ) / ( fabs(sigma_u) + fabs(sigma_d) );
-          double A = TMath::Sqrt( 0.7978845608 ) / ( fabs(sigma_u) + fabs(sigma_d) );
-          double lambda = A * parameters.at(k);
+//          double A = TMath::Sqrt( 0.7978845608 ) / ( fabs(sigma_u) + fabs(sigma_d) );
 
+          int    k      = i + m_nbins;
+          double lambda = parameters.at(k);
+//          std::cout << "S :: r=" << r << " i=" << i << " k=" << k << " l=" << lambda << std::endl; 
+         
           if( lambda > 0 ) S += fabs(lambda)*sigma_u;
           else             S += fabs(lambda)*sigma_d;
 
@@ -317,7 +317,6 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
        double B = p_bkg ? p_bkg->GetBinContent( r+1 ) : 0.;
        for( int i = 0 ; i < m_syst_index.size() ; ++i ) {
-          int k = i + m_nbins;
 
           const std::string& sname   = m_syst_names.at(i);
           SystPair_t spair           = m_syst_pairs.at(i);
@@ -328,7 +327,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
           pTH1D_t p_bkg_d = GetBackgroundSample()->GetDetector(sname_d);
 
           double sigma_u = p_bkg_u->GetBinContent(r+1) - p_bkg->GetBinContent(r+1);
-          double sigma_d = p_bkg->GetBinContent(r+1)   - p_bkg_d->GetBinContent(r+1);
+          double sigma_d = p_bkg_d->GetBinContent(r+1) - p_bkg->GetBinContent(r+1);
 
           if( (sigma_u>0.) && (sigma_d>0.) ) {
              sigma_u = std::max( sigma_u, sigma_d );
@@ -340,8 +339,10 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
           }
 
 //          double A = TMath::Sqrt( 1./ TMath::PiOver2 ) / ( fabs(sigma_u) + fabs(sigma_d) );
-          double A = TMath::Sqrt( 0.7978845608 ) / ( fabs(sigma_u) + fabs(sigma_d) );
-          double lambda = A * parameters.at(k);
+//          double A = TMath::Sqrt( 0.7978845608 ) / ( fabs(sigma_u) + fabs(sigma_d) );
+          int    k      = i + m_nbins;
+          double lambda = parameters.at(k);
+//          std::cout << "B :: r=" << r << " i=" << i << " k=" << k << " l=" << lambda << std::endl;
 
           if( lambda > 0 ) B += fabs(lambda)*sigma_u;
           else             B += fabs(lambda)*sigma_d;

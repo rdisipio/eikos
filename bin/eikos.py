@@ -15,6 +15,8 @@ gSystem.Load( "libEikos.so" )
 
 from ROOT import *
 
+gErrorIgnoreLevel = kSysError
+
 unfolder = EikosUnfolder()
 
 gparams = {}
