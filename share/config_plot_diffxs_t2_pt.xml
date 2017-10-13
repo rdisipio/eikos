@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<plots tag="MCGEN" phspace="particle" latex="Fiducial phase space" meas="abs" >
+  <plot obs="t2_pt" xtitle="p_{T}^{t,2} [GeV]" ytitle="d #sigma_{t#bar{t}} / d p_{T}^{t,2} [pb GeV^{ -1}]" scale="logy" />
+</plots>
+<samples>
+ <sample name="data"       hpath="diffxs_abs"   type="data"   latex="Data"             color="1"   markerstyle="0"  linewidth="0" linestyle="1" />
+ <sample name="pwgpy8"     hpath="theory_abs"   type="signal" latex="POWHEG+P8"        color="2"   markerstyle="20" linewidth="3" linestyle="1" />
+ <sample name="statsyst"   hpath="diffxs_abs"   type="unc"    latex="Stat.+Syst. unc." color="920" fillcolor="920" alpha="0.7" linewidth="0" />
+</samples>
+<inputfiles>
+  <file sample="data"       path="output/diffxs.root"      />
+  <file sample="pwgpy8"     path="output/diffxs.root"	   />
+  <file sample="statsyst"   path="output/diffxs.root"	   />
+</inputfiles>
+</config>
+<!-- marker styles: https://root.cern.ch/root/html/TAttMarker.html -->

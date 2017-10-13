@@ -222,7 +222,7 @@ void EikosUnfolder::PrepareForRun()
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
       double y_max = 2.0 * y;
-      double dy    = 0.1*( y_max - y_min );
+      double dy    = 0.2*( y_max - y_min );
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
       xs_incl += y;
 
@@ -243,7 +243,7 @@ void EikosUnfolder::PrepareForRun()
   }
 
   // additional observables
-  AddObservable( "xs_incl", 0.5*xs_inc, 1.5*xs_incl, "#sigma_{incl}" );
+  AddObservable( "xs_incl", 0.5*xs_incl, 1.5*xs_incl, "#sigma_{incl}" );
 
 }
 

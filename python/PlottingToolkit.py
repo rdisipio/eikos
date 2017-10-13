@@ -80,7 +80,7 @@ def SetAxesStyle( hlist ):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def DrawRatio( data, uncertainty, predictions, xtitle = "", yrange = [ 0.4, 1.6 ] ):
+def DrawRatio( data, predictions, xtitle = "", yrange = [ 0.4, 1.6 ] ):
 
     nbins = data.GetNbinsX()
     xmin = data.GetXaxis().GetXmin()
@@ -108,11 +108,9 @@ def DrawRatio( data, uncertainty, predictions, xtitle = "", yrange = [ 0.4, 1.6 
 
     frame.Draw()
     
-    unc_stat = MakeUncertaintyBand( data )
-    unc_tot  = MakeUncertaintyBand( uncertainty )
+    unc_tot = MakeUncertaintyBand( data )
 
     unc_tot.Draw( "e2 same" )
-    unc_stat.Draw( "e2 same" )
     ratios = []
     for prediction in predictions:
         #r = MakeRatio( prediction, data )
@@ -142,7 +140,7 @@ def DrawRatio( data, uncertainty, predictions, xtitle = "", yrange = [ 0.4, 1.6 
 
     gPad.RedrawAxis()
 
-    return frame, unc_stat, unc_tot, ratios
+    return frame, unc_tot, ratios
 
 #########################################################
 
@@ -263,7 +261,7 @@ def PrintATLASLabel( x = 0.2, y = 0.85, status="Internal", lumi = 0. ):
   l.DrawLatex(x+0.13,y, status)
   #l.DrawLatex(x+0.14,y,"Preliminary")
   l.SetTextSize(0.04)
-  s = "#sqrt{s} = 13 TeV, %2.1f fb^{-1}" % (lumi/1000.)
+  s = "#sqrt{s} = 13 TeV, %2.1f fb^{-1}" % (lumi)
   l.DrawLatex(x, y-0.05, s )
 
 

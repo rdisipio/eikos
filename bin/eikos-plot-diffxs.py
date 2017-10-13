@@ -5,13 +5,16 @@ import argparse
 import xml.etree.ElementTree as ET
 
 GeV = 1000.
+iLumi = 36.1
 
 from PlottingToolkit import *
 
 from ROOT import *
 
-gROOT.Macro( "rootlogon.C" )
-gROOT.LoadMacro( "AtlasUtils.C" )
+gROOT.Macro( "rootlogon.C" ) 
+gROOT.LoadMacro( "AtlasUtils.C" ) 
+# os.path.expanduser( "share/rootlogon.C" ) )
+#gROOT.LoadMacro( os.path.expanduser( "$PWD/share/AtlasUtils.C" ) )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -176,6 +179,8 @@ def FetchHistograms( hname ):
        histograms[sample] = infile.Get( hpath ).Clone( newname )
 #       print "DEBUG:", sample, hpath, infilename
 
+       DivideByBinWidth( histograms[sample] )
+
     gROOT.cd()
     return histograms
 
@@ -234,7 +239,7 @@ def DoPlot( pconfig ):
 
    histograms['data'].Draw("p")
    histograms['statsyst'].Draw( 'e2 same' )
-   histograms['statonly'].Draw( 'e2 same' )
+#   histograms['statonly'].Draw( 'e2 same' )
 
    predictions = []
    ordered_samples = [ "" for i in range( len(histograms) ) ]
@@ -261,13 +266,13 @@ def DoPlot( pconfig ):
    leg.AddEntry( histograms['data'], samples_configuration['data'].latex, "ep" )
    for sname in ordered_samples:
       leg.AddEntry( histograms[sname], samples_configuration[sname].latex, "l" )
-   leg.AddEntry( histograms['statonly'], "Stat. Unc.", "f" )
+#   leg.AddEntry( histograms['statonly'], "Stat. Unc.", "f" )
    leg.AddEntry( histograms['statsyst'], "Stat. #oplus Syst. Unc.", "f" )
    leg.Draw()
    leg.SetY1( leg.GetY1() - lparams['height'] * leg.GetNRows() )
 
-#   PrintATLASLabel( 0.23, 0.87, "Internal", iLumiAll )
-   PrintATLASLabel( 0.23, 0.87, "Preliminary", iLumiAll )
+   PrintATLASLabel( 0.23, 0.87, "Internal", iLumi )
+#   PrintATLASLabel( 0.23, 0.87, "Preliminary", iLumiAll )
 
    txt = TLatex()
    txt.SetNDC()
@@ -312,7 +317,8 @@ def DoPlot( pconfig ):
 
    yrange = [ 0.4, 1.6 ]
    if pconfig.meas in [ "abs", "AbsoluteDiffXs" ]:
-     yrange = [ 0., 2.4 ]
+     yrange = [ 0.4, 1.6 ]
+     #yrange = [ 0., 2.4 ]
    elif pconfig.meas in [ "rel", "RelativeDiffXs" ]:
       yrange = [ 0.4, 1.6 ]
       if pconfig.obs in [ 'tt_HT' ]: yrange = [ 0., 2.4 ]
@@ -321,7 +327,7 @@ def DoPlot( pconfig ):
       print "ERROR: unknwon type of measurement", pconfig.meas
    print "DEBUG:", pconfig.obs, yrange
 
-   frame, stat_unc, tot_unc, ratio = DrawRatio( histograms['statonly'], histograms['statsyst'], predictions, plot.xtitle, yrange )   
+   frame, tot_unc, ratio = DrawRatio( histograms['statsyst'], predictions, plot.xtitle, yrange )   
 
    if plot.scale in [ PlotScale.bilog, PlotScale.logx ]: 
      pad1.SetLogx(True)
@@ -333,7 +339,7 @@ def DoPlot( pconfig ):
 
    c.cd()
    for ext in [ "pdf" ]:
-     imgname = "img/%s/%s.%s" % ( pconfig.phspace, pconfig.hname, ext )
+     imgname = "img/%s.%s" % ( pconfig.hname, ext )
      c.SaveAs( imgname ) 
 
 
