@@ -300,11 +300,19 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
           const std::string& sname_u = spair.first;
           const	std::string& sname_d = spair.second;
 
-          pTH1D_t p_sig_u = GetSignalSample()->GetDetector(sname_u);
-          pTH1D_t p_sig_d = GetSignalSample()->GetDetector(sname_d);
+          double sigma_u = 0.;
+          double sigma_d = 0.;
 
-          double sigma_u = p_sig_u->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
-          double sigma_d = p_sig_d->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
+          pTH1D_t p_sig_u = GetSignalSample()->GetDetector(sname_u);
+          sigma_u = p_sig_u->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
+
+          if( sname_d == "@symmetrize@" ) {
+             sigma_d = -sigma_u;            
+          }
+          else {
+             pTH1D_t p_sig_d = GetSignalSample()->GetDetector(sname_d);
+             sigma_d = p_sig_d->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
+          }
 
           if( (sigma_u>0.) && (sigma_d>0.) ) {
              sigma_u = std::max( sigma_u, sigma_d );
@@ -335,11 +343,19 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
           const std::string& sname_u = spair.first;
           const std::string& sname_d = spair.second;
 
-          pTH1D_t p_bkg_u = GetBackgroundSample()->GetDetector(sname_u);
-          pTH1D_t p_bkg_d = GetBackgroundSample()->GetDetector(sname_d);
+       	  double sigma_u = 0.;
+       	  double sigma_d = 0.;
 
-          double sigma_u = p_bkg_u->GetBinContent(r+1) - p_bkg->GetBinContent(r+1);
-          double sigma_d = p_bkg_d->GetBinContent(r+1) - p_bkg->GetBinContent(r+1);
+          pTH1D_t p_bkg_u = GetBackgroundSample()->GetDetector(sname_u);
+          sigma_u = p_bkg_u->GetBinContent(r+1) - p_bkg->GetBinContent(r+1); 
+       	  
+       	  if( sname_d == "@symmetrize@"	) {
+       	     sigma_d = -sigma_u;
+          }
+       	  else {
+             pTH1D_t p_bkg_d = GetBackgroundSample()->GetDetector(sname_d);
+             sigma_d = p_bkg_d->GetBinContent(r+1) - p_bkg->GetBinContent(r+1);
+       	  }
 
           if( (sigma_u>0.) && (sigma_d>0.) ) {
              sigma_u = std::max( sigma_u, sigma_d );

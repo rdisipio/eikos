@@ -240,7 +240,9 @@ class EikosPrompt( Cmd, object ):
             pass
          elif param == "variations":
             var_u = tokens[3]
-            var_d = tokens[4]
+            var_d = "@symmetrize@"
+            if len(tokens)>4:  var_d = tokens[4]
+
             unfolder.SetSystematicVariations( sname, var_u, var_d )
  
    ###################
