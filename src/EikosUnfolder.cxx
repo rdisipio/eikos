@@ -238,6 +238,44 @@ void EikosUnfolder::PrepareForRun()
 
 /////////////////////////////////
 
+pTH1D_t EikosUnfolder::MakeFoldedHistogram( const std::vector<double>& parameters )
+{
+   pTH1D_t h_folded = MakeTruthHistogram( parameters );
+
+   pTH1D_t p_eff = GetSignalSample()->GetEfficiency();
+   pTH1D_t p_acc = GetSignalSample()->GetAcceptance();
+   pTH2D_t p_mig = GetSignalSample()->GetMigrations();
+
+   h_folded->Scale( m_lumi );
+
+   h_folded->Multiply( p_eff.get() );
+
+   // migrations
+   TH1D * h_tmp = (TH1D*)h_folded->Clone( "h_tmp" );
+
+   for( int i = 0 ; i < p_mig->GetNbinsX() ; ++i ) {
+     double x = 0;
+
+     for( int j = 0 ; j < p_mig->GetNbinsY() ; ++j ) {
+        double m = p_mig->GetBinContent( i+1, j+1 );
+
+        x += h_folded->GetBinContent(j+1) * m;
+     }
+     h_tmp->SetBinContent( i+1, x );
+   }
+   for( int i = 0 ; i < m_nbins ; ++i ) {
+      h_folded->SetBinContent( i+1, h_tmp->GetBinContent(i+1) );
+   }
+   delete h_tmp;
+
+   h_folded->Divide( p_acc.get() );
+
+   return h_folded;
+}
+
+
+/////////////////////////////////
+
 
 double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 {
@@ -246,37 +284,11 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 //  std::cout << "p1=" << parameters.at(0) << " p2=" << parameters.at(1) << " p3=" << parameters.at(2) << std::endl;
 //  copy( parameters.begin(), parameters.end(), back_inserter(m_parameters) );
 
-  pTH1D_t p_exp = MakeUnfolded( parameters );
-  pTH1D_t p_eff = GetSignalSample()->GetEfficiency();
-  pTH1D_t p_acc = GetSignalSample()->GetAcceptance();
-  pTH2D_t p_mig = GetSignalSample()->GetMigrations();
   pTH1D_t p_bkg = GetBackgroundSample() ? GetBackgroundSample()->GetDetector() : NULL;
   pTH1D_t p_nominal = GetSignalSample()->GetDetector();
 
-  p_exp->Scale( m_lumi );
-
-  p_exp->Multiply( p_eff.get() );
-
-  // migrations here
-  TH1D * h_tmp = (TH1D*)p_exp->Clone( "h_tmp" );
-
-  for( int i = 0 ; i < p_mig->GetNbinsX() ; ++i ) {
-     double x = 0; 
-
-     for( int j = 0 ; j < p_mig->GetNbinsY() ; ++j ) {
-        double m = p_mig->GetBinContent( i+1, j+1 );
- 
-        x += p_exp->GetBinContent(j+1) * m;
-     }
-     h_tmp->SetBinContent( i+1, x );
-  }
-  for( int i = 0 ; i < m_nbins ; ++i ) {
-     p_exp->SetBinContent( i+1, h_tmp->GetBinContent(i+1) );
-  }
-  delete h_tmp;
-
-  p_exp->Divide( p_acc.get() );
-
+  pTH1D_t p_exp = MakeFoldedHistogram( parameters );
+  
   for( int r = 0 ; r < m_nbins ; ++r ) {
        
        const double D = m_h_data->GetBinContent( r+1 );
@@ -365,7 +377,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-pTH1D_t EikosUnfolder::MakeUnfolded( const std::vector<double>& parameters )
+pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters )
 {
    pTH1D_t p_unf = std::make_shared<TH1D>();
    pTH1D_t p_gen = GetSignalSample()->GetTruth();

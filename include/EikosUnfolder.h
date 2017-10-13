@@ -65,7 +65,8 @@ class EikosUnfolder : public BCModel, public TObject
     ClassDef( EikosUnfolder, 1 )
 
  protected:
-    pTH1D_t MakeUnfolded( const std::vector<double>& parameters );
+    pTH1D_t MakeTruthHistogram( const std::vector<double>& parameters );
+    pTH1D_t MakeFoldedHistogram( const std::vector<double>& parameters );
 
  //~~~~~~~~~~~~~~~~~~~~~
 
