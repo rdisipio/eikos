@@ -243,7 +243,7 @@ void EikosUnfolder::PrepareForRun()
   }
 
   // additional observables
-  AddObservable( "xs_incl", 0., 2.0*xs_incl, "#sigma_{incl}" );
+  AddObservable( "xs_incl", 0.5*xs_inc, 1.5*xs_incl, "#sigma_{incl}" );
 
 }
 
