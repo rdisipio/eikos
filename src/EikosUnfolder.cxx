@@ -4,7 +4,7 @@
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins(-1), m_lumi(1.), m_h_data(NULL)
+  m_nbins(-1), m_regularization(kMultinomial), m_lumi(1.), m_h_data(NULL)
 {
 }
 
@@ -217,21 +217,33 @@ void EikosUnfolder::PrepareForRun()
   }
 
   char b_name[32];
+  double xs_incl = 0.;
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
       double y_max = 2.0 * y;
       double dy    = 0.1*( y_max - y_min );
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
+      xs_incl += y;
 
       sprintf( b_name, "bin_%i", i+1 );
       BCParameter * np = &GetParameter( b_name );
       np->SetLimits( 0., y_max );
 
- //     GetParameter(i).SetPriorConstant();
-      GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
-
+      if( m_regularization == kUnregularized ) {
+         GetParameter(i).SetPriorConstant();
+      }
+      else if( m_regularization == kMultinomial ) { 
+          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
+      }
+      else {
+          std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
+          throw std::runtime_error( "unknown regularization method" );
+      }
   }
+
+  // additional observables
+  AddObservable( "xs_incl", 0., 2.0*xs_incl, "#sigma_{incl}" );
 
 }
 
@@ -291,7 +303,9 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
   
   for( int r = 0 ; r < m_nbins ; ++r ) {
        
-       const double D = m_h_data->GetBinContent( r+1 );
+       double D = m_h_data->GetBinContent( r+1 );
+       // Data stat unc: poisson smearing
+//       D = m_rng.Poisson(D);
 
        double S = p_exp->GetBinContent( r+1 );
        for( int i = 0 ; i < m_syst_index.size() ; ++i ) {
@@ -426,4 +440,13 @@ pTH1D_t EikosUnfolder::GetDiffxsAbs()
    }
 
    return p_diffxs;
+}
+
+
+void EikosUnfolder::CalculateObservables(const std::vector<double>& parameters)
+{
+   double xs_incl = 0.;
+   for( int i = 0 ; i < m_nbins ; ++i ) xs_incl += parameters.at(i);
+
+   GetObservable(0).Value( xs_incl );
 }

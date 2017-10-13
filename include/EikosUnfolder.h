@@ -4,6 +4,7 @@
 #include <TObject.h>
 #include <TH1D.h>
 #include <TMath.h>
+#include <TRandom3.h>
 
 #include <BAT/BCModel.h>
 #include <BAT/BCGaussianPrior.h>
@@ -21,6 +22,7 @@
 
 typedef std::pair< std::string, std::string >  SystPair_t;
 
+enum REGULARIZATION { kUnregularized = 0, kMultinomial = 1, kCurvature = 2 };
 //enum StatusCode { kSuccess = 0, kWarning = 1, kError = 2 };
 
 /////////////////////////////////
@@ -33,6 +35,7 @@ class EikosUnfolder : public BCModel, public TObject
     EikosUnfolder();
     ~EikosUnfolder();
 
+    void SetRegularization( REGULARIZATION r )   { m_regularization = r; };
     inline size_t GetNSamples()       { return m_samples.size(); };
     inline size_t GetNSystematics()   { return m_syst_index.size(); };
 
@@ -61,6 +64,7 @@ class EikosUnfolder : public BCModel, public TObject
 
     double LogLikelihood( const std::vector<double>& parameters );
 //    void MCMCUserIterationinterface();
+    void CalculateObservables(const std::vector<double>& parameters);
 
     ClassDef( EikosUnfolder, 1 )
 
@@ -71,10 +75,13 @@ class EikosUnfolder : public BCModel, public TObject
  //~~~~~~~~~~~~~~~~~~~~~
 
  protected:
+//    TRandom3    m_rng;
+
     std::string m_name;
     int         m_nbins;
     std::vector<double> m_parameters;
 
+    REGULARIZATION      m_regularization;
     double              m_lumi;
     std::vector<double> m_xedges;
     std::vector<double>	m_bw;

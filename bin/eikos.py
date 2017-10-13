@@ -26,6 +26,7 @@ gparams['PHSPACE']    = "particle"
 gparams['OBS']        = "t1_pt"
 gparams['LUMI']       = 36074.6
 gparams['INPUTPATH']  = "$PWD/data/tt_allhad_boosted"
+gparams['REGULARIZATION'] = 1
 
 systematics = {}
 
@@ -276,6 +277,7 @@ class EikosPrompt( Cmd, object ):
    def do_run( self, args ):
      lumi = float(gparams['LUMI'])
      unfolder.SetLuminosity( lumi )
+     unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
 
      unfolder.PrepareForRun()
 
@@ -283,6 +285,7 @@ class EikosPrompt( Cmd, object ):
 #     unfolder.SetPrecision( BCEngineMCMC.kHigh )
      unfolder.SetPrecision( int(gparams['PRECISION']) )
 
+#     unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
      unfolder.PrintSummary()
 
      unfolder.MarginalizeAll()
@@ -365,6 +368,8 @@ class EikosPrompt( Cmd, object ):
      closure.SetMarkerColor( kBlack )
      closure.SetLineWidth(2)
 
+     xs_incl = unfolder.GetMarginalizedHistogram( "xs_incl" )
+
      outfile.cd()
 
      data.get().Write( "data" )
@@ -380,6 +385,7 @@ class EikosPrompt( Cmd, object ):
      efficiency.get().Write( "efficiency" )
      acceptance.get().Write( "acceptance" )
      closure.Write( "closure" )
+     xs_incl.Write( "xs_incl" )
 
      outfile.Close()
 
