@@ -299,22 +299,33 @@ class EikosPrompt( Cmd, object ):
      for i in range(n):
        print "%-2i) %f" % ( i, bestfit[i] )
 
-     diffxs_abs = unfolder.GetDiffxsAbs()
-
-     theory_abs = unfolder.GetSignalSample().GetTruth()
-     theory_abs.Scale( 1./lumi )
-
      migrations = unfolder.GetSignalSample().GetMigrations()
      efficiency = unfolder.GetSignalSample().GetEfficiency()
      acceptance = unfolder.GetSignalSample().GetAcceptance()
 
+     diffxs_abs = unfolder.GetDiffxsAbs()
      diffxs_abs.SetLineColor(kBlack)
      diffxs_abs.SetMarkerColor(kBlack)
      diffxs_abs.SetLineWidth(2)
 
+     diffxs_rel = unfolder.GetDiffxsRel()
+     diffxs_rel.SetLineColor(kBlack)
+     diffxs_rel.SetMarkerColor(kBlack)
+     diffxs_rel.SetLineWidth(2)
+
+     theory_abs = unfolder.GetSignalSample().GetTruth()
+     theory_abs.Scale( 1./lumi )
      theory_abs.SetLineColor(kRed)
      theory_abs.SetMarkerColor(kRed)
      theory_abs.SetLineWidth(2)
+
+     xs_incl_theory = theory_abs.Integral()
+
+     theory_rel = theory_abs.Clone( "theory_rel" )
+     theory_rel.Scale( 1./xs_incl_theory )
+     theory_rel.SetLineColor(kRed)
+     theory_rel.SetMarkerColor(kRed)
+     theory_rel.SetLineWidth(2)
 
      migrations.SetMinimum( 0. )
      migrations.SetMaximum( 1.0 )
@@ -379,11 +390,17 @@ class EikosPrompt( Cmd, object ):
      signal.get().Write( "signal" )
      prediction.Write( "prediction" )
      dataminusbkg.Write( "dataminusbkg" )
-     theory_abs.get().Write( "theory_abs" )
-     diffxs_abs.get().Write( "diffxs_abs" )
+
      migrations.get().Write( "migrations" )
      efficiency.get().Write( "efficiency" )
      acceptance.get().Write( "acceptance" )
+
+     theory_abs.get().Write( "theory_abs" )
+     diffxs_abs.get().Write( "diffxs_abs" )
+
+     theory_rel.Write( "theory_rel" )
+     diffxs_rel.get().Write( "diffxs_rel" )
+
      closure.Write( "closure" )
      xs_incl.Write( "xs_incl" )
 

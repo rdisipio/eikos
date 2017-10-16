@@ -61,6 +61,7 @@ class EikosUnfolder : public BCModel, public TObject
     void PrepareForRun();
 
     pTH1D_t GetDiffxsAbs();
+    pTH1D_t GetDiffxsRel();
 
     double LogLikelihood( const std::vector<double>& parameters );
 //    void MCMCUserIterationinterface();

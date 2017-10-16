@@ -133,8 +133,8 @@ void EikosUnfolder::SetData( const TH1 * data )
   char b_name[32];
   char b_latex[32];
   for( int i = 0 ; i < m_nbins ; i++ ) {
-      sprintf( b_name, "bin_%i", i+1 );
-      sprintf( b_latex, "Bin %i", i+1 );
+      sprintf( b_name, "bin_abs_%i", i+1 );
+      sprintf( b_latex, "Bin %i (abs xs)", i+1 );
       AddParameter( b_name, 0., 1., b_latex );
   }
 }
@@ -217,6 +217,8 @@ void EikosUnfolder::PrepareForRun()
   }
 
   char b_name[32];
+  char b_latex[32];
+
   double xs_incl = 0.;
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = h->GetBinContent( i+1 ) / m_lumi;
@@ -226,7 +228,7 @@ void EikosUnfolder::PrepareForRun()
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
       xs_incl += y;
 
-      sprintf( b_name, "bin_%i", i+1 );
+      sprintf( b_name, "bin_abs_%i", i+1 );
       BCParameter * np = &GetParameter( b_name );
       np->SetLimits( 0., y_max );
 
@@ -244,6 +246,17 @@ void EikosUnfolder::PrepareForRun()
 
   // additional observables
   AddObservable( "xs_incl", 0.5*xs_incl, 1.5*xs_incl, "#sigma_{incl}" );
+
+  // set params
+  for( int i = 0 ; i < m_nbins ; i++ ) {
+      sprintf( b_name, "bin_rel_%i", i+1 );
+      sprintf( b_latex, "Bin %i (rel xs)", i+1 );
+
+      double y_abs = h->GetBinContent( i+1 ) / m_lumi;
+      double y_rel = y_abs / xs_incl;
+
+      AddObservable( b_name, 0., 2.0*y_rel, b_latex );
+  }
 
 }
 
@@ -443,10 +456,45 @@ pTH1D_t EikosUnfolder::GetDiffxsAbs()
 }
 
 
+//////////////////////////////
+
+
+pTH1D_t EikosUnfolder::GetDiffxsRel()
+{
+   pTH1D_t p_diffxs = std::make_shared<TH1D>();
+   pTH1D_t p_gen = GetSignalSample()->GetTruth();
+
+   p_gen->Copy( *(p_diffxs.get()) );
+   p_diffxs->Reset();
+
+   size_t m_nparams = GetNParameters();
+   for( int i = 0 ; i < m_nbins ; i++ ) {
+       
+      BCH1D h_post = GetMarginalized(m_nparams+i);
+      double mean = h_post.GetHistogram()->GetMean();
+      double rms  = h_post.GetHistogram()->GetRMS();
+      p_diffxs->SetBinContent( i+1, mean );
+      p_diffxs->SetBinError( i+1, rms );
+   }
+
+   return p_diffxs;
+}
+
+//////////////////////////////
+
+
 void EikosUnfolder::CalculateObservables(const std::vector<double>& parameters)
 {
    double xs_incl = 0.;
    for( int i = 0 ; i < m_nbins ; ++i ) xs_incl += parameters.at(i);
 
    GetObservable(0).Value( xs_incl );
+
+   for( int i = 0 ; i < m_nbins ; ++i ) {
+      double abs_xs = parameters.at(i);
+      double rel_xs = ( xs_incl > 0. ) ? abs_xs / xs_incl : 0.;
+      GetObservable(i+1).Value( rel_xs );
+   }
 }
+ 
+ 
