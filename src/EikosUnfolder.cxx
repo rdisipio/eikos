@@ -470,7 +470,7 @@ pTH1D_t EikosUnfolder::GetDiffxsRel()
    size_t m_nparams = GetNParameters();
    for( int i = 0 ; i < m_nbins ; i++ ) {
        
-      BCH1D h_post = GetMarginalized(m_nparams+i);
+      BCH1D h_post = GetMarginalized(m_nparams+i+1);
       double mean = h_post.GetHistogram()->GetMean();
       double rms  = h_post.GetHistogram()->GetRMS();
       p_diffxs->SetBinContent( i+1, mean );
