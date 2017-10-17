@@ -23,6 +23,7 @@ void Sample::SetDetector( const TH1 * h, const std::string& syst_name, const std
 {
    pTH1D_t p_h = std::make_shared<TH1D>();
    h->Copy( *p_h );
+   p_h->SetName( hname.c_str() );
    SetDetector( p_h, syst_name, hname );
 }
 
@@ -30,6 +31,7 @@ void Sample::SetDetector( pTH1D_t h, const std::string& syst_name, const std::st
 {
    m_h_detector[syst_name] = std::make_shared<TH1D>();
    h->Copy( (*m_h_detector[syst_name]) );
+   m_h_detector[syst_name]->SetName( hname.c_str() );
 }
 
 pTH1D_t Sample::GetDetector( const std::string& syst_name )  
@@ -48,6 +50,7 @@ void Sample::SetResponse( const TH1 * h, const std::string& syst_name, const std
 { 
    m_h_response[syst_name] = std::make_shared<TH2D>();
    h->Copy( (*m_h_response[syst_name]) );
+   m_h_response[syst_name]->SetName( hname.c_str() );
 }
 
 
@@ -63,14 +66,26 @@ pTH2D_t Sample::GetResponse( const std::string& syst_name )
 
 //////////////////////////////////////////
 
-void Sample::SetTruth( const TH1 * h, const std::string& syst_name, const std::string& hname )   
+void Sample::SetTruth( pTH1D_t h, const std::string& syst_name, const std::string& hname )
 {
    m_h_truth[syst_name] = std::make_shared<TH1D>();
    h->Copy( (*m_h_truth[syst_name]) );
+   m_h_truth[syst_name]->SetName( hname.c_str() );
+
+   std::cout << "DEBUG: Set truth histogram for syst " << syst_name << " name = " << hname << std::endl; 
+}
+
+void Sample::SetTruth( const TH1 * h, const std::string& syst_name, const std::string& hname )   
+{
+   pTH1D_t p_h = std::make_shared<TH1D>();
+   h->Copy( *p_h );
+   SetTruth( p_h, syst_name, hname );
 }
 
 pTH1D_t Sample::GetTruth( const std::string& syst_name )
 {
+//  return m_h_truth.at( syst_name );
+
   if( m_h_truth.count(syst_name) == 0 ) {
      std::cout << "ERROR: sample " << GetName() << " has no truth histogram set for systematic " << syst_name << std::endl;
      return NULL;

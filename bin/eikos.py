@@ -152,20 +152,21 @@ class EikosPrompt( Cmd, object ):
       if lvl in [ "reco", "detector" ]: 
             h = TH1D()
             f.Get( hpath ).Copy( h )
-            sample.SetDetector( h, syst )
+            hname = "reco_%s" % ( syst )
+            sample.SetDetector( h, syst, hname )
 #            BCLog.OutSummary( "Sample %s: reco histogram %s : %s" %(sname,fpath,hpath) )
       elif lvl in [ "resp", "response" ]:
             h = TH2D()
             f.Get( hpath ).Copy( h ) 
-            sample.SetResponse( h, syst )
+            hname = "resp_%s" % ( syst )
+            sample.SetResponse( h, syst, hname )
       elif lvl in [ "gen", "truth", "particle", "parton" ]:
             h = TH1D()
             f.Get( hpath ).Copy( h )
-            #ilumi = float( gparams['LUMI'] )
-            #h.Scale( 1./ilumi )
-            sample.SetTruth( h, syst )
+            hname = "truth_%s" % ( syst )
+            sample.SetTruth( h, syst, hname )
             #BCLog.OutSummary( "Truth histogram is scaled to 1/iLumi" )
-#            BCLog.OutSummary( "Sample %s: truth histogram %s : %s" %(sname,fpath,hpath) )
+#            BCLog.OutSummary( "Sample %s: syst %s :: truth histogram %s : %s" %(sname,syst,fpath,hpath) )
       else: 
             BCLog.OutSummary( "Sample %s: invalid level %s" % lvl )
             return False
@@ -245,7 +246,16 @@ class EikosPrompt( Cmd, object ):
             if len(tokens)>4:  var_d = tokens[4]
 
             unfolder.SetSystematicVariations( sname, var_u, var_d )
- 
+         elif param  == "type":
+            type = tokens[3]
+            if type in [ "detector" ]: 
+               unfolder.SetSystematicType( sname, 0 )
+            elif type in [ "modelling", "generator" ]: 
+               unfolder.SetSystematicType( sname, 1 )
+            else:
+               print "ERROR: unknown type of systematic", type
+               exit(1)  
+
    ###################
 
    def do_get( self, args ):

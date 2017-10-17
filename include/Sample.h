@@ -21,7 +21,7 @@ typedef std::shared_ptr<TH1D> pTH1D_t;
 typedef	std::shared_ptr<TH2D> pTH2D_t;
 typedef std::shared_ptr<TMatrixD> pTMatrixD_t;
 
-enum SAMPLE_TYPE { kData = 0, kSignal = 1, kBackground = 2, kDataDriven = 3, kNSampleTypes = 4 };
+enum SAMPLE_TYPE { kData = 0, kSignal = 1, kBackground = 2, kNSampleTypes = 4 };
 
 class Sample : public TObject
 {

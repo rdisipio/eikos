@@ -78,6 +78,7 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
 
   m_syst_index[sname] = index;
   m_syst_pairs.push_back( SystPair_t( "none_u", "none_d" ) );
+  m_syst_types.push_back( kDetector );
 
   GetParameter(index).SetPrior(new BCGaussianPrior( 0., 1. ) );
 
@@ -86,6 +87,32 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
   return index;
 }
 
+
+/////////////////////////////////
+
+void EikosUnfolder::SetSystematicType( const std::string& sname, SYSTEMATIC_TYPE type )
+{
+  const int index = m_syst_index[sname] - m_nbins;
+  SetSystematicType( index, type );
+}
+
+void EikosUnfolder::SetSystematicType( int index, SYSTEMATIC_TYPE type )
+{
+   m_syst_types[index] = type;
+   const std::string& sname = m_syst_names[index];
+   std::cout << "Systematic " << sname << "(" << index << ") :: type = " << m_syst_types[index] << std::endl;
+}
+
+SYSTEMATIC_TYPE EikosUnfolder::GetSystematicType( int index ) const
+{
+   return m_syst_types[index];
+}
+
+SYSTEMATIC_TYPE EikosUnfolder::GetSystematicType( const std::string& sname ) const
+{
+   const int index = m_syst_index.at(sname) - m_nbins;
+   return GetSystematicType( index );
+}
 
 /////////////////////////////////
 
@@ -204,16 +231,51 @@ void EikosUnfolder::PrepareForRun()
 //  AddSample( background );
   
   // 1) adjust posterior min/max
-  pSample_t nominal = GetSignalSample();
-  if( nominal == NULL ) {
+  pSample_t signal = GetSignalSample();
+  if( signal == NULL ) {
      std::cout << "ERROR: invalid signal sample" << std::endl;
      return;
   }
 
-  pTH1D_t h = nominal->GetTruth( syst_name );
+  pTH1D_t h = signal->GetTruth( syst_name );
   if( h == NULL ) {
      std::cout << "ERROR: invalid signal truth histogram" << std::endl;
      return;
+  }
+
+  // check modelling systematics (no reco histogram)
+  for( auto sname : m_syst_names ) {
+ 
+     int index = m_syst_index[sname] - m_nbins;
+     if( m_syst_types[index] == kModelling ) {
+
+        SystPair_t spair = m_syst_pairs[index];
+        const std::string& sname_u = spair.first;
+        const std::string& sname_d = spair.second;
+
+        std::cout << "INFO: modelling systematic " << sname << "(" << index << ") / " << sname_u << " :: folding truth->reco" << std::endl;
+ 
+        pTH1D_t p_gen_u    = signal->GetTruth( sname_u );
+        p_gen_u->Scale( 1./m_lumi );
+        std::string hname  = std::string("reco_") + sname_u;
+        pTH1D_t p_folded_u = MakeFoldedHistogram( p_gen_u, hname );
+        signal->GetDetector()->Print("all");
+        GetSignalSample()->SetDetector( p_folded_u, sname_u );
+
+        if( sname_d != "@symmetrize@" ) {
+           std::cout << "INFO: modelling systematic " << sname << "(" << index << ") / " << sname_d << " :: folding truth->reco" << std::endl;
+
+           std::string hname  = std::string("reco_") + sname_d;
+           pTH1D_t p_gen_d    = signal->GetTruth( sname_d );
+           p_gen_d->Scale( 1./m_lumi );
+           pTH1D_t p_folded_d = MakeFoldedHistogram( p_gen_d, hname );
+           GetSignalSample()->SetDetector( p_folded_d, sname_d );
+        }
+
+     }
+     else {
+        std::cout << "INFO: detector systematic " << sname << "(" << index << ")" << std::endl;
+     }
   }
 
   char b_name[32];
@@ -224,7 +286,8 @@ void EikosUnfolder::PrepareForRun()
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
       double y_max = 2.0 * y;
-      double dy    = 0.2*( y_max - y_min );
+      double dy = 0.1 * y;
+//      double dy    = 0.2*( y_max - y_min );
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
       xs_incl += y;
 
@@ -240,7 +303,7 @@ void EikosUnfolder::PrepareForRun()
       }
       else {
           std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
-          throw std::runtime_error( "unknown regularization method" );
+          throw std::runtime_error( "unknown regularization method\n" );
       }
   }
 
@@ -263,9 +326,14 @@ void EikosUnfolder::PrepareForRun()
 
 /////////////////////////////////
 
-pTH1D_t EikosUnfolder::MakeFoldedHistogram( const std::vector<double>& parameters )
+pTH1D_t EikosUnfolder::MakeFoldedHistogram( pTH1D_t p_h, const std::string& hname )
 {
-   pTH1D_t h_folded = MakeTruthHistogram( parameters );
+   if( p_h == NULL ) throw std::runtime_error( "MakeFoldedHistogram: invalid input histogram\n" );
+
+   pTH1D_t h_folded = std::make_shared<TH1D>();
+
+   p_h->Copy( *(h_folded.get()) );
+   h_folded->SetName( hname.c_str() );
 
    pTH1D_t p_eff = GetSignalSample()->GetEfficiency();
    pTH1D_t p_acc = GetSignalSample()->GetAcceptance();
@@ -296,6 +364,13 @@ pTH1D_t EikosUnfolder::MakeFoldedHistogram( const std::vector<double>& parameter
    h_folded->Divide( p_acc.get() );
 
    return h_folded;
+}
+
+pTH1D_t EikosUnfolder::MakeFoldedHistogram( const std::vector<double>& parameters, const std::string& hname )
+{
+   pTH1D_t h_folded = MakeTruthHistogram( parameters );
+
+   return MakeFoldedHistogram( h_folded, hname );
 }
 
 

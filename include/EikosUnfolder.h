@@ -22,7 +22,9 @@
 
 typedef std::pair< std::string, std::string >  SystPair_t;
 
-enum REGULARIZATION { kUnregularized = 0, kMultinomial = 1, kCurvature = 2 };
+enum REGULARIZATION  { kUnregularized = 0, kMultinomial = 1, kCurvature = 2 };
+enum SYSTEMATIC_TYPE { kDetector = 0, kModelling = 1, kDataDriven = 3 }; 
+
 //enum StatusCode { kSuccess = 0, kWarning = 1, kError = 2 };
 
 /////////////////////////////////
@@ -51,6 +53,10 @@ class EikosUnfolder : public BCModel, public TObject
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     void SetSystematicVariations( const std::string& sname, const std::string& var_u, const std::string& var_d );
+    void SetSystematicType( const std::string& sname, SYSTEMATIC_TYPE type );
+    void SetSystematicType( int index, SYSTEMATIC_TYPE type );
+    SYSTEMATIC_TYPE GetSystematicType( int index ) const;
+    SYSTEMATIC_TYPE GetSystematicType( const std::string& sname ) const;
 
     void    SetData( const TH1 * data );
     pTH1D_t GetData() { return m_h_data; };
@@ -71,7 +77,9 @@ class EikosUnfolder : public BCModel, public TObject
 
  protected:
     pTH1D_t MakeTruthHistogram( const std::vector<double>& parameters );
-    pTH1D_t MakeFoldedHistogram( const std::vector<double>& parameters );
+
+    pTH1D_t MakeFoldedHistogram( pTH1D_t p_h, const std::string& hname = "folded" );
+    pTH1D_t MakeFoldedHistogram( const std::vector<double>& parameters, const std::string& hname = "folded" );
 
  //~~~~~~~~~~~~~~~~~~~~~
 
@@ -94,6 +102,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::map< const std::string, int >           m_syst_index;
     std::vector<std::string>                     m_syst_names;
     std::vector<SystPair_t>                      m_syst_pairs;
+    std::vector<SYSTEMATIC_TYPE>                 m_syst_types;
 
     pTH1D_t     m_h_data;
 //    pTMatrixD_t m_v_data;
