@@ -243,6 +243,7 @@ void EikosUnfolder::PrepareForRun()
      return;
   }
 
+  std::cout << "INFO: folding modelling systematics..." << std::endl;
   // check modelling systematics (no reco histogram)
   for( auto sname : m_syst_names ) {
  
@@ -254,22 +255,29 @@ void EikosUnfolder::PrepareForRun()
         const std::string& sname_d = spair.second;
 
         std::cout << "INFO: modelling systematic " << sname << "(" << index << ") / " << sname_u << " :: folding truth->reco" << std::endl;
- 
+
+        signal->CalculateAcceptance( sname_u );
+        signal->CalculateEfficiency( sname_u );
+        signal->CalculateMigrations( sname_u );
+
         pTH1D_t p_gen_u    = signal->GetTruth( sname_u );
         p_gen_u->Scale( 1./m_lumi );
         std::string hname  = std::string("reco_") + sname_u;
-        pTH1D_t p_folded_u = MakeFoldedHistogram( p_gen_u, hname );
-        signal->GetDetector()->Print("all");
+        pTH1D_t p_folded_u = MakeFoldedHistogram( p_gen_u, sname_u, hname );
         GetSignalSample()->SetDetector( p_folded_u, sname_u );
 
         if( sname_d != "@symmetrize@" ) {
            std::cout << "INFO: modelling systematic " << sname << "(" << index << ") / " << sname_d << " :: folding truth->reco" << std::endl;
+           signal->CalculateAcceptance( sname_d );
+           signal->CalculateEfficiency( sname_d );
+           signal->CalculateMigrations( sname_d );
 
            std::string hname  = std::string("reco_") + sname_d;
            pTH1D_t p_gen_d    = signal->GetTruth( sname_d );
            p_gen_d->Scale( 1./m_lumi );
-           pTH1D_t p_folded_d = MakeFoldedHistogram( p_gen_d, hname );
+           pTH1D_t p_folded_d = MakeFoldedHistogram( p_gen_d, sname_d, hname );
            GetSignalSample()->SetDetector( p_folded_d, sname_d );
+
         }
 
      }
@@ -326,7 +334,7 @@ void EikosUnfolder::PrepareForRun()
 
 /////////////////////////////////
 
-pTH1D_t EikosUnfolder::MakeFoldedHistogram( pTH1D_t p_h, const std::string& hname )
+pTH1D_t EikosUnfolder::MakeFoldedHistogram( pTH1D_t p_h, const std::string& syst_name, const std::string& hname )
 {
    if( p_h == NULL ) throw std::runtime_error( "MakeFoldedHistogram: invalid input histogram\n" );
 
@@ -335,9 +343,9 @@ pTH1D_t EikosUnfolder::MakeFoldedHistogram( pTH1D_t p_h, const std::string& hnam
    p_h->Copy( *(h_folded.get()) );
    h_folded->SetName( hname.c_str() );
 
-   pTH1D_t p_eff = GetSignalSample()->GetEfficiency();
-   pTH1D_t p_acc = GetSignalSample()->GetAcceptance();
-   pTH2D_t p_mig = GetSignalSample()->GetMigrations();
+   pTH1D_t p_eff = GetSignalSample()->GetEfficiency( syst_name );
+   pTH1D_t p_acc = GetSignalSample()->GetAcceptance( syst_name );
+   pTH2D_t p_mig = GetSignalSample()->GetMigrations( syst_name );
 
    h_folded->Scale( m_lumi );
 
@@ -366,11 +374,11 @@ pTH1D_t EikosUnfolder::MakeFoldedHistogram( pTH1D_t p_h, const std::string& hnam
    return h_folded;
 }
 
-pTH1D_t EikosUnfolder::MakeFoldedHistogram( const std::vector<double>& parameters, const std::string& hname )
+pTH1D_t EikosUnfolder::MakeFoldedHistogram( const std::vector<double>& parameters, const std::string& syst_name, const std::string& hname )
 {
    pTH1D_t h_folded = MakeTruthHistogram( parameters );
 
-   return MakeFoldedHistogram( h_folded, hname );
+   return MakeFoldedHistogram( h_folded, syst_name, hname );
 }
 
 

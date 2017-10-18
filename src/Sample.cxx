@@ -53,6 +53,12 @@ void Sample::SetResponse( const TH1 * h, const std::string& syst_name, const std
    m_h_response[syst_name]->SetName( hname.c_str() );
 }
 
+void Sample::SetResponse( pTH2D_t h, const std::string& syst_name, const std::string& hname )
+{
+   m_h_response[syst_name] = std::make_shared<TH2D>();
+   h->Copy( (*m_h_response[syst_name]) );
+   m_h_response[syst_name]->SetName( hname.c_str() );
+}
 
 pTH2D_t Sample::GetResponse( const std::string& syst_name )
 {
@@ -103,11 +109,13 @@ void Sample::CalculateAcceptance( const std::string& syst_name )
    pTH2D_t h_resp = GetResponse( syst_name );
    pTH1D_t h_sig  = GetDetector( syst_name );
 
-   TH1D * h_acc = (TH1D*)h_resp->ProjectionX( "acceptance" );
+   std::string hname = std::string("acceptance_") + syst_name;
+   TH1D * h_acc = (TH1D*)h_resp->ProjectionX( hname.c_str() );
    h_acc->Divide( h_sig.get() );
 
-//   std::cout <<	"INFO: acceptance " << syst_name << ":"	<< std::endl;
-//   h_acc->Print("all");
+   std::cout <<	"INFO: acceptance " << syst_name << ":"	<< std::endl;
+   for(	int i =	0 ; i <	h_acc->GetNbinsX() ; ++i ) std::cout <<	h_acc->GetBinContent(i+1) << " ";
+   std::cout <<	std::endl;
 
    m_h_acceptance[syst_name] = std::make_shared<TH1D>();
    h_acc->Copy( *(m_h_acceptance[syst_name].get()) );
@@ -133,11 +141,13 @@ void Sample::CalculateEfficiency( const std::string& syst_name )
    pTH2D_t h_resp = GetResponse( syst_name );
    pTH1D_t h_gen  = GetTruth( syst_name );
 
-   TH1D	* h_eff	= (TH1D*)h_resp->ProjectionY( "efficiency" );
+   std::string hname = std::string("efficiency_") + syst_name;
+   TH1D	* h_eff	= (TH1D*)h_resp->ProjectionY( hname.c_str() );
    h_eff->Divide( h_gen.get() );
 
-//   std::cout << "INFO: efficiency " << syst_name << ":" << std::endl;
-//   h_eff->Print("all");
+   std::cout << "INFO: efficiency " << syst_name << ":" << std::endl;
+   for( int i = 0 ; i < h_eff->GetNbinsX() ; ++i ) std::cout << h_eff->GetBinContent(i+1) << " ";
+   std::cout << std::endl;
 
    m_h_efficiency[syst_name] = std::make_shared<TH1D>();
    h_eff->Copy( *(m_h_efficiency[syst_name].get()) );
@@ -162,6 +172,9 @@ void Sample::CalculateMigrations( const std::string& syst_name )
 
    pTH2D_t h_resp = GetResponse( syst_name );
    h_resp->Copy( *(m_h_migrations[syst_name].get()) );
+
+   std::string hname = std::string("migrations_") + syst_name;
+   m_h_migrations[syst_name]->SetName( hname.c_str() );
 
    // normalize rows (should become configurable)
    for(	int j = 0 ; j < h_resp->GetNbinsY() ; ++j ) {

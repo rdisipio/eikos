@@ -78,8 +78,8 @@ class EikosUnfolder : public BCModel, public TObject
  protected:
     pTH1D_t MakeTruthHistogram( const std::vector<double>& parameters );
 
-    pTH1D_t MakeFoldedHistogram( pTH1D_t p_h, const std::string& hname = "folded" );
-    pTH1D_t MakeFoldedHistogram( const std::vector<double>& parameters, const std::string& hname = "folded" );
+    pTH1D_t MakeFoldedHistogram( pTH1D_t p_h, const std::string& syst_name="nominal", const std::string& hname = "folded" );
+    pTH1D_t MakeFoldedHistogram( const std::vector<double>& parameters, const std::string& syst_name="nominal", const std::string& hname = "folded" );
 
  //~~~~~~~~~~~~~~~~~~~~~
 
