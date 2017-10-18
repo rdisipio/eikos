@@ -294,7 +294,7 @@ void EikosUnfolder::PrepareForRun()
       double y = h->GetBinContent( i+1 ) / m_lumi;
       double y_min = 0. * y;
       double y_max = 2.0 * y;
-      double dy = 0.1 * y;
+      double dy = 0.2 * y;
 //      double dy    = 0.2*( y_max - y_min );
 //      double dy = h->GetBinError( i+1 ) / m_lumi;
       xs_incl += y;
@@ -590,9 +590,10 @@ pTH1D_t EikosUnfolder::GetSystematicsPullHistogram()
 
    pTH1D_t h_pull = std::make_shared<TH1D>( "pull", "Systematics pulls", n_syst, 0.5, n_syst+0.5 );
 
-   h_pull->GetYaxis()->SetTitle( "( \theta_{fit} - \theta_{0} ) / #Delta#theta" );
+   h_pull->GetYaxis()->SetTitle( "( #theta_{fit} - #theta_{0} ) / #Delta#theta" );
    h_pull->SetMaximum(  5.0 );
    h_pull->SetMinimum( -5.0 );
+   h_pull->GetXaxis()->LabelsOption( "v") ;
 
    for( int i = 0 ; i < n_syst ; ++i ) {
        const std::string& sname = m_syst_names.at(i);
