@@ -597,7 +597,7 @@ pTH1D_t EikosUnfolder::GetSystematicsPullHistogram()
 
        h_pull->GetXaxis()->SetBinLabel( i+1, sname.c_str() );
 
-       BCH1D h_post = GetMarginalized(m_nbins+i+1);
+       BCH1D h_post = GetMarginalized(m_nbins+i);
        double mean = h_post.GetHistogram()->GetMean();
        double rms  = h_post.GetHistogram()->GetRMS();
 
