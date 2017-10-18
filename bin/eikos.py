@@ -391,6 +391,8 @@ class EikosPrompt( Cmd, object ):
 
      xs_incl = unfolder.GetMarginalizedHistogram( "xs_incl" )
 
+     pulls = unfolder.GetSystematicsPullHistogram();
+
      outfile.cd()
 
      data.get().Write( "data" )
@@ -413,6 +415,8 @@ class EikosPrompt( Cmd, object ):
 
      closure.Write( "closure" )
      xs_incl.Write( "xs_incl" )
+
+     pulls.get().Write( "pulls" )
 
      outfile.Close()
 

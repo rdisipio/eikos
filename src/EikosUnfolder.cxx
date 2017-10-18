@@ -579,5 +579,32 @@ void EikosUnfolder::CalculateObservables(const std::vector<double>& parameters)
       GetObservable(i+1).Value( rel_xs );
    }
 }
- 
- 
+
+
+//////////////////////////////
+
+
+pTH1D_t EikosUnfolder::GetSystematicsPullHistogram() 
+{
+   int n_syst = m_syst_index.size();
+
+   pTH1D_t h_pull = std::make_shared<TH1D>( "pull", "Systematics pulls", n_syst, 0.5, n_syst+0.5 );
+
+   h_pull->GetYaxis()->SetTitle( "( \theta_{fit} - \theta_{0} ) / #Delta#theta" );
+
+   for( int i = 0 ; i < n_syst ; ++i ) {
+       const std::string& sname = m_syst_names.at(i);
+
+       h_pull->GetXaxis()->SetBinLabel( i+1, sname.c_str() );
+
+       BCH1D h_post = GetMarginalized(m_nbins+i+1);
+       double mean = h_post.GetHistogram()->GetMean();
+       double rms  = h_post.GetHistogram()->GetRMS();
+
+       h_pull->SetBinContent( i+1, mean );
+       h_pull->SetBinError( i+1, rms );
+   }
+
+   return h_pull;
+} 
+
