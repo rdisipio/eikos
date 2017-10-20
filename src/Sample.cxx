@@ -114,7 +114,7 @@ void Sample::CalculateAcceptance( const std::string& syst_name )
    h_acc->Divide( h_sig.get() );
 
    std::cout <<	"INFO: acceptance " << syst_name << ":"	<< std::endl;
-   for(	int i =	0 ; i <	h_acc->GetNbinsX() ; ++i ) std::cout <<	h_acc->GetBinContent(i+1) << " ";
+   for(	int i =	0 ; i <	h_acc->GetNbinsX() ; ++i ) std::cout << std::setprecision(3) <<	h_acc->GetBinContent(i+1) << " ";
    std::cout <<	std::endl;
 
    m_h_acceptance[syst_name] = std::make_shared<TH1D>();
@@ -146,7 +146,7 @@ void Sample::CalculateEfficiency( const std::string& syst_name )
    h_eff->Divide( h_gen.get() );
 
    std::cout << "INFO: efficiency " << syst_name << ":" << std::endl;
-   for( int i = 0 ; i < h_eff->GetNbinsX() ; ++i ) std::cout << h_eff->GetBinContent(i+1) << " ";
+   for( int i = 0 ; i < h_eff->GetNbinsX() ; ++i ) std::cout << std::setprecision(3) << h_eff->GetBinContent(i+1) << " ";
    std::cout << std::endl;
 
    m_h_efficiency[syst_name] = std::make_shared<TH1D>();

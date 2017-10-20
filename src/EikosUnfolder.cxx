@@ -237,11 +237,12 @@ void EikosUnfolder::PrepareForRun()
      return;
   }
 
-  pTH1D_t h = signal->GetTruth( syst_name );
-  if( h == NULL ) {
+  pTH1D_t h_gen = signal->GetTruth( syst_name );
+  if( h_gen == NULL ) {
      std::cout << "ERROR: invalid signal truth histogram" << std::endl;
      return;
   }
+  h_gen->Scale( 1./m_lumi );
 
   std::cout << "INFO: folding modelling systematics..." << std::endl;
   // check modelling systematics (no reco histogram)
@@ -260,10 +261,8 @@ void EikosUnfolder::PrepareForRun()
         signal->CalculateEfficiency( sname_u );
         signal->CalculateMigrations( sname_u );
 
-        pTH1D_t p_gen_u    = signal->GetTruth( sname_u );
-        p_gen_u->Scale( 1./m_lumi );
         std::string hname  = std::string("reco_") + sname_u;
-        pTH1D_t p_folded_u = MakeFoldedHistogram( p_gen_u, sname_u, hname );
+        pTH1D_t p_folded_u = MakeFoldedHistogram( h_gen, sname_u, hname );
         GetSignalSample()->SetDetector( p_folded_u, sname_u );
 
         if( sname_d != "@symmetrize@" ) {
@@ -273,11 +272,8 @@ void EikosUnfolder::PrepareForRun()
            signal->CalculateMigrations( sname_d );
 
            std::string hname  = std::string("reco_") + sname_d;
-           pTH1D_t p_gen_d    = signal->GetTruth( sname_d );
-           p_gen_d->Scale( 1./m_lumi );
-           pTH1D_t p_folded_d = MakeFoldedHistogram( p_gen_d, sname_d, hname );
+           pTH1D_t p_folded_d = MakeFoldedHistogram( h_gen, sname_d, hname );
            GetSignalSample()->SetDetector( p_folded_d, sname_d );
-
         }
 
      }
@@ -291,12 +287,12 @@ void EikosUnfolder::PrepareForRun()
 
   double xs_incl = 0.;
   for( int i = 0 ; i < m_nbins ; i++ ) {
-      double y = h->GetBinContent( i+1 ) / m_lumi;
+      double y = h_gen->GetBinContent( i+1 );
       double y_min = 0. * y;
       double y_max = 2.0 * y;
       double dy = 0.2 * y;
 //      double dy    = 0.2*( y_max - y_min );
-//      double dy = h->GetBinError( i+1 ) / m_lumi;
+//      double dy = h_gen->GetBinError( i+1 ) / m_lumi;
       xs_incl += y;
 
       sprintf( b_name, "bin_abs_%i", i+1 );
@@ -323,7 +319,7 @@ void EikosUnfolder::PrepareForRun()
       sprintf( b_name, "bin_rel_%i", i+1 );
       sprintf( b_latex, "Bin %i (rel xs)", i+1 );
 
-      double y_abs = h->GetBinContent( i+1 ) / m_lumi;
+      double y_abs = h_gen->GetBinContent( i+1 );
       double y_rel = y_abs / xs_incl;
 
       AddObservable( b_name, 0., 2.0*y_rel, b_latex );
