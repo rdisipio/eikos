@@ -324,7 +324,6 @@ class EikosPrompt( Cmd, object ):
      diffxs_rel.SetLineWidth(2)
 
      theory_abs = unfolder.GetSignalSample().GetTruth()
-     theory_abs.Scale( 1./lumi )
      theory_abs.SetLineColor(kRed)
      theory_abs.SetMarkerColor(kRed)
      theory_abs.SetLineWidth(2)
