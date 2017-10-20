@@ -6,6 +6,8 @@ Installation
 
 Master repository is https://gitlab.cern.ch/disipio/Eikos
 
+Introductory slides: https://www.dropbox.com/s/uxfdtn74z7fxqpx/disipio_2017_10_18-eikos_bayesian_unfolding.pdf
+
 To download the code
 ```bash
 git clone https://:@gitlab.cern.ch:8443/disipio/Eikos.git
