@@ -1,0 +1,296 @@
+set param  INPUTPATH /afs/cern.ch/user/d/disipio/work/public/ttbar_diffxs_13TeV/AnalysisTop/run/output
+set param  LUMI 36074.6 
+set param  PRECISION 2
+set param  REGULARIZATION 1
+set param  OBS tt_m
+set data   path @INPUTPATH@/data/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+add sample ttAH
+set sample ttAH type signal
+set sample ttAH path nominal reco  @INPUTPATH@/nominal/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.nominal.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH	path nominal resp  @INPUTPATH@/nominal/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.nominal.YearAll.histograms.root:response_singlespectrum_@PHSPACE@_@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH	path nominal gen   @INPUTPATH@/particle/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.particle.nominal.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+add sample background
+set sample background type background
+set sample background path nominal reco   @INPUTPATH@/nominal/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.nominal.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b 
+
+add systematic LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA variations LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1up LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA variations LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1up LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA variations LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1up LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA variations LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1up LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_Tau32WTA__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+
+
+add systematic LARGERJET_Weak_JET_Rtrk_Baseline_pT -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Baseline_pT variations LARGERJET_Weak_JET_Rtrk_Baseline_pT__1up LARGERJET_Weak_JET_Rtrk_Baseline_pT__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Baseline_pT__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_pT__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Baseline_pT__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_pT__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Baseline_pT__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_pT__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Baseline_pT__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_pT__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_Modelling_pT -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Modelling_pT variations LARGERJET_Weak_JET_Rtrk_Modelling_pT__1up LARGERJET_Weak_JET_Rtrk_Modelling_pT__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Modelling_pT__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_pT__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Modelling_pT__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_pT__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Modelling_pT__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_pT__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Modelling_pT__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_pT__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_TotalStat_pT -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_TotalStat_pT variations LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1up LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_Tracking_pT -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Tracking_pT variations LARGERJET_Weak_JET_Rtrk_Tracking_pT__1up LARGERJET_Weak_JET_Rtrk_Tracking_pT__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Tracking_pT__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_pT__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Tracking_pT__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_pT__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Tracking_pT__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_pT__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_pT__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Tracking_pT__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_pT__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_pT__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+
+
+add systematic LARGERJET_Weak_JET_Rtrk_Baseline_mass -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Baseline_mass variations LARGERJET_Weak_JET_Rtrk_Baseline_mass__1up LARGERJET_Weak_JET_Rtrk_Baseline_mass__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Baseline_mass__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_mass__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Baseline_mass__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_mass__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Baseline_mass__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_mass__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Baseline_mass__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Baseline_mass__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Baseline_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_Modelling_mass -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Modelling_mass variations LARGERJET_Weak_JET_Rtrk_Modelling_mass__1up LARGERJET_Weak_JET_Rtrk_Modelling_mass__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Modelling_mass__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_mass__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Modelling_mass__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_mass__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Modelling_mass__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_mass__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Modelling_mass__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Modelling_mass__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Modelling_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_TotalStat_mass -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_TotalStat_mass variations LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1up LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_TotalStat_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic LARGERJET_Weak_JET_Rtrk_Tracking_mass -5 5
+set systematic LARGERJET_Weak_JET_Rtrk_Tracking_mass variations LARGERJET_Weak_JET_Rtrk_Tracking_mass__1up LARGERJET_Weak_JET_Rtrk_Tracking_mass__1down
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Tracking_mass__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_mass__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Rtrk_Tracking_mass__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_mass__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Tracking_mass__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_mass__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Rtrk_Tracking_mass__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Rtrk_Tracking_mass__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Rtrk_Tracking_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+
+add systematic LARGERJET_Weak_JET_Top_massRes_mass -5 5
+set systematic LARGERJET_Weak_JET_Top_massRes_mass variations LARGERJET_Weak_JET_Top_massRes_mass__1up LARGERJET_Weak_JET_Top_massRes_mass__1down
+set sample ttAH path LARGERJET_Weak_JET_Top_massRes_mass__1up         reco @INPUTPATH@/LARGERJET_Weak_JET_Top_massRes_mass__1up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Top_massRes_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path LARGERJET_Weak_JET_Top_massRes_mass__1down       reco @INPUTPATH@/LARGERJET_Weak_JET_Top_massRes_mass__1down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Top_massRes_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Top_massRes_mass__1up   reco @INPUTPATH@/LARGERJET_Weak_JET_Top_massRes_mass__1up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Top_massRes_mass__1up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path LARGERJET_Weak_JET_Top_massRes_mass__1down reco @INPUTPATH@/LARGERJET_Weak_JET_Top_massRes_mass__1down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.LARGERJET_Weak_JET_Top_massRes_mass__1down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+
+
+
+add systematic bTagSF_70_eigenvars_B_0 -5 5
+set systematic bTagSF_70_eigenvars_B_0 variations bTagSF_70_eigenvars_B_up_0 bTagSF_70_eigenvars_B_down_0
+set sample ttAH path bTagSF_70_eigenvars_B_up_0         reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_0/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_B_down_0       reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_0/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_up_0	reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_0/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_down_0 reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_0/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_B_1 -5 5
+set systematic bTagSF_70_eigenvars_B_1 variations bTagSF_70_eigenvars_B_up_1 bTagSF_70_eigenvars_B_down_1
+set sample ttAH path bTagSF_70_eigenvars_B_up_1         reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_1/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_B_down_1	reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_1/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_up_1   reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_1/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_down_1 reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_1/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_B_2 -5 5
+set systematic bTagSF_70_eigenvars_B_2 variations bTagSF_70_eigenvars_B_up_2 bTagSF_70_eigenvars_B_down_2
+set sample ttAH path bTagSF_70_eigenvars_B_up_2         reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_2/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_B_down_2	reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_2/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_up_2   reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_2/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_down_2 reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_2/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_B_3 -5 5
+set systematic bTagSF_70_eigenvars_B_3 variations bTagSF_70_eigenvars_B_up_3 bTagSF_70_eigenvars_B_down_3
+set sample ttAH path bTagSF_70_eigenvars_B_up_3         reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_3/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_B_down_3	reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_3/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_up_3   reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_3/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_down_3 reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_3/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_B_4 -5 5
+set systematic bTagSF_70_eigenvars_B_4 variations bTagSF_70_eigenvars_B_up_4 bTagSF_70_eigenvars_B_down_4
+set sample ttAH path bTagSF_70_eigenvars_B_up_4         reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_4/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_B_down_4	reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_4/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_up_4   reco @INPUTPATH@/bTagSF_70_eigenvars_B_up_4/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_up_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_B_down_4 reco @INPUTPATH@/bTagSF_70_eigenvars_B_down_4/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_B_down_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+
+add systematic bTagSF_70_eigenvars_C_0 -5 5 
+set systematic bTagSF_70_eigenvars_C_0 variations bTagSF_70_eigenvars_C_up_0 bTagSF_70_eigenvars_C_down_0
+set sample ttAH path bTagSF_70_eigenvars_C_up_0         reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_0/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_C_down_0       reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_0/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_up_0   reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_0/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_down_0	reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_0/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_C_1 -5 5
+set systematic bTagSF_70_eigenvars_C_1 variations bTagSF_70_eigenvars_C_up_1 bTagSF_70_eigenvars_C_down_1
+set sample ttAH path bTagSF_70_eigenvars_C_up_1         reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_1/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_C_down_1	reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_1/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_up_1   reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_1/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_down_1 reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_1/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_C_2 -5 5
+set systematic bTagSF_70_eigenvars_C_2 variations bTagSF_70_eigenvars_C_up_2 bTagSF_70_eigenvars_C_down_2
+set sample ttAH path bTagSF_70_eigenvars_C_up_2         reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_2/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_C_down_2	reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_2/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_up_2   reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_2/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_down_2 reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_2/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_C_3 -5 5
+set systematic bTagSF_70_eigenvars_C_3 variations bTagSF_70_eigenvars_C_up_3 bTagSF_70_eigenvars_C_down_3
+set sample ttAH path bTagSF_70_eigenvars_C_up_3         reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_3/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_C_down_3	reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_3/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_up_3   reco @INPUTPATH@/bTagSF_70_eigenvars_C_up_3/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_up_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_C_down_3 reco @INPUTPATH@/bTagSF_70_eigenvars_C_down_3/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_C_down_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+
+add systematic bTagSF_70_eigenvars_Light_0 -5 5 
+set systematic bTagSF_70_eigenvars_Light_0 variations bTagSF_70_eigenvars_Light_up_0 bTagSF_70_eigenvars_Light_down_0
+set sample ttAH path bTagSF_70_eigenvars_Light_up_0         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_0/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_0       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_0/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_0   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_0/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_0	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_0/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_0.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_1 -5 5
+set systematic bTagSF_70_eigenvars_Light_1 variations bTagSF_70_eigenvars_Light_up_1 bTagSF_70_eigenvars_Light_down_1
+set sample ttAH path bTagSF_70_eigenvars_Light_up_1         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_1/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_1       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_1/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_1   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_1/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_1     reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_1/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_1.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_2 -5 5 
+set systematic bTagSF_70_eigenvars_Light_2 variations bTagSF_70_eigenvars_Light_up_2 bTagSF_70_eigenvars_Light_down_2
+set sample ttAH path bTagSF_70_eigenvars_Light_up_2         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_2/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_2       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_2/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_2   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_2/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_2	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_2/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_2.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_3 -5 5 
+set systematic bTagSF_70_eigenvars_Light_3 variations bTagSF_70_eigenvars_Light_up_3 bTagSF_70_eigenvars_Light_down_3
+set sample ttAH path bTagSF_70_eigenvars_Light_up_3         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_3/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_3       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_3/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_3   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_3/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_3	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_3/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_3.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_4 -5 5 
+set systematic bTagSF_70_eigenvars_Light_4 variations bTagSF_70_eigenvars_Light_up_4 bTagSF_70_eigenvars_Light_down_4
+set sample ttAH path bTagSF_70_eigenvars_Light_up_4         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_4/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_4       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_4/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_4   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_4/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_4	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_4/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_4.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_5 -5 5 
+set systematic bTagSF_70_eigenvars_Light_5 variations bTagSF_70_eigenvars_Light_up_5 bTagSF_70_eigenvars_Light_down_5
+set sample ttAH path bTagSF_70_eigenvars_Light_up_5         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_5/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_5.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_5       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_5/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_5.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_5   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_5/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_5.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_5	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_5/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_5.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_6 -5 5 
+set systematic bTagSF_70_eigenvars_Light_6 variations bTagSF_70_eigenvars_Light_up_6 bTagSF_70_eigenvars_Light_down_6
+set sample ttAH path bTagSF_70_eigenvars_Light_up_6         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_6/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_6.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_6       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_6/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_6.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_6   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_6/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_6.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_6	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_6/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_6.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_7 -5 5 
+set systematic bTagSF_70_eigenvars_Light_7 variations bTagSF_70_eigenvars_Light_up_7 bTagSF_70_eigenvars_Light_down_7
+set sample ttAH path bTagSF_70_eigenvars_Light_up_7         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_7/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_7.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_7       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_7/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_7.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_7   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_7/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_7.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_7	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_7/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_7.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_8 -5 5 
+set systematic bTagSF_70_eigenvars_Light_8 variations bTagSF_70_eigenvars_Light_up_8 bTagSF_70_eigenvars_Light_down_8
+set sample ttAH path bTagSF_70_eigenvars_Light_up_8         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_8/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_8.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_8       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_8/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_8.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_8   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_8/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_8.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_8	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_8/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_8.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_9 -5 5 
+set systematic bTagSF_70_eigenvars_Light_9 variations bTagSF_70_eigenvars_Light_up_9 bTagSF_70_eigenvars_Light_down_9
+set sample ttAH path bTagSF_70_eigenvars_Light_up_9         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_9/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_9.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_9       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_9/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_9.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_9   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_9/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_9.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_9	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_9/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_9.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_10 -5 5 
+set systematic bTagSF_70_eigenvars_Light_10 variations bTagSF_70_eigenvars_Light_up_10 bTagSF_70_eigenvars_Light_down_10
+set sample ttAH path bTagSF_70_eigenvars_Light_up_10         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_10/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_10.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_10       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_10/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_10.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_10   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_10/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_10.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_10	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_10/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_10.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_11 -5 5 
+set systematic bTagSF_70_eigenvars_Light_11 variations bTagSF_70_eigenvars_Light_up_11 bTagSF_70_eigenvars_Light_down_11
+set sample ttAH path bTagSF_70_eigenvars_Light_up_11         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_11/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_11.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_11       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_11/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_11.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_11   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_11/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_11.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_11	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_11/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_11.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_12 -5 5 
+set systematic bTagSF_70_eigenvars_Light_12 variations bTagSF_70_eigenvars_Light_up_12 bTagSF_70_eigenvars_Light_down_12
+set sample ttAH path bTagSF_70_eigenvars_Light_up_12         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_12/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_12.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_12       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_12/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_12.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_12   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_12/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_12.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_12	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_12/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_12.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_eigenvars_Light_13 -5 5 
+set systematic bTagSF_70_eigenvars_Light_13 variations bTagSF_70_eigenvars_Light_up_13 bTagSF_70_eigenvars_Light_down_13
+set sample ttAH path bTagSF_70_eigenvars_Light_up_13         reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_13/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_13.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_eigenvars_Light_down_13       reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_13/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_13.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_up_13   reco @INPUTPATH@/bTagSF_70_eigenvars_Light_up_13/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_up_13.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_eigenvars_Light_down_13	reco @INPUTPATH@/bTagSF_70_eigenvars_Light_down_13/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_eigenvars_Light_down_13.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+
+
+
+add systematic bTagSF_70_extrapolation_from_charm -5 5
+set systematic bTagSF_70_extrapolation_from_charm variations bTagSF_70_extrapolation_from_charm_up bTagSF_70_extrapolation_from_charm_down
+set sample ttAH path bTagSF_70_extrapolation_from_charm_up         reco @INPUTPATH@/bTagSF_70_extrapolation_from_charm_up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_from_charm_up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_extrapolation_from_charm_down       reco @INPUTPATH@/bTagSF_70_extrapolation_from_charm_down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_from_charm_down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_extrapolation_from_charm_up   reco @INPUTPATH@/bTagSF_70_extrapolation_from_charm_up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_from_charm_up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_extrapolation_from_charm_down     reco @INPUTPATH@/bTagSF_70_extrapolation_from_charm_down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_from_charm_down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+add systematic bTagSF_70_extrapolation -5 5
+set systematic bTagSF_70_extrapolation variations bTagSF_70_extrapolation_up bTagSF_70_extrapolation_down
+set sample ttAH path bTagSF_70_extrapolation_up         reco @INPUTPATH@/bTagSF_70_extrapolation_up/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample ttAH path bTagSF_70_extrapolation_down       reco @INPUTPATH@/bTagSF_70_extrapolation_down/mc15_13TeV.ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_extrapolation_up   reco @INPUTPATH@/bTagSF_70_extrapolation_up/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_up.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+set sample background path bTagSF_70_extrapolation_down     reco @INPUTPATH@/bTagSF_70_extrapolation_down/mc15_13TeV.Background_ttAH_pwgpy8.DAOD_TOPQ1.TightTop.bTagSF_70_extrapolation_down.YearAll.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
+
+run
+exit

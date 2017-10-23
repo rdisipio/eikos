@@ -285,6 +285,12 @@ class EikosPrompt( Cmd, object ):
    ###################
 
    def do_run( self, args ):
+     loaded_RooUnfold = gSystem.Load("libRooUnfold.so")
+     if not loaded_RooUnfold == 0:
+        print "INFO: RooUnfold not found."
+     else:
+        print "INFO: RooUnfold found. Output file will contain unfolded distributions with Iterative Bayesian with Nitr=4"
+
      lumi = float(gparams['LUMI'])
      unfolder.SetLuminosity( lumi )
      unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
@@ -392,12 +398,44 @@ class EikosPrompt( Cmd, object ):
 
      pulls = unfolder.GetSystematicsPullHistogram();
 
+     diffxs_ib_abs = None
+     diffxs_ib_rel = None
+     if loaded_RooUnfold == 0:
+        h_psig = dataminusbkg.Clone( "pseudosignal" )
+        h_psig.Multiply( acceptance.get() )
+
+        h_response = unfolder.GetSignalSample().GetResponse().get()
+        m_response = RooUnfoldResponse( 0, 0, h_response, h_response.GetName(), h_response.GetTitle() )
+        m_response.UseOverflow( False )
+
+        unfolder_ib = RooUnfoldBayes()
+        unfolder_ib.Reset()
+        unfolder_ib.SetIterations( 4 )   
+        unfolder_ib.SetVerbose( 0 )
+        unfolder_ib.SetSmoothing( 0 )
+
+        unfolder_ib.SetResponse( m_response ) 
+        unfolder_ib.SetMeasured( h_psig ) 
+ 
+        diffxs_ib_abs = unfolder_ib.Hreco( RooUnfold.kNoError ) 
+        diffxs_ib_abs.SetName( "diffxs_IB4_abs" )
+        diffxs_ib_abs.Divide( efficiency.get() )
+        diffxs_ib_abs.Scale( 1./lumi )
+        diffxs_ib_abs.SetLineColor(kGreen+2)
+        diffxs_ib_abs.SetLineWidth(2)
+        diffxs_ib_abs.SetMarkerColor(kGreen+3)
+
+        xs_incl_ib = diffxs_ib_abs.Integral()
+        diffxs_ib_rel = diffxs_ib_abs.Clone( "diffxs_IB4_rel" )
+        diffxs_ib_rel.Scale( 1./xs_incl_ib )
+
      outfile.cd()
 
      data.get().Write( "data" )
 
      if	isClosureTest == False:
         background.get().Write( "background" )
+
      signal.get().Write( "signal" )
      prediction.Write( "prediction" )
      dataminusbkg.Write( "dataminusbkg" )
@@ -416,6 +454,10 @@ class EikosPrompt( Cmd, object ):
      xs_incl.Write( "xs_incl" )
 
      pulls.get().Write( "pulls" )
+
+     if loaded_RooUnfold == 0:
+       diffxs_ib_abs.Write( "diffxs_IB4_abs" )
+       diffxs_ib_rel.Write( "diffxs_IB4_rel" ) 
 
      outfile.Close()
 
