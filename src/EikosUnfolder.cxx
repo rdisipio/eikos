@@ -513,7 +513,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+/*
 void EikosUnfolder::MCMCUserIterationInterface()
 {
 
@@ -527,7 +527,7 @@ void EikosUnfolder::MCMCUserIterationInterface()
    }
 
 }
-
+*/
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters )

@@ -75,7 +75,7 @@ class EikosUnfolder : public BCModel, public TObject
     virtual double LogLikelihood( const std::vector<double>& parameters );
 //    virtual double LogProbability( const std::vector<double>& parameters );
     virtual void CalculateObservables(const std::vector<double>& parameters);
-    virtual void MCMCUserIterationInterface();
+//    virtual void MCMCUserIterationInterface();
 
     ClassDef( EikosUnfolder, 1 )
 
