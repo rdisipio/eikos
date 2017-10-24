@@ -15,7 +15,7 @@ gSystem.Load( "libEikos.so" )
 
 from ROOT import *
 
-gErrorIgnoreLevel = kSysError
+gROOT.ProcessLine("gErrorIgnoreLevel = kSysError;")
 
 unfolder = EikosUnfolder()
 
@@ -27,6 +27,8 @@ gparams['OBS']        = "t1_pt"
 gparams['LUMI']       = 36074.6
 gparams['INPUTPATH']  = "$PWD/data/tt_allhad_boosted"
 gparams['REGULARIZATION'] = 1
+gparams['OUTPUTPATH'] = "$PWD/output"
+gparams['OUTPUTTAG'] = "statonly"
 
 systematics = {}
 
@@ -45,7 +47,7 @@ class EikosPrompt( Cmd, object ):
      return True
 
    def preloop( self ):
-     BCLog.OutSummary("Welcome to Eikos v2.0, eh!")
+     BCLog.OutSummary("Welcome to Eikos v0.1, eh!")
 
      self.print_params()
      super( EikosPrompt, self ).preloop()
@@ -289,7 +291,13 @@ class EikosPrompt( Cmd, object ):
      if not loaded_RooUnfold == 0:
         print "INFO: RooUnfold not found."
      else:
-        print "INFO: RooUnfold found. Output file will contain unfolded distributions with Iterative Bayesian with Nitr=4"
+        print "INFO: RooUnfold found. Output file will contain unfolded distributions with (unregularized) Matrix Inversion and (regularized) Iterative Bayesian with Nitr=4"
+
+     # create output directory
+     gparams['OUTPUTPATH'] = os.path.expandvars( gparams['OUTPUTPATH'] ) + "/" + gparams['OUTPUTTAG'] + "/"
+     if not os.path.exists( gparams['OUTPUTPATH'] ):
+        os.makedirs( gparams['OUTPUTPATH'] )
+     BCLog.OutSummary( "Output path: %s" % gparams['OUTPUTPATH'] )     
 
      lumi = float(gparams['LUMI'])
      unfolder.SetLuminosity( lumi )
@@ -309,7 +317,10 @@ class EikosPrompt( Cmd, object ):
      bestfit = unfolder.GetBestFitParameters()
      unfolder.FindMode( bestfit )
 
-     outfile = TFile.Open( "output/diffxs.root", "RECREATE" )
+     unfolder.CalculatePValue( bestfit )
+
+     outfilename = "%s/%s.diffxs.root" % ( gparams['OUTPUTPATH'], gparams['OBS'] )
+     outfile = TFile.Open( outfilename, "RECREATE" )
 
      n = bestfit.size()
      for i in range(n):
@@ -400,6 +411,8 @@ class EikosPrompt( Cmd, object ):
 
      diffxs_ib_abs = None
      diffxs_ib_rel = None
+     diffxs_mi_abs = None
+     diffxs_mi_rel = None
      if loaded_RooUnfold == 0:
         h_psig = dataminusbkg.Clone( "pseudosignal" )
         h_psig.Multiply( acceptance.get() )
@@ -408,8 +421,7 @@ class EikosPrompt( Cmd, object ):
         m_response = RooUnfoldResponse( 0, 0, h_response, h_response.GetName(), h_response.GetTitle() )
         m_response.UseOverflow( False )
 
-        unfolder_ib = RooUnfoldBayes()
-        unfolder_ib.Reset()
+        unfolder_ib = RooUnfoldBayes( "IB", "Iterative Baysian" )
         unfolder_ib.SetIterations( 4 )   
         unfolder_ib.SetVerbose( 0 )
         unfolder_ib.SetSmoothing( 0 )
@@ -418,16 +430,39 @@ class EikosPrompt( Cmd, object ):
         unfolder_ib.SetMeasured( h_psig ) 
  
         diffxs_ib_abs = unfolder_ib.Hreco( RooUnfold.kNoError ) 
-        diffxs_ib_abs.SetName( "diffxs_IB4_abs" )
+        diffxs_ib_abs.SetName( "diffxs_IB_abs" )
         diffxs_ib_abs.Divide( efficiency.get() )
         diffxs_ib_abs.Scale( 1./lumi )
-        diffxs_ib_abs.SetLineColor(kGreen+2)
+        diffxs_ib_abs.SetLineColor(kGreen+3)
         diffxs_ib_abs.SetLineWidth(2)
         diffxs_ib_abs.SetMarkerColor(kGreen+3)
 
         xs_incl_ib = diffxs_ib_abs.Integral()
-        diffxs_ib_rel = diffxs_ib_abs.Clone( "diffxs_IB4_rel" )
+        diffxs_ib_rel = diffxs_ib_abs.Clone( "diffxs_IB_rel" )
         diffxs_ib_rel.Scale( 1./xs_incl_ib )
+
+        unfolder_ib.Reset()
+
+        unfolder_mi = RooUnfoldInvert( "MI", "Matrix Inversion" )
+        unfolder_mi.SetVerbose( 0 )
+
+        unfolder_mi.SetResponse( m_response )
+        unfolder_mi.SetMeasured( h_psig )
+
+        diffxs_mi_abs = unfolder_mi.Hreco( RooUnfold.kNoError )
+        diffxs_mi_abs.SetName( "diffxs_MI_abs" )
+        diffxs_mi_abs.Divide( efficiency.get() )
+        diffxs_mi_abs.Scale( 1./lumi )
+        diffxs_mi_abs.SetLineColor(kBlue)
+        diffxs_mi_abs.SetLineWidth(2)
+        diffxs_mi_abs.SetMarkerColor(kBlue)
+
+        xs_incl_mi = diffxs_mi_abs.Integral()
+        diffxs_mi_rel = diffxs_mi_abs.Clone( "diffxs_MI_rel" )
+        diffxs_mi_rel.Scale( 1./xs_incl_mi )
+
+        unfolder_mi.Reset()
+
 
      outfile.cd()
 
@@ -456,17 +491,20 @@ class EikosPrompt( Cmd, object ):
      pulls.get().Write( "pulls" )
 
      if loaded_RooUnfold == 0:
-       diffxs_ib_abs.Write( "diffxs_IB4_abs" )
-       diffxs_ib_rel.Write( "diffxs_IB4_rel" ) 
+       diffxs_mi_abs.Write( "diffxs_MI_abs" )
+       diffxs_mi_rel.Write( "diffxs_MI_rel" ) 
+
+       diffxs_ib_abs.Write( "diffxs_IB_abs" )
+       diffxs_ib_rel.Write( "diffxs_IB_rel" ) 
 
      outfile.Close()
 
      gROOT.SetBatch(True)
 
-     unfolder.PrintParameterPlot( "output/parameters.pdf" )
-     unfolder.PrintCorrelationPlot( "output/correlations.pdf" )
-     unfolder.PrintKnowledgeUpdatePlots( "output/update.pdf" )
-     unfolder.PrintAllMarginalized( "output/marginalized.pdf" )
+     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+#     unfolder.PrintAllMarginalized( "%s/%s_marginalized.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+#     unfolder.PrintCorrelationPlot( "%s/%s_correlations.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+#     unfolder.PrintParameterPlot( "%s/%s_parameters.pdf"     % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 
 
 ##############################

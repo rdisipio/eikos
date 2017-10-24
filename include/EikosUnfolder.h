@@ -21,6 +21,7 @@
 #include "Sample.h"
 
 typedef std::pair< std::string, std::string >  SystPair_t;
+typedef std::pair< std::vector<double>, std::vector<double> > SystValues_t;
 
 enum REGULARIZATION  { kUnregularized = 0, kMultinomial = 1, kCurvature = 2 };
 enum SYSTEMATIC_TYPE { kDetector = 0, kModelling = 1, kDataDriven = 3 }; 
@@ -70,9 +71,11 @@ class EikosUnfolder : public BCModel, public TObject
     pTH1D_t GetDiffxsRel();
     pTH1D_t GetSystematicsPullHistogram();
 
-    double LogLikelihood( const std::vector<double>& parameters );
-//    void MCMCUserIterationinterface();
-    void CalculateObservables(const std::vector<double>& parameters);
+//    virtual double LogAPrioriProbability(const std::vector<double>& parameters );
+    virtual double LogLikelihood( const std::vector<double>& parameters );
+//    virtual double LogProbability( const std::vector<double>& parameters );
+    virtual void CalculateObservables(const std::vector<double>& parameters);
+    virtual void MCMCUserIterationInterface();
 
     ClassDef( EikosUnfolder, 1 )
 
@@ -103,6 +106,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::map< const std::string, int >           m_syst_index;
     std::vector<std::string>                     m_syst_names;
     std::vector<SystPair_t>                      m_syst_pairs;
+    std::vector<SystValues_t>                    m_syst_values;
     std::vector<SYSTEMATIC_TYPE>                 m_syst_types;
 
     pTH1D_t     m_h_data;

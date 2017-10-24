@@ -1,4 +1,6 @@
 set param  INPUTPATH /afs/cern.ch/user/d/disipio/work/public/ttbar_diffxs_13TeV/AnalysisTop/run/output
+set param  OUTPUTPATH $PWD/output                                                  
+set param  OUTPUTTAG  statsyst
 set param  LUMI 36074.6 
 set param  PRECISION 2
 set param  REGULARIZATION 1

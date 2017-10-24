@@ -6,6 +6,7 @@ ClassImp( EikosUnfolder )
 EikosUnfolder::EikosUnfolder() : 
   m_nbins(-1), m_regularization(kMultinomial), m_lumi(1.), m_h_data(NULL)
 {
+   gErrorIgnoreLevel = kSysError;
 }
 
 EikosUnfolder::~EikosUnfolder()
@@ -78,6 +79,7 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
 
   m_syst_index[sname] = index;
   m_syst_pairs.push_back( SystPair_t( "none_u", "none_d" ) );
+  m_syst_values.push_back( SystValues_t( 0., 0. ) );
   m_syst_types.push_back( kDetector );
 
   GetParameter(index).SetPrior(new BCGaussianPrior( 0., 1. ) );
@@ -160,9 +162,9 @@ void EikosUnfolder::SetData( const TH1 * data )
   char b_name[32];
   char b_latex[32];
   for( int i = 0 ; i < m_nbins ; i++ ) {
-      sprintf( b_name, "bin_abs_%i", i+1 );
-      sprintf( b_latex, "Bin %i (abs xs)", i+1 );
-      AddParameter( b_name, 0., 1., b_latex );
+      sprintf( b_name, "bin_%i", i+1 );
+      sprintf( b_latex, "Bin %i", i+1 );
+      AddParameter( b_name, -3., 3., b_latex );
   }
 }
 
@@ -190,21 +192,11 @@ pSample_t EikosUnfolder::GetBackgroundSample( const std::string& name )
 
 void EikosUnfolder::PrepareForRun()
 {
-/*
-  // Create background sample
-  pSample_t background = std::make_shared<Sample>( "background", SAMPLE_TYPE::kBackground, "Total background" );    
-  pTH1D_t h_bkg = std::make_shared<TH1D>();
-  m_h_data->Copy(*h_bkg);
-  h_bkg->Reset();
-  h_bkg->SetName( "background" );
-*/
-
   std::string syst_name = "nominal";
 
   // Print out summary of samples  
   std::cout << "List of defined samples:" << std::endl;
   for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
-//     const std::string& sname = itr->first;
      pSample_t p_sample = itr->second; 
      SAMPLE_TYPE type = p_sample->GetType();
 
@@ -216,21 +208,8 @@ void EikosUnfolder::PrepareForRun()
         p_sample->CalculateMigrations();
      } 
 
-/*
-     if( (type==SAMPLE_TYPE::kBackground) || (type==SAMPLE_TYPE::kDataDriven) ) {
-        pTH1D_t h_sample;
-        p_sample->GetDetector( h_sample, syst_name );
-
-        if( h_sample == NULL ) std::cout << "ERROR: invalid histogram for sample " << p_sample->GetName() << std::endl;
-        h_bkg->Add( h_sample.get() );
-     }
-*/
   }
-
-//  background->SetDetector( h_bkg, syst_name );
-//  AddSample( background );
   
-  // 1) adjust posterior min/max
   pSample_t signal = GetSignalSample();
   if( signal == NULL ) {
      std::cout << "ERROR: invalid signal sample" << std::endl;
@@ -249,11 +228,12 @@ void EikosUnfolder::PrepareForRun()
   for( auto sname : m_syst_names ) {
  
      int index = m_syst_index[sname] - m_nbins;
-     if( m_syst_types[index] == kModelling ) {
 
-        SystPair_t spair = m_syst_pairs[index];
-        const std::string& sname_u = spair.first;
-        const std::string& sname_d = spair.second;
+     SystPair_t spair = m_syst_pairs[index];
+     const std::string& sname_u = spair.first;
+     const std::string& sname_d = spair.second;
+
+     if( m_syst_types[index] == kModelling ) {
 
         std::cout << "INFO: modelling systematic " << sname << "(" << index << ") / " << sname_u << " :: folding truth->reco" << std::endl;
 
@@ -280,6 +260,37 @@ void EikosUnfolder::PrepareForRun()
      else {
         std::cout << "INFO: detector systematic " << sname << "(" << index << ")" << std::endl;
      }
+
+     // Calculate shifts at reco level
+     pTH1D_t h_nominal = signal->GetDetector();
+     for( int r = 0 ; r < m_nbins ; ++r ) {
+        double sigma_u = 0.;
+        double sigma_d = 0.;
+
+        pTH1D_t p_sig_u = GetSignalSample()->GetDetector(sname_u); 
+        sigma_u = p_sig_u->GetBinContent(r+1) - h_nominal->GetBinContent(r+1);
+
+        if( sname_d == "@symmetrize@" ) {
+          sigma_d = -sigma_u;            
+        }
+        else {
+          pTH1D_t p_sig_d = GetSignalSample()->GetDetector(sname_d);
+          sigma_d = p_sig_d->GetBinContent(r+1) - h_nominal->GetBinContent(r+1);
+        }
+
+        if( (sigma_u>0.) && (sigma_d>0.) ) {
+           sigma_u = std::max( sigma_u, sigma_d );
+           sigma_d = -sigma_u;
+        }
+        if( (sigma_u<0.) && (sigma_d<0.) ) { 
+           sigma_d = std::min( sigma_u, sigma_d );
+           sigma_u = -sigma_d; 
+        }
+
+        m_syst_values[index].first.push_back( sigma_u );
+        m_syst_values[index].second.push_back( sigma_d );
+     }
+
   }
 
   char b_name[32];
@@ -288,22 +299,25 @@ void EikosUnfolder::PrepareForRun()
   double xs_incl = 0.;
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = h_gen->GetBinContent( i+1 );
-      double y_min = 0. * y;
-      double y_max = 2.0 * y;
-      double dy = 0.2 * y;
-//      double dy    = 0.2*( y_max - y_min );
-//      double dy = h_gen->GetBinError( i+1 ) / m_lumi;
       xs_incl += y;
 
-      sprintf( b_name, "bin_abs_%i", i+1 );
-      BCParameter * np = &GetParameter( b_name );
-      np->SetLimits( 0., y_max );
+//      double y_min = 0. * y;
+//      double y_max = 2.0 * y;
+//      double dy = 0.5 * y;
+//      double dy    = 0.2*( y_max - y_min );
+//      double dy = h_gen->GetBinError( i+1 ) / m_lumi;
 
+//      sprintf( b_name, "bin_abs_%i", i+1 );
+//      BCParameter * np = &GetParameter( b_name );
+//      np->SetLimits( 0., y_max );
+//      np->SetLimits( 0., 2. );
+ 
       if( m_regularization == kUnregularized ) {
          GetParameter(i).SetPriorConstant();
       }
       else if( m_regularization == kMultinomial ) { 
-          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
+//          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
+          GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
       }
       else {
           std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
@@ -314,7 +328,17 @@ void EikosUnfolder::PrepareForRun()
   // additional observables
   AddObservable( "xs_incl", 0.5*xs_incl, 1.5*xs_incl, "#sigma_{incl}" );
 
-  // set params
+  // absolute diffxs
+  for( int i = 0 ; i < m_nbins ; i++ ) {
+      sprintf( b_name, "bin_abs_%i", i+1 );
+      sprintf( b_latex, "Bin %i (abs xs)", i+1 );
+
+      double y_abs = h_gen->GetBinContent( i+1 );
+
+      AddObservable( b_name, 0., 2.0*y_abs, b_latex );
+  }
+
+  // relative diffxs
   for( int i = 0 ; i < m_nbins ; i++ ) {
       sprintf( b_name, "bin_rel_%i", i+1 );
       sprintf( b_latex, "Bin %i (rel xs)", i+1 );
@@ -380,10 +404,19 @@ pTH1D_t EikosUnfolder::MakeFoldedHistogram( const std::vector<double>& parameter
 
 /////////////////////////////////
 
+/*
+double EikosUnfolder::LogAPrioriProbability(const std::vector<double>& parameters )
+{
+   double logP = 0.;
+
+   return logP;
+}
+*/
 
 double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 {
   double logL = 0.;
+  double alpha = ( m_nbins+m_syst_index.size() ) / float(m_nbins);
 
 //  std::cout << "p1=" << parameters.at(0) << " p2=" << parameters.at(1) << " p3=" << parameters.at(2) << std::endl;
 //  copy( parameters.begin(), parameters.end(), back_inserter(m_parameters) );
@@ -403,31 +436,12 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        for( int i = 0 ; i < m_syst_index.size() ; ++i ) {
           const std::string& sname   = m_syst_names.at(i);
           SystPair_t spair           = m_syst_pairs.at(i); 
-          const std::string& sname_u = spair.first;
-          const	std::string& sname_d = spair.second;
+//          const std::string& sname_u = spair.first;
+//         const	std::string& sname_d = spair.second;
 
-          double sigma_u = 0.;
-          double sigma_d = 0.;
-
-          pTH1D_t p_sig_u = GetSignalSample()->GetDetector(sname_u);
-          sigma_u = p_sig_u->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
-
-          if( sname_d == "@symmetrize@" ) {
-             sigma_d = -sigma_u;            
-          }
-          else {
-             pTH1D_t p_sig_d = GetSignalSample()->GetDetector(sname_d);
-             sigma_d = p_sig_d->GetBinContent(r+1) - p_nominal->GetBinContent(r+1);
-          }
-
-          if( (sigma_u>0.) && (sigma_d>0.) ) {
-             sigma_u = std::max( sigma_u, sigma_d );
-             sigma_d = -sigma_u;
-          }
-          if( (sigma_u<0.) && (sigma_d<0.) ) { 
-             sigma_d = std::min( sigma_u, sigma_d );
-             sigma_u = -sigma_d; 
-          }
+          SystValues_t * syst_values = &( m_syst_values.at(i) );
+          double sigma_u = syst_values->first.at(r);
+          double sigma_d = syst_values->second.at(r);
 
 //          double A = TMath::Sqrt( 1./ TMath::PiOver2 ) / ( fabs(sigma_u) + fabs(sigma_d) );
 //          double A = TMath::Sqrt( 0.7978845608 ) / ( fabs(sigma_u) + fabs(sigma_d) );
@@ -489,13 +503,30 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
  //      std::cout << "r=" << r << " D=" << D << " S=" << S << " B=" << B << " :: mu=" << mu << std::endl; 
        
-       logL += BCMath::LogPoisson( D, mu );
+       logL += alpha * BCMath::LogPoisson( D, mu );
   }
-//  std::cout << "logL = " << logL << std::endl;
+
+//  std::cout << "DEBUG: logL = " << logL << std::endl;
 
   return logL;
 }
 
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+void EikosUnfolder::MCMCUserIterationInterface()
+{
+
+//   int npar = GetNParameters();
+
+   for (int c = 0; c < fMCMCNChains; ++c) {
+      double logL = fMCMCLogLikelihood[c];
+      double logP = fMCMCLogPrior[c];
+
+      std::cout << "DEBUG: chain " << c << " :: logP = " << logP << " :: logL = " << logL << " :: logP+logL = " << (logP+logL) <<  std::endl;
+   }
+
+}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -506,7 +537,10 @@ pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters
 
    p_gen->Copy( *(p_unf.get()) );
    p_unf->Reset();
-   for( int i = 0 ; i < m_nbins ; ++i ) p_unf->SetBinContent( i+1, parameters.at(i) ); 
+   for( int i = 0 ; i < m_nbins ; ++i ) {
+      double y0 = p_gen->GetBinContent(i+1);
+      p_unf->SetBinContent( i+1, y0 * ( 1. + parameters.at(i) ) ); 
+   }
 
    return p_unf;
 }
@@ -515,16 +549,20 @@ pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters
 
 pTH1D_t EikosUnfolder::GetDiffxsAbs()
 {
-//   std::vector<double> bestfit = GetBestFitParameters();
-
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
    pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
    p_gen->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
- 
+
+   char buf[32];
    for( int i = 0 ; i < m_nbins ; i++ ) {
-      BCH1D h_post = GetMarginalized(i);
+
+//      sprintf( buf, "bin_abs_%i", (i+1) );
+//      BCH1D h_post = GetMarginalized( buf );
+      int k = GetNParameters() + 1 + i;
+      BCH1D h_post = GetMarginalized( k );
+
       double mean = h_post.GetHistogram()->GetMean();
       double rms  = h_post.GetHistogram()->GetRMS();
       p_diffxs->SetBinContent( i+1, mean );
@@ -546,10 +584,14 @@ pTH1D_t EikosUnfolder::GetDiffxsRel()
    p_gen->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
 
-   size_t m_nparams = GetNParameters();
+   char	buf[32];
    for( int i = 0 ; i < m_nbins ; i++ ) {
-       
-      BCH1D h_post = GetMarginalized(m_nparams+i+1);
+ 
+//      sprintf( buf, "bin_rel_%i", (i+1)	);
+//      BCH1D h_post = GetMarginalized(buf);
+      int k = GetNParameters() + m_nbins + 1 + i;
+      BCH1D h_post = GetMarginalized( k	);
+
       double mean = h_post.GetHistogram()->GetMean();
       double rms  = h_post.GetHistogram()->GetRMS();
       p_diffxs->SetBinContent( i+1, mean );
@@ -565,14 +607,24 @@ pTH1D_t EikosUnfolder::GetDiffxsRel()
 void EikosUnfolder::CalculateObservables(const std::vector<double>& parameters)
 {
    double xs_incl = 0.;
-   for( int i = 0 ; i < m_nbins ; ++i ) xs_incl += parameters.at(i);
+   size_t n_params = parameters.size();
+   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
+   for( size_t i = 0 ; i < m_nbins ; ++i ) { 
+      double y0 = p_gen->GetBinContent(i+1); 
+      double abs_xs = y0 * ( 1. + parameters.at(i) );
+      xs_incl += abs_xs;
+   }
+   xs_incl = ( xs_incl > 0. ) ? xs_incl : 0.;
    GetObservable(0).Value( xs_incl );
 
    for( int i = 0 ; i < m_nbins ; ++i ) {
-      double abs_xs = parameters.at(i);
+      double y0 = p_gen->GetBinContent(i+1);
+      double abs_xs = y0 * ( 1. + parameters.at(i) );
       double rel_xs = ( xs_incl > 0. ) ? abs_xs / xs_incl : 0.;
-      GetObservable(i+1).Value( rel_xs );
+
+      GetObservable(i+1).Value( abs_xs );
+      GetObservable(i+1+m_nbins).Value( rel_xs );
    }
 }
 
