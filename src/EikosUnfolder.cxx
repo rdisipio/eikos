@@ -319,6 +319,10 @@ void EikosUnfolder::PrepareForRun()
 //          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
           GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
       }
+      else if( m_regularization == kCurvature ) {
+         GetParameter(i).SetPriorConstant();
+         GetParameter(i).SetLimits( -1., 1. );
+      } 
       else {
           std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
           throw std::runtime_error( "unknown regularization method\n" );
@@ -504,6 +508,23 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
  //      std::cout << "r=" << r << " D=" << D << " S=" << S << " B=" << B << " :: mu=" << mu << std::endl; 
        
        logL += alpha * BCMath::LogPoisson( D, mu );
+
+  }
+
+  if( m_regularization == kCurvature ) {
+    // bins' prior is constant. add a curvature term
+
+    double S = 0.;
+    for( int t = 1 ; t < (m_nbins-1) ; t++ ) {
+       double t0 = parameters.at(t);
+       double tp = parameters.at(t+1);
+       double tm = parameters.at(t-1);
+       double dp = tp - t0;
+       double dm = t0 - tm;
+       S += pow( dp - dm, 2 );
+    }
+//    std::cout << "DEBUG: S = " << (-S) << std::endl;
+    logL -= S;
   }
 
 //  std::cout << "DEBUG: logL = " << logL << std::endl;
@@ -513,10 +534,10 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/*
+
 void EikosUnfolder::MCMCUserIterationInterface()
 {
-
+  return;
 //   int npar = GetNParameters();
 
    for (int c = 0; c < fMCMCNChains; ++c) {
@@ -527,7 +548,7 @@ void EikosUnfolder::MCMCUserIterationInterface()
    }
 
 }
-*/
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters )
@@ -555,11 +576,8 @@ pTH1D_t EikosUnfolder::GetDiffxsAbs()
    p_gen->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
 
-   char buf[32];
    for( int i = 0 ; i < m_nbins ; i++ ) {
 
-//      sprintf( buf, "bin_abs_%i", (i+1) );
-//      BCH1D h_post = GetMarginalized( buf );
       int k = GetNParameters() + 1 + i;
       BCH1D h_post = GetMarginalized( k );
 
@@ -584,11 +602,8 @@ pTH1D_t EikosUnfolder::GetDiffxsRel()
    p_gen->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
 
-   char	buf[32];
    for( int i = 0 ; i < m_nbins ; i++ ) {
  
-//      sprintf( buf, "bin_rel_%i", (i+1)	);
-//      BCH1D h_post = GetMarginalized(buf);
       int k = GetNParameters() + m_nbins + 1 + i;
       BCH1D h_post = GetMarginalized( k	);
 

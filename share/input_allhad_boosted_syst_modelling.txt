@@ -2,7 +2,7 @@ set param  INPUTPATH /afs/cern.ch/user/d/disipio/work/public/ttbar_diffxs_13TeV/
 set param  OUTPUTPATH $PWD/output                                                  
 set param  OUTPUTTAG  syst_modelling
 set param  LUMI 36074.6
-set param  REGULARIZATION 1
+set param  REGULARIZATION 2
 set param  PRECISION 2
 set param  OBS tt_m
 set data   path @INPUTPATH@/data/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
