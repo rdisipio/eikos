@@ -317,8 +317,6 @@ class EikosPrompt( Cmd, object ):
      bestfit = unfolder.GetBestFitParameters()
      unfolder.FindMode( bestfit )
 
-     unfolder.CalculatePValue( bestfit )
-
      outfilename = "%s/%s.diffxs.root" % ( gparams['OUTPUTPATH'], gparams['OBS'] )
      outfile = TFile.Open( outfilename, "RECREATE" )
 
