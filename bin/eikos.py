@@ -307,7 +307,8 @@ class EikosPrompt( Cmd, object ):
      if int(gparams['PRECISION']) == 2:
        unfolder.SetNChains( 5 )
        unfolder.SetNIterationsPreRunMax( 200000 )
-#       unfolder.SetNIterationsRun( 200000 )
+       unfolder.SetNIterationsRun( 200000 )
+       unfolder.SetNIterationsPreRunCheck( 1000 )
 
      BCLog.OutSummary( "\033[92m\033[1mFirst run: estimating prior distribution...\033[0m" )
      unfolder.SetRegularization( 0 ) # start with unregularized
