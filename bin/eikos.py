@@ -16,6 +16,7 @@ gSystem.Load( "libEikos.so" )
 from ROOT import *
 
 gROOT.ProcessLine("gErrorIgnoreLevel = kSysError;")
+gROOT.SetBatch(True)
 
 unfolder = EikosUnfolder()
 
@@ -315,17 +316,26 @@ class EikosPrompt( Cmd, object ):
      unfolder.MarginalizeAll()
      bestfit = unfolder.GetBestFitParameters()
      unfolder.FindMode( bestfit )
-     prior = unfolder.GetDiffxsAbs()
+     prior_abs = unfolder.GetDiffxsAbs()
+
+     xs_incl_prior = prior_abs.Integral()
+     prior_rel = prior_abs.Clone( "prior_rel" )
+     prior_rel.Scale( 1./xs_incl_prior )
 
      BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated. Starting real run.\033[0m" )
 
-     unfolder.SetPrior( prior )
+     unfolder.SetPrior( prior_abs )
      unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
      unfolder.PrepareForRun( False )
      unfolder.PrintSummary()
      unfolder.MarginalizeAll()
      bestfit = unfolder.GetBestFitParameters()
      unfolder.FindMode( bestfit )
+
+     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintAllMarginalized( "%s/%s_marginalized.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+#     unfolder.PrintCorrelationPlot( "%s/%s_correlations.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+#     unfolder.PrintParameterPlot( "%s/%s_parameters.pdf"     % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 
      outfilename = "%s/%s.diffxs.root" % ( gparams['OUTPUTPATH'], gparams['OBS'] )
      outfile = TFile.Open( outfilename, "RECREATE" )
@@ -438,7 +448,7 @@ class EikosPrompt( Cmd, object ):
         unfolder_ib.SetResponse( m_response ) 
         unfolder_ib.SetMeasured( h_psig ) 
  
-        diffxs_ib_abs = unfolder_ib.Hreco( RooUnfold.kNoError ) 
+        diffxs_ib_abs = unfolder_ib.Hreco() # RooUnfold.kNoError ) 
         diffxs_ib_abs.SetName( "diffxs_IB_abs" )
         diffxs_ib_abs.Divide( efficiency.get() )
         diffxs_ib_abs.Scale( 1./lumi )
@@ -458,7 +468,7 @@ class EikosPrompt( Cmd, object ):
         unfolder_mi.SetResponse( m_response )
         unfolder_mi.SetMeasured( h_psig )
 
-        diffxs_mi_abs = unfolder_mi.Hreco( RooUnfold.kNoError )
+        diffxs_mi_abs = unfolder_mi.Hreco() # RooUnfold.kNoError )
         diffxs_mi_abs.SetName( "diffxs_MI_abs" )
         diffxs_mi_abs.Divide( efficiency.get() )
         diffxs_mi_abs.Scale( 1./lumi )
@@ -480,7 +490,6 @@ class EikosPrompt( Cmd, object ):
      if	isClosureTest == False:
         background.get().Write( "background" )
 
-     prior.get().Write( "prior" )
      signal.get().Write( "signal" )
      prediction.Write( "prediction" )
      dataminusbkg.Write( "dataminusbkg" )
@@ -490,9 +499,11 @@ class EikosPrompt( Cmd, object ):
      acceptance.get().Write( "acceptance" )
 
      theory_abs.get().Write( "theory_abs" )
+     prior_abs.get().Write( "prior_abs" )
      diffxs_abs.get().Write( "diffxs_abs" )
 
      theory_rel.Write( "theory_rel" )
+     prior_rel.Write( "prior_rel" )
      diffxs_rel.get().Write( "diffxs_rel" )
 
      closure.Write( "closure" )
@@ -507,15 +518,44 @@ class EikosPrompt( Cmd, object ):
        diffxs_ib_abs.Write( "diffxs_IB_abs" )
        diffxs_ib_rel.Write( "diffxs_IB_rel" ) 
 
+     # Final statistics 
+     BCLog.OutSummary( "\033[92m\033[1mFinal statistics:\033[0m" ) 
+     BCLog.OutSummary( "\033[92m\033[1mNB: covariance matrix not implemented yet\033[0m" ) 
+
+     NDF_abs = theory_abs.GetNbinsX()
+     NDF_rel = NDF_abs - 1 
+
+     chi2_prior_vs_theory_abs  = prior_abs.Chi2Test(  theory_abs.get(), "WW CHI2" ) 
+     chi2_diffxs_vs_theory_abs = diffxs_abs.Chi2Test( theory_abs.get(), "WW CHI2" )
+     chi2_diffxs_vs_prior_abs  = diffxs_abs.Chi2Test( prior_abs.get(),  "WW CHI2" )
+
+     chi2_prior_vs_theory_rel  = prior_rel.Chi2Test(  theory_rel, "WW CHI2" )
+     chi2_diffxs_vs_theory_rel = diffxs_rel.Chi2Test( theory_rel, "WW CHI2" )
+     chi2_diffxs_vs_prior_rel  = diffxs_rel.Chi2Test( prior_rel,  "WW CHI2" )
+
+     pvalue_prior_vs_theory_abs  = TMath.Prob( chi2_prior_vs_theory_abs,  NDF_abs )
+     pvalue_diffxs_vs_theory_abs = TMath.Prob( chi2_diffxs_vs_theory_abs, NDF_abs ) 
+     pvalue_diffxs_vs_prior_abs  = TMath.Prob( chi2_diffxs_vs_prior_abs,  NDF_abs )
+
+     pvalue_prior_vs_theory_rel  = TMath.Prob( chi2_prior_vs_theory_rel,  NDF_rel )
+     pvalue_diffxs_vs_theory_rel = TMath.Prob( chi2_diffxs_vs_theory_rel, NDF_rel )
+     pvalue_diffxs_vs_prior_rel  = TMath.Prob( chi2_diffxs_vs_prior_rel,  NDF_rel )
+     
+     BCLog.OutSummary( "[prior,  theory] :: abs :: chi2/NDF = %.2f/%i = %.2f :: pvalue = %.3f" % ( chi2_prior_vs_theory_abs,  NDF_abs, chi2_prior_vs_theory_abs/NDF_abs,  pvalue_prior_vs_theory_abs  ) )
+     BCLog.OutSummary( "[diffxs, theory] :: abs :: chi2/NDF = %.2f/%i = %.2f :: pvalue = %.3f" % ( chi2_diffxs_vs_theory_abs, NDF_abs, chi2_diffxs_vs_theory_abs/NDF_abs, pvalue_diffxs_vs_theory_abs ) )
+     BCLog.OutSummary( "[diffxs, prior ] :: abs :: chi2/NDF = %.2f/%i = %.2f :: pvalue = %.3f" % ( chi2_diffxs_vs_prior_abs,  NDF_abs, chi2_diffxs_vs_prior_abs/NDF_abs,  pvalue_diffxs_vs_prior_abs ) )
+     BCLog.OutSummary( "[prior,  theory] :: rel :: chi2/NDF = %.2f/%i = %.2f :: pvalue = %.3f" % ( chi2_prior_vs_theory_rel,  NDF_rel, chi2_prior_vs_theory_rel/NDF_rel,  pvalue_prior_vs_theory_rel  ) )
+     BCLog.OutSummary( "[diffxs, theory] :: rel :: chi2/NDF = %.2f/%i = %.2f :: pvalue = %.3f" % ( chi2_diffxs_vs_theory_rel, NDF_rel, chi2_diffxs_vs_theory_rel/NDF_rel, pvalue_diffxs_vs_theory_rel ) )
+     BCLog.OutSummary( "[diffxs, prior ] :: rel :: chi2/NDF = %.2f/%i = %.2f :: pvalue = %.3f" % ( chi2_diffxs_vs_prior_rel,  NDF_rel, chi2_diffxs_vs_prior_rel/NDF_rel,  pvalue_diffxs_vs_prior_rel ) )
+
+     if pvalue_prior_vs_theory_abs  < 0.05: BCLog.OutSummary( "Prior  (abs) incompatible with theory model" )
+     if pvalue_diffxs_vs_theory_abs < 0.05: BCLog.OutSummary( "Diffxs (abs) incompatible with theory model" )
+     if pvalue_diffxs_vs_prior_abs  < 0.05: BCLog.OutSummary( "Diffxs (abs) incompatible with prior" )
+     if	pvalue_prior_vs_theory_rel  < 0.05: BCLog.OutSummary( "Prior  (rel) incompatible with theory model" )
+     if	pvalue_diffxs_vs_theory_rel < 0.05: BCLog.OutSummary( "Diffxs (rel) incompatible with theory model" )
+     if	pvalue_diffxs_vs_prior_rel  < 0.05: BCLog.OutSummary( "Diffxs (rel) incompatible with prior" )
+
      outfile.Close()
-
-     gROOT.SetBatch(True)
-
-     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-#     unfolder.PrintAllMarginalized( "%s/%s_marginalized.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-#     unfolder.PrintCorrelationPlot( "%s/%s_correlations.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-#     unfolder.PrintParameterPlot( "%s/%s_parameters.pdf"     % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-
      BCLog.OutSummary( "Output file created: %s" % outfile.GetName() )
 
 

@@ -111,7 +111,7 @@ void Sample::CalculateAcceptance( const std::string& syst_name )
 
    std::string hname = std::string("acceptance_") + syst_name;
    TH1D * h_acc = (TH1D*)h_resp->ProjectionX( hname.c_str() );
-   h_acc->Divide( h_sig.get() );
+   h_acc->Divide( h_acc, h_sig.get(), 1., 1., "B" );
 
    std::cout <<	"INFO: acceptance " << syst_name << ":"	<< std::endl;
    for(	int i =	0 ; i <	h_acc->GetNbinsX() ; ++i ) std::cout << std::setprecision(3) <<	h_acc->GetBinContent(i+1) << " ";
@@ -143,7 +143,7 @@ void Sample::CalculateEfficiency( const std::string& syst_name )
 
    std::string hname = std::string("efficiency_") + syst_name;
    TH1D	* h_eff	= (TH1D*)h_resp->ProjectionY( hname.c_str() );
-   h_eff->Divide( h_gen.get() );
+   h_eff->Divide( h_eff, h_gen.get(), 1., 1., "B" );
 
    std::cout << "INFO: efficiency " << syst_name << ":" << std::endl;
    for( int i = 0 ; i < h_eff->GetNbinsX() ; ++i ) std::cout << std::setprecision(3) << h_eff->GetBinContent(i+1) << " ";
