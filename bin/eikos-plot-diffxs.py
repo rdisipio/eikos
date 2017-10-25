@@ -317,8 +317,8 @@ def DoPlot( pconfig ):
 
    yrange = [ 0.4, 1.6 ]
    if pconfig.meas in [ "abs", "AbsoluteDiffXs" ]:
-     yrange = [ 0.4, 1.6 ]
-     #yrange = [ 0., 2.4 ]
+     #yrange = [ 0.4, 1.6 ]
+     yrange = [ 0., 2.4 ]
    elif pconfig.meas in [ "rel", "RelativeDiffXs" ]:
       yrange = [ 0.4, 1.6 ]
       if pconfig.obs in [ 'tt_HT' ]: yrange = [ 0., 2.4 ]
@@ -339,7 +339,7 @@ def DoPlot( pconfig ):
 
    c.cd()
    for ext in [ "pdf" ]:
-     imgname = "img/%s.%s" % ( pconfig.hname, ext )
+     imgname = "output/img/%s.%s" % ( pconfig.hname, ext )
      c.SaveAs( imgname ) 
 
 

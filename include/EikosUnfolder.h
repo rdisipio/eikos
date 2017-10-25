@@ -62,10 +62,14 @@ class EikosUnfolder : public BCModel, public TObject
     void    SetData( const TH1 * data );
     pTH1D_t GetData() { return m_h_data; };
 
+    void    SetPrior( const TH1 * h );
+    void    SetPrior( pTH1D_t h );
+    pTH1D_t GetPrior() { return m_h_prior; };
+
     void   SetLuminosity( double lumi ) { m_lumi = lumi; };
     double GetLuminosity()              { return m_lumi; };
 
-    void PrepareForRun();
+    void PrepareForRun( bool first_iteration = false );
 
     pTH1D_t GetDiffxsAbs();
     pTH1D_t GetDiffxsRel();
@@ -109,8 +113,8 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector<SystValues_t>                    m_syst_values;
     std::vector<SYSTEMATIC_TYPE>                 m_syst_types;
 
-    pTH1D_t     m_h_data;
-//    pTMatrixD_t m_v_data;
+    pTH1D_t   m_h_data;
+    pTH1D_t   m_h_prior; 
 };
 
 //} // namespace Eikos

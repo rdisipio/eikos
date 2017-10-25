@@ -4,7 +4,7 @@
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins(-1), m_regularization(kMultinomial), m_lumi(1.), m_h_data(NULL)
+  m_nbins(-1), m_regularization(kUnregularized), m_lumi(1.), m_h_data(NULL), m_h_prior(NULL)
 {
    gErrorIgnoreLevel = kSysError;
 }
@@ -46,8 +46,6 @@ pSample_t EikosUnfolder::AddSample( const pSample_t sample )
 
 pSample_t EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, const std::string& latex, int color, int fillstyle, int linestyle )
 {
-  int index = -1;
-
   m_samples[name] = std::make_shared<Sample>();
   pSample_t p_sample = m_samples[name];
 
@@ -164,10 +162,27 @@ void EikosUnfolder::SetData( const TH1 * data )
   for( int i = 0 ; i < m_nbins ; i++ ) {
       sprintf( b_name, "bin_%i", i+1 );
       sprintf( b_latex, "Bin %i", i+1 );
-      AddParameter( b_name, -3., 3., b_latex );
+      AddParameter( b_name, -1., 3., b_latex );
   }
 }
 
+/////////////////////////////////
+
+
+void EikosUnfolder::SetPrior( const TH1 * h )
+{
+   pTH1D_t p_h = std::make_shared<TH1D>();
+   h->Copy( *p_h );
+   p_h->SetName( "prior" );
+   SetPrior( p_h );
+}
+
+void EikosUnfolder::SetPrior( pTH1D_t h	)
+{
+   m_h_prior = std::make_shared<TH1D>();
+   h->Copy( (*m_h_prior) );
+   m_h_prior->SetName( "prior" );
+}
 
 /////////////////////////////////
 
@@ -190,7 +205,7 @@ pSample_t EikosUnfolder::GetBackgroundSample( const std::string& name )
 /////////////////////////////////
 
 
-void EikosUnfolder::PrepareForRun()
+void EikosUnfolder::PrepareForRun( bool first_iteration )
 {
   std::string syst_name = "nominal";
 
@@ -221,10 +236,14 @@ void EikosUnfolder::PrepareForRun()
      std::cout << "ERROR: invalid signal truth histogram" << std::endl;
      return;
   }
-  h_gen->Scale( 1./m_lumi );
 
   std::cout << "INFO: folding modelling systematics..." << std::endl;
   // check modelling systematics (no reco histogram)
+
+  pTH1D_t h_truth_nominal = std::make_shared<TH1D>();
+  h_gen->Copy( *h_truth_nominal );
+  h_truth_nominal->Scale( 1./m_lumi );
+
   for( auto sname : m_syst_names ) {
  
      int index = m_syst_index[sname] - m_nbins;
@@ -242,7 +261,7 @@ void EikosUnfolder::PrepareForRun()
         signal->CalculateMigrations( sname_u );
 
         std::string hname  = std::string("reco_") + sname_u;
-        pTH1D_t p_folded_u = MakeFoldedHistogram( h_gen, sname_u, hname );
+        pTH1D_t p_folded_u = MakeFoldedHistogram( h_truth_nominal, sname_u, hname );
         GetSignalSample()->SetDetector( p_folded_u, sname_u );
 
         if( sname_d != "@symmetrize@" ) {
@@ -252,7 +271,7 @@ void EikosUnfolder::PrepareForRun()
            signal->CalculateMigrations( sname_d );
 
            std::string hname  = std::string("reco_") + sname_d;
-           pTH1D_t p_folded_d = MakeFoldedHistogram( h_gen, sname_d, hname );
+           pTH1D_t p_folded_d = MakeFoldedHistogram( h_truth_nominal, sname_d, hname );
            GetSignalSample()->SetDetector( p_folded_d, sname_d );
         }
 
@@ -291,37 +310,42 @@ void EikosUnfolder::PrepareForRun()
         m_syst_values[index].second.push_back( sigma_d );
      }
 
-  }
+     // check if systematics have to be fixed to estimate prior
+     if( first_iteration ) {
+        GetParameter(m_syst_index[sname]).Fix(0.);
+     }
+     else {
+        GetParameter(m_syst_index[sname]).Unfix();
+     }
+
+  } // end loop over systematics
+
+
+  // check if a prior has been set
+  if( first_iteration ) m_h_prior = h_truth_nominal;
+//  pTH1D_t h_prior = ( first_iteration ) ? h_truth_nominal : m_h_prior;
 
   char b_name[32];
   char b_latex[32];
-
   double xs_incl = 0.;
   for( int i = 0 ; i < m_nbins ; i++ ) {
-      double y = h_gen->GetBinContent( i+1 );
+      double y = m_h_prior->GetBinContent( i+1 );
       xs_incl += y;
-
-//      double y_min = 0. * y;
-//      double y_max = 2.0 * y;
-//      double dy = 0.5 * y;
-//      double dy    = 0.2*( y_max - y_min );
-//      double dy = h_gen->GetBinError( i+1 ) / m_lumi;
-
-//      sprintf( b_name, "bin_abs_%i", i+1 );
-//      BCParameter * np = &GetParameter( b_name );
-//      np->SetLimits( 0., y_max );
-//      np->SetLimits( 0., 2. );
  
       if( m_regularization == kUnregularized ) {
          GetParameter(i).SetPriorConstant();
+         GetParameter(i).SetLimits( -1., 2. );
       }
       else if( m_regularization == kMultinomial ) { 
 //          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
-          GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
+         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
+         GetParameter(i).SetLimits( -1., 3. );
       }
       else if( m_regularization == kCurvature ) {
          GetParameter(i).SetPriorConstant();
-         GetParameter(i).SetLimits( -1., 1. );
+//         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
+         GetParameter(i).SetLimits( -1., 2. );
+
       } 
       else {
           std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
@@ -330,27 +354,30 @@ void EikosUnfolder::PrepareForRun()
   }
 
   // additional observables
-  AddObservable( "xs_incl", 0.5*xs_incl, 1.5*xs_incl, "#sigma_{incl}" );
+  if( first_iteration ) AddObservable( "xs_incl", 0, 3.*xs_incl, "#sigma_{incl}" );
+  GetObservable(0).SetLimits( 0, 3.*xs_incl );
 
   // absolute diffxs
   for( int i = 0 ; i < m_nbins ; i++ ) {
-      sprintf( b_name, "bin_abs_%i", i+1 );
-      sprintf( b_latex, "Bin %i (abs xs)", i+1 );
+     sprintf( b_name, "bin_abs_%i", i+1 );
+     sprintf( b_latex, "Bin %i (abs xs)", i+1 );
 
-      double y_abs = h_gen->GetBinContent( i+1 );
+     double y_abs = m_h_prior->GetBinContent( i+1 );
 
-      AddObservable( b_name, 0., 2.0*y_abs, b_latex );
+     if( first_iteration ) AddObservable( b_name, 0., 2.0*y_abs, b_latex );
+     GetObservable(1+i).SetLimits( 0., 2.0*y_abs );
   }
 
   // relative diffxs
   for( int i = 0 ; i < m_nbins ; i++ ) {
-      sprintf( b_name, "bin_rel_%i", i+1 );
-      sprintf( b_latex, "Bin %i (rel xs)", i+1 );
+     sprintf( b_name, "bin_rel_%i", i+1 );
+     sprintf( b_latex, "Bin %i (rel xs)", i+1 );
 
-      double y_abs = h_gen->GetBinContent( i+1 );
-      double y_rel = y_abs / xs_incl;
+     double y_abs = m_h_prior->GetBinContent( i+1 );
+     double y_rel = y_abs / xs_incl;
 
-      AddObservable( b_name, 0., 2.0*y_rel, b_latex );
+     if( first_iteration ) AddObservable( b_name, 0., 2.0*y_rel, b_latex );
+     GetObservable(m_nbins+1+i).SetLimits( 0., 2.0*y_rel );
   }
 
 }
@@ -420,10 +447,7 @@ double EikosUnfolder::LogAPrioriProbability(const std::vector<double>& parameter
 double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 {
   double logL = 0.;
-  double alpha = ( m_nbins+m_syst_index.size() ) / float(m_nbins);
-
-//  std::cout << "p1=" << parameters.at(0) << " p2=" << parameters.at(1) << " p3=" << parameters.at(2) << std::endl;
-//  copy( parameters.begin(), parameters.end(), back_inserter(m_parameters) );
+  double alpha = 1.0; //( m_nbins+m_syst_index.size() ) / float(m_nbins);
 
   pTH1D_t p_bkg = GetBackgroundSample() ? GetBackgroundSample()->GetDetector() : NULL;
   pTH1D_t p_nominal = GetSignalSample()->GetDetector();
@@ -437,18 +461,13 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 //       D = m_rng.Poisson(D);
 
        double S = p_exp->GetBinContent( r+1 );
-       for( int i = 0 ; i < m_syst_index.size() ; ++i ) {
+       for( size_t i = 0 ; i < m_syst_index.size() ; ++i ) {
           const std::string& sname   = m_syst_names.at(i);
           SystPair_t spair           = m_syst_pairs.at(i); 
-//          const std::string& sname_u = spair.first;
-//         const	std::string& sname_d = spair.second;
 
           SystValues_t * syst_values = &( m_syst_values.at(i) );
           double sigma_u = syst_values->first.at(r);
           double sigma_d = syst_values->second.at(r);
-
-//          double A = TMath::Sqrt( 1./ TMath::PiOver2 ) / ( fabs(sigma_u) + fabs(sigma_d) );
-//          double A = TMath::Sqrt( 0.7978845608 ) / ( fabs(sigma_u) + fabs(sigma_d) );
 
           int    k      = i + m_nbins;
           double lambda = parameters.at(k);
@@ -460,7 +479,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        }
 
        double B = p_bkg ? p_bkg->GetBinContent( r+1 ) : 0.;
-       for( int i = 0 ; i < m_syst_index.size() ; ++i ) {
+       for( size_t i = 0 ; i < m_syst_index.size() ; ++i ) {
 
           const std::string& sname   = m_syst_names.at(i);
           SystPair_t spair           = m_syst_pairs.at(i);
@@ -540,7 +559,7 @@ void EikosUnfolder::MCMCUserIterationInterface()
   return;
 //   int npar = GetNParameters();
 
-   for (int c = 0; c < fMCMCNChains; ++c) {
+   for( size_t c = 0; c < fMCMCNChains; ++c ) {
       double logL = fMCMCLogLikelihood[c];
       double logP = fMCMCLogPrior[c];
 
@@ -554,12 +573,12 @@ void EikosUnfolder::MCMCUserIterationInterface()
 pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters )
 {
    pTH1D_t p_unf = std::make_shared<TH1D>();
-   pTH1D_t p_gen = GetSignalSample()->GetTruth();
+//   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
-   p_gen->Copy( *(p_unf.get()) );
+   m_h_prior->Copy( *(p_unf.get()) );
    p_unf->Reset();
    for( int i = 0 ; i < m_nbins ; ++i ) {
-      double y0 = p_gen->GetBinContent(i+1);
+      double y0 = m_h_prior->GetBinContent(i+1);
       p_unf->SetBinContent( i+1, y0 * ( 1. + parameters.at(i) ) ); 
    }
 
@@ -571,9 +590,9 @@ pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters
 pTH1D_t EikosUnfolder::GetDiffxsAbs()
 {
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
-   pTH1D_t p_gen = GetSignalSample()->GetTruth();
+//   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
-   p_gen->Copy( *(p_diffxs.get()) );
+   m_h_prior->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
 
    for( int i = 0 ; i < m_nbins ; i++ ) {
@@ -597,9 +616,9 @@ pTH1D_t EikosUnfolder::GetDiffxsAbs()
 pTH1D_t EikosUnfolder::GetDiffxsRel()
 {
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
-   pTH1D_t p_gen = GetSignalSample()->GetTruth();
+//   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
-   p_gen->Copy( *(p_diffxs.get()) );
+   m_h_prior->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
 
    for( int i = 0 ; i < m_nbins ; i++ ) {
@@ -623,10 +642,10 @@ void EikosUnfolder::CalculateObservables(const std::vector<double>& parameters)
 {
    double xs_incl = 0.;
    size_t n_params = parameters.size();
-   pTH1D_t p_gen = GetSignalSample()->GetTruth();
+//   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
-   for( size_t i = 0 ; i < m_nbins ; ++i ) { 
-      double y0 = p_gen->GetBinContent(i+1); 
+   for( int i = 0 ; i < m_nbins ; ++i ) { 
+      double y0 = m_h_prior->GetBinContent(i+1); 
       double abs_xs = y0 * ( 1. + parameters.at(i) );
       xs_incl += abs_xs;
    }
@@ -634,7 +653,7 @@ void EikosUnfolder::CalculateObservables(const std::vector<double>& parameters)
    GetObservable(0).Value( xs_incl );
 
    for( int i = 0 ; i < m_nbins ; ++i ) {
-      double y0 = p_gen->GetBinContent(i+1);
+      double y0 = m_h_prior->GetBinContent(i+1);
       double abs_xs = y0 * ( 1. + parameters.at(i) );
       double rel_xs = ( xs_incl > 0. ) ? abs_xs / xs_incl : 0.;
 

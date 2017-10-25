@@ -9,9 +9,9 @@
  <sample name="statsyst"   hpath="diffxs_rel"   type="unc"    latex="Stat.+Syst. unc." color="920" fillcolor="920" alpha="0.7" linewidth="0" />
 </samples>
 <inputfiles>
-  <file sample="data"       path="output/diffxs.root"      />
-  <file sample="pwgpy8"     path="output/diffxs.root"	   />
-  <file sample="statsyst"   path="output/diffxs.root"	   />
+  <file sample="data"       path="output/statsyst/t2_pt.diffxs.root"      />
+  <file sample="pwgpy8"     path="output/statsyst/t2_pt.diffxs.root"	   />
+  <file sample="statsyst"   path="output/statsyst/t2_pt.diffxs.root"	   />
 </inputfiles>
 </config>
 <!-- marker styles: https://root.cern.ch/root/html/TAttMarker.html -->

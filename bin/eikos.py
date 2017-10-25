@@ -301,19 +301,29 @@ class EikosPrompt( Cmd, object ):
 
      lumi = float(gparams['LUMI'])
      unfolder.SetLuminosity( lumi )
-     unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
 
-     unfolder.PrepareForRun()
-
-#     unfolder.SetPrecision( BCEngineMCMC.kMedium )
-#     unfolder.SetPrecision( BCEngineMCMC.kHigh )
      unfolder.SetPrecision( int(gparams['PRECISION']) )
+     if int(gparams['PRECISION']) == 2:
+       unfolder.SetNChains( 5 )
+       unfolder.SetNIterationsPreRunMax( 200000 )
+#       unfolder.SetNIterationsRun( 200000 )
 
-#     unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
+     BCLog.OutSummary( "\033[92m\033[1mFirst run: estimating prior distribution...\033[0m" )
+     unfolder.SetRegularization( 0 ) # start with unregularized
+     unfolder.PrepareForRun( True )
      unfolder.PrintSummary()
-
      unfolder.MarginalizeAll()
+     bestfit = unfolder.GetBestFitParameters()
+     unfolder.FindMode( bestfit )
+     prior = unfolder.GetDiffxsAbs()
 
+     BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated. Starting real run.\033[0m" )
+
+     unfolder.SetPrior( prior )
+     unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
+     unfolder.PrepareForRun( False )
+     unfolder.PrintSummary()
+     unfolder.MarginalizeAll()
      bestfit = unfolder.GetBestFitParameters()
      unfolder.FindMode( bestfit )
 
@@ -339,6 +349,7 @@ class EikosPrompt( Cmd, object ):
      diffxs_rel.SetLineWidth(2)
 
      theory_abs = unfolder.GetSignalSample().GetTruth()
+     theory_abs.Scale( 1./lumi )
      theory_abs.SetLineColor(kRed)
      theory_abs.SetMarkerColor(kRed)
      theory_abs.SetLineWidth(2)
@@ -469,6 +480,7 @@ class EikosPrompt( Cmd, object ):
      if	isClosureTest == False:
         background.get().Write( "background" )
 
+     prior.get().Write( "prior" )
      signal.get().Write( "signal" )
      prediction.Write( "prediction" )
      dataminusbkg.Write( "dataminusbkg" )
@@ -503,6 +515,8 @@ class EikosPrompt( Cmd, object ):
 #     unfolder.PrintAllMarginalized( "%s/%s_marginalized.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 #     unfolder.PrintCorrelationPlot( "%s/%s_correlations.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 #     unfolder.PrintParameterPlot( "%s/%s_parameters.pdf"     % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+
+     BCLog.OutSummary( "Output file created: %s" % outfile.GetName() )
 
 
 ##############################
