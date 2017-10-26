@@ -4,10 +4,10 @@
   <plot obs="t2_pt" xtitle="p_{T}^{t,2} [GeV]" ytitle="d #sigma_{t#bar{t}} / d p_{T}^{t,2} [pb GeV^{ -1}]" scale="logy" />
 </plots>
 <samples>
- <sample name="data"       hpath="diffxs_abs"   type="data"   latex="Data"             color="1"   markerstyle="0"  linewidth="0" linestyle="1" />
+ <sample name="data"       hpath="diffxs_abs"   type="data"   latex="Eikos unfolded"             color="1"   markerstyle="0"  linewidth="0" linestyle="1" />
  <sample name="pwgpy8"     hpath="theory_abs"   type="signal" latex="POWHEG+P8"        color="2"   markerstyle="20" linewidth="3" linestyle="1" />
- <sample name="prior"      hpath="prior_abs"    type="signal" latex="Prior"            color="600" markerstyle="21" linewidth="3" linestyle="2" />
- <sample name="ib4"        hpath="diffxs_IB_abs" type="signal" latex="ItrB4"           color="418" markerstyle="22" linewidth="3" linestyle="3" />
+ <sample name="prior"      hpath="prior_abs"    type="signal" latex="Eikos Prior"            color="600" markerstyle="21" linewidth="3" linestyle="2" />
+ <sample name="ib4"        hpath="diffxs_IB_abs" type="signal" latex="IB N_{itr}=4"           color="418" markerstyle="22" linewidth="3" linestyle="3" />
  <sample name="statsyst"   hpath="diffxs_abs"   type="unc"    latex="Stat.+Syst. unc." color="920" fillcolor="920" alpha="0.7" linewidth="0" />
 </samples>
 <inputfiles>

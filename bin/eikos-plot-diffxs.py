@@ -347,15 +347,16 @@ def DoPlot( pconfig ):
 
 if __name__ == "__main__":
    
-   parser = argparse.ArgumentParser( description="%prog [options] configfile.xml" )
-   parser.add_argument( "-b", "--batch", help="Batch mode [%default]", dest="batch", default=True )
-   parser.add_argument( "-c", "--config", help="XML configuration [%default]", dest="config", default="config.xml" )
-   args = parser.parse_args()
+#   parser = argparse.ArgumentParser( description="%prog [options] configfile.xml" )
+#   parser.add_argument( "-b", "--batch", help="Batch mode [%default]", dest="batch", default=True )
+#   parser.add_argument( "-c", "--config", help="XML configuration [%default]", dest="config", default="config.xml" )
+#   args = parser.parse_args()
  
-   if args.batch:
-        gROOT.SetBatch(True)
+#   if args.batch:
+   gROOT.SetBatch(True)
 
-   configFileName = args.config
+#   configFileName = args.config
+   configFileName = sys.argv[-1]
    plots_configuration, samples_configuration, input_files = ReadConfiguration( configFileName )
 
    c, pad0, pad1 = MakeCanvas()
