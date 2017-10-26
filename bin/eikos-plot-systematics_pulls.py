@@ -63,5 +63,5 @@ h_pulls.Draw( "e1 p x0 same" )
 
 gPad.RedrawAxis()
 
-c.SaveAs( "img/pulls.pdf" )
+c.SaveAs( "output/img/pulls.pdf" )
 
