@@ -25,6 +25,7 @@ typedef std::pair< std::vector<double>, std::vector<double> > SystValues_t;
 
 enum REGULARIZATION  { kUnregularized = 0, kMultinomial = 1, kCurvature = 2 };
 enum SYSTEMATIC_TYPE { kDetector = 0, kModelling = 1, kDataDriven = 3 }; 
+enum RUN_STAGE       { kStageEstimatePrior, kStageStatSyst, kStageStatonly, kStageTableOfSyst }; 
 
 //enum StatusCode { kSuccess = 0, kWarning = 1, kError = 2 };
 
@@ -69,7 +70,7 @@ class EikosUnfolder : public BCModel, public TObject
     void   SetLuminosity( double lumi ) { m_lumi = lumi; };
     double GetLuminosity()              { return m_lumi; };
 
-    void PrepareForRun( bool first_iteration = false );
+    void PrepareForRun( RUN_STAGE run_stage );
 
     pTH1D_t GetDiffxsAbs();
     pTH1D_t GetDiffxsRel();
@@ -84,6 +85,8 @@ class EikosUnfolder : public BCModel, public TObject
     ClassDef( EikosUnfolder, 1 )
 
  protected:
+    void PrepareSystematics();
+   
     pTH1D_t MakeTruthHistogram( const std::vector<double>& parameters );
 
     pTH1D_t MakeFoldedHistogram( pTH1D_t p_h, const std::string& syst_name="nominal", const std::string& hname = "folded" );
@@ -99,6 +102,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector<double> m_parameters;
 
     REGULARIZATION      m_regularization;
+    RUN_STAGE           m_runStage;
     double              m_lumi;
     std::vector<double> m_xedges;
     std::vector<double>	m_bw;

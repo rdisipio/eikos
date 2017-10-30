@@ -311,30 +311,37 @@ class EikosPrompt( Cmd, object ):
        unfolder.SetNIterationsPreRunCheck( 1000 )
 
      BCLog.OutSummary( "\033[92m\033[1mFirst run: estimating prior distribution...\033[0m" )
+     run_stage = kStageEstimatePrior
      unfolder.SetRegularization( 0 ) # start with unregularized
-     unfolder.PrepareForRun( True )
-     unfolder.PrintSummary()
+     unfolder.PrepareForRun( run_stage )
      unfolder.MarginalizeAll()
      bestfit = unfolder.GetBestFitParameters()
      unfolder.FindMode( bestfit )
-     prior_abs = unfolder.GetDiffxsAbs()
+     unfolder.PrintSummary()
+     BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated.\033[0m" )
+ 
+     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_prior.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintAllMarginalized( "%s/%s_marginalized_prior.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 
+     # Store prior for 2nd run stage
+     prior_abs = unfolder.GetDiffxsAbs()
      xs_incl_prior = prior_abs.Integral()
      prior_rel = prior_abs.Clone( "prior_rel" )
      prior_rel.Scale( 1./xs_incl_prior )
 
-     BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated. Starting real run.\033[0m" )
-
+     BCLog.OutSummary( "\033[92m\033[1mStarting stat+syst run.\033[0m" )
+     run_stage = kStageStatSyst
      unfolder.SetPrior( prior_abs )
      unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
-     unfolder.PrepareForRun( False )
-     unfolder.PrintSummary()
+     unfolder.PrepareForRun( run_stage )
      unfolder.MarginalizeAll()
      bestfit = unfolder.GetBestFitParameters()
      unfolder.FindMode( bestfit )
+     unfolder.PrintSummary()
+     BCLog.OutSummary( "\033[92m\033[1mEnd of second run: posterior distributions with stat+syst uncertainties estimated.\033[0m" )
 
-     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-     unfolder.PrintAllMarginalized( "%s/%s_marginalized.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_statsyst.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintAllMarginalized( "%s/%s_marginalized_statsyst.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 #     unfolder.PrintCorrelationPlot( "%s/%s_correlations.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 #     unfolder.PrintParameterPlot( "%s/%s_parameters.pdf"     % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 

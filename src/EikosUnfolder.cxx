@@ -7,6 +7,7 @@ EikosUnfolder::EikosUnfolder() :
   m_nbins(-1), m_regularization(kUnregularized), m_lumi(1.), m_h_data(NULL), m_h_prior(NULL)
 {
    gErrorIgnoreLevel = kSysError;
+   m_runStage = kStageEstimatePrior;
 }
 
 EikosUnfolder::~EikosUnfolder()
@@ -204,41 +205,19 @@ pSample_t EikosUnfolder::GetBackgroundSample( const std::string& name )
 
 /////////////////////////////////
 
-
-void EikosUnfolder::PrepareForRun( bool first_iteration )
+void EikosUnfolder::PrepareSystematics()
 {
-  std::string syst_name = "nominal";
-
-  // Print out summary of samples  
-  std::cout << "List of defined samples:" << std::endl;
-  for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
-     pSample_t p_sample = itr->second; 
-     SAMPLE_TYPE type = p_sample->GetType();
-
-     std::cout << "Sample " << p_sample->GetName() << " :: type=" << type << std::endl;
-
-     if( type==SAMPLE_TYPE::kSignal ) {
-        p_sample->CalculateAcceptance();
-        p_sample->CalculateEfficiency();
-        p_sample->CalculateMigrations();
-     } 
-
-  }
-  
   pSample_t signal = GetSignalSample();
   if( signal == NULL ) {
      std::cout << "ERROR: invalid signal sample" << std::endl;
      return;
   }
 
-  pTH1D_t h_gen = signal->GetTruth( syst_name );
+  pTH1D_t h_gen = signal->GetTruth( "nominal" );
   if( h_gen == NULL ) {
      std::cout << "ERROR: invalid signal truth histogram" << std::endl;
      return;
   }
-
-  std::cout << "INFO: folding modelling systematics..." << std::endl;
-  // check modelling systematics (no reco histogram)
 
   pTH1D_t h_truth_nominal = std::make_shared<TH1D>();
   h_gen->Copy( *h_truth_nominal );
@@ -280,6 +259,7 @@ void EikosUnfolder::PrepareForRun( bool first_iteration )
         std::cout << "INFO: detector systematic " << sname << "(" << index << ")" << std::endl;
      }
 
+
      // Calculate shifts at reco level
      pTH1D_t h_nominal = signal->GetDetector();
      for( int r = 0 ; r < m_nbins ; ++r ) {
@@ -310,9 +290,67 @@ void EikosUnfolder::PrepareForRun( bool first_iteration )
         m_syst_values[index].second.push_back( sigma_d );
      }
 
-     // check if systematics have to be fixed to estimate prior
-     if( first_iteration ) {
+  } // end loop over systematics
+
+}
+
+
+/////////////////////////////////
+
+
+void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
+{
+  std::cout << "DEBUG: run stage " << run_stage << std::endl;
+
+  std::string syst_name = "nominal";
+
+  // Print out summary of samples  
+  std::cout << "List of defined samples:" << std::endl;
+  for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
+     pSample_t p_sample = itr->second; 
+     SAMPLE_TYPE type = p_sample->GetType();
+
+     std::cout << "Sample " << p_sample->GetName() << " :: type=" << type << std::endl;
+
+     if( run_stage != kStageEstimatePrior ) continue;
+
+     if( type==SAMPLE_TYPE::kSignal ) {
+        p_sample->CalculateAcceptance();
+        p_sample->CalculateEfficiency();
+        p_sample->CalculateMigrations();
+     } 
+
+  }
+  
+  // check if a prior has been set
+  if( run_stage == kStageEstimatePrior ) {
+     pTH1D_t h_truth_nominal = std::make_shared<TH1D>(); 
+     pTH1D_t h_gen = GetSignalSample()->GetTruth( syst_name );	
+     h_gen->Copy( *h_truth_nominal ); 
+     h_truth_nominal->Scale( 1./m_lumi );	
+
+     SetPrior( h_truth_nominal );
+  }
+
+  if( run_stage == kStageEstimatePrior ) {
+    PrepareSystematics();
+  }
+
+  // Fix or Unfix systematics:
+  // check if systematics have to be fixed to estimate prior
+  for( auto sname : m_syst_names ) {
+ 
+     if( run_stage == kStageEstimatePrior ) {
         GetParameter(m_syst_index[sname]).Fix(0.);
+     }
+     else if( run_stage == kStageStatSyst ) {
+        GetParameter(m_syst_index[sname]).Unfix();
+     }
+     else if( run_stage == kStageStatonly ) {
+        GetParameter(m_syst_index[sname]).Unfix();
+     }
+     else if( run_stage == kStageTableOfSyst ) {
+        GetParameter(m_syst_index[sname]).Unfix();
      }
      else {
         GetParameter(m_syst_index[sname]).Unfix();
@@ -320,9 +358,6 @@ void EikosUnfolder::PrepareForRun( bool first_iteration )
 
   } // end loop over systematics
 
-
-  // check if a prior has been set
-  if( first_iteration ) SetPrior( h_truth_nominal );
 
   char b_name[32];
   char b_latex[32];
@@ -352,7 +387,7 @@ void EikosUnfolder::PrepareForRun( bool first_iteration )
   }
 
   // additional observables
-  if( first_iteration ) {
+  if( run_stage == kStageEstimatePrior ) {
       AddObservable( "xs_incl", 0, 2.*xs_incl, "#sigma_{incl}" );
 
       // absolute diffxs
