@@ -323,7 +323,7 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
   }
   
   // check if a prior has been set
-  if( run_stage == kStageEstimatePrior ) {
+  if( (GetPrior() == NULL) || (run_stage == kStageEstimatePrior) ) {
      pTH1D_t h_truth_nominal = std::make_shared<TH1D>(); 
      pTH1D_t h_gen = GetSignalSample()->GetTruth( syst_name );	
      h_gen->Copy( *h_truth_nominal ); 
@@ -347,7 +347,11 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
         GetParameter(m_syst_index[sname]).Unfix();
      }
      else if( run_stage == kStageStatonly ) {
-        GetParameter(m_syst_index[sname]).Unfix();
+        int i = m_syst_index[sname];
+        double s0 = GetMarginalized(i).GetHistogram()->GetMean();
+//        double s0 =  GetBestFitParameters()[i];
+        GetParameter(m_syst_index[sname]).Fix(s0);
+        std::cout << "DEBUG: Parameter " << sname << "(" << i << ") fixed to " << std::setprecision(4)  << s0 << " :: best-fit = " << GetBestFitParameters()[i] << std::endl;
      }
      else if( run_stage == kStageTableOfSyst ) {
         GetParameter(m_syst_index[sname]).Unfix();
@@ -620,13 +624,14 @@ pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-pTH1D_t EikosUnfolder::GetDiffxsAbs()
+pTH1D_t EikosUnfolder::GetDiffxsAbs( const std::string hname )
 {
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
 //   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
    GetPrior()->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
+   p_diffxs->SetName( hname.c_str() );
 
    for( int i = 0 ; i < m_nbins ; i++ ) {
 
@@ -646,13 +651,14 @@ pTH1D_t EikosUnfolder::GetDiffxsAbs()
 //////////////////////////////
 
 
-pTH1D_t EikosUnfolder::GetDiffxsRel()
+pTH1D_t EikosUnfolder::GetDiffxsRel( const std::string hname )
 {
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
 //   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
    GetPrior()->Copy( *(p_diffxs.get()) );
    p_diffxs->Reset();
+   p_diffxs->SetName( hname.c_str() );
 
    for( int i = 0 ; i < m_nbins ; i++ ) {
  

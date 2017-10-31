@@ -17,6 +17,7 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
+#include <iomanip>
 
 #include "Sample.h"
 
@@ -72,8 +73,8 @@ class EikosUnfolder : public BCModel, public TObject
 
     void PrepareForRun( RUN_STAGE run_stage );
 
-    pTH1D_t GetDiffxsAbs();
-    pTH1D_t GetDiffxsRel();
+    pTH1D_t GetDiffxsAbs( const std::string hname = "diffxs_abs" );
+    pTH1D_t GetDiffxsRel( const std::string hname = "diffxs_rel" );
     pTH1D_t GetSystematicsPullHistogram();
 
 //    virtual double LogAPrioriProbability(const std::vector<double>& parameters );
