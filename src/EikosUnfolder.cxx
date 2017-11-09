@@ -604,7 +604,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
   } // loop over bins
 
-/*
+
 //  if( m_regularization == kCurvature ) {
     if( m_regularization != kUnregularized ) {
     // bins' prior is constant. add a curvature term
@@ -632,13 +632,13 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        double Dm = ( (t0/w0) - (tm/wm) ) / ( c0 - cm );
        S += fabs( Dp - Dm ) / fabs( Dp + Dm );
     }
-    S /= float(GetNParameters());
+//    S /= float(m_nbins);
     logL -= S; 
 //    std::cout << "DEBUG: logL = " << logL << " ::  S = " << (-S) << std::endl;
   }
 
 //  std::cout << "DEBUG: logL = " << logL << std::endl;
-*/
+
 
   return logL;
 }
