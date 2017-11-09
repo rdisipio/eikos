@@ -4,6 +4,7 @@ ROOTLIBS     := -lMinuit $(shell root-config --libs)
 ROOTLIBS     += -lRooFitCore -lRooFit -lRooStats -lFoam -lMathMore
 
 # compiler and flags
+OMPFLAGS     = -fopenmp -lgomp
 CXX          = g++
 CXXFLAGS     =  -g -Wall -fPIC -Wno-deprecated -O2
 LD           = /usr/bin/ld -m elf_x86_64
@@ -57,10 +58,6 @@ library: src/EikosUnfolderDict.o $(CXXOBJS)
 install:
 	mv libEikos.so $(BATINSTALLDIR)/lib
 	mv EikosUnfolderDict_rdict.pcm $(BATINSTALLDIR)/lib
-
-project: src/run-Eikos.cxx $(CXXOBJS)
-	$(CXX) $(CXXFLAGS) -c $<
-	$(CXX) $(LDFLAGS) run-Eikos.o $(CXXOBJS) $(LIBS) -o bin/run-Eikos
 
 print :
 	echo compiler  : $(CXX)

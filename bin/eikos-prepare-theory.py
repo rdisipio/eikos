@@ -6,7 +6,7 @@ from ROOT import *
 
 lumi = 36074.6
 
-known_observables = [ "t1_pt", "t2_pt", "t1_y", "t2_y", "tt_m", "tt_pt", "tt_y" ]
+known_observables = [ "t1_pt", "t2_pt", "t1_y", "t2_y", "tt_m", "tt_pt", "tt_y", "tt_Pout", "tt_chi", "tt_cosThS", "tt_yB", "tt_dPhi", "tt_HT" ]
 SRCPATH = "/afs/cern.ch/user/d/disipio/work/public/ttbar_diffxs_13TeV/AnalysisTop/run/output/particle/"
 
 generator  = sys.argv[1]

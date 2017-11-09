@@ -4,7 +4,8 @@
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins(-1), m_regularization(kUnregularized), m_lumi(1.), m_h_data(NULL), m_h_prior(NULL)
+  m_nbins(-1), m_regularization(kUnregularized), m_syst_initialized(false), m_obs_initialized(false),
+  m_lumi(1.), m_h_data(NULL), m_h_prior(NULL)
 {
    gErrorIgnoreLevel = kSysError;
    m_runStage = kStageEstimatePrior;
@@ -180,9 +181,35 @@ void EikosUnfolder::SetPrior( const TH1 * h )
 
 void EikosUnfolder::SetPrior( pTH1D_t h	)
 {
-   m_h_prior = std::make_shared<TH1D>();
+   if( m_h_prior == NULL ) {
+     m_h_prior = std::make_shared<TH1D>();
+   }
    h->Copy( (*m_h_prior) );
    m_h_prior->SetName( "prior" );
+
+   for( int i = 0 ; i < m_h_prior->GetNbinsX() ; ++i ) { 
+      std::cout << "DEBUG: prior :: bin " << (i+1) << " y = " << m_h_prior->GetBinContent(i+1) << std::endl;
+
+      if( m_regularization == kUnregularized ) {
+         GetParameter(i).SetPriorConstant();
+         GetParameter(i).SetLimits( -1., 2. );
+      }
+      else if( m_regularization == kMultinomial ) {
+//          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
+         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 0.5 ) );
+         GetParameter(i).SetLimits( -1., 2. );
+      }
+      else if( m_regularization == kCurvature ) {
+         GetParameter(i).SetPriorConstant();
+//         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
+         GetParameter(i).SetLimits( -1., 2. );
+      }
+      else {
+          std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
+          throw std::runtime_error( "unknown regularization method\n" );
+      }
+  }
+
 }
 
 /////////////////////////////////
@@ -207,6 +234,10 @@ pSample_t EikosUnfolder::GetBackgroundSample( const std::string& name )
 
 void EikosUnfolder::PrepareSystematics()
 {
+  if( m_syst_initialized ) { 
+     std::cout << "WARNING: systematics were initialized previously" << std::endl;
+  }
+
   pSample_t signal = GetSignalSample();
   if( signal == NULL ) {
      std::cout << "ERROR: invalid signal sample" << std::endl;
@@ -292,6 +323,7 @@ void EikosUnfolder::PrepareSystematics()
 
   } // end loop over systematics
 
+  m_syst_initialized = true;
 }
 
 
@@ -323,7 +355,9 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
   }
   
   // check if a prior has been set
-  if( (GetPrior() == NULL) || (run_stage == kStageEstimatePrior) ) {
+  if( GetPrior() == NULL ) {
+     std::cout << "INFO: no prior set. Using nominal Monte Carlo truth to start with." << std::endl;
+
      pTH1D_t h_truth_nominal = std::make_shared<TH1D>(); 
      pTH1D_t h_gen = GetSignalSample()->GetTruth( syst_name );	
      h_gen->Copy( *h_truth_nominal ); 
@@ -332,7 +366,7 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
      SetPrior( h_truth_nominal );
   }
 
-  if( run_stage == kStageEstimatePrior ) {
+  if( !m_syst_initialized ) {
     PrepareSystematics();
   }
 
@@ -365,7 +399,9 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
 
   char b_name[32];
   char b_latex[32];
-  double xs_incl = 0.;
+  double xs_incl = GetPrior()->Integral();
+
+/*
   for( int i = 0 ; i < m_nbins ; i++ ) {
       double y = GetPrior()->GetBinContent( i+1 );
       xs_incl += y;
@@ -376,7 +412,7 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
       }
       else if( m_regularization == kMultinomial ) { 
 //          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
-         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 0.5 ) );
+         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1. ) );
          GetParameter(i).SetLimits( -1., 2. );
       }
       else if( m_regularization == kCurvature ) {
@@ -389,9 +425,9 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
           throw std::runtime_error( "unknown regularization method\n" );
       }
   }
-
+*/
   // additional observables
-  if( run_stage == kStageEstimatePrior ) {
+  if( !m_obs_initialized ) {
       AddObservable( "xs_incl", 0, 2.*xs_incl, "#sigma_{incl}" );
 
       // absolute diffxs
@@ -410,7 +446,8 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
         double y_rel = y_abs / xs_incl;
         AddObservable( b_name, 0., 2.0*y_rel, b_latex );
       }
- 
+
+      m_obs_initialized = true;
   } // first iteration
 
 }
@@ -567,23 +604,41 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
   } // loop over bins
 
-  if( m_regularization == kCurvature ) {
+/*
+//  if( m_regularization == kCurvature ) {
+    if( m_regularization != kUnregularized ) {
     // bins' prior is constant. add a curvature term
 
     double S = 0.;
     for( int t = 1 ; t < (m_nbins-1) ; t++ ) {
+       double w0 = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1);
+       double wp = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1+1);
+       double wm = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t-1+1);
+
+       double c0  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1);
+       double cp  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1+1);
+       double cm  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t-1+1);
+
        double t0 = parameters.at(t);
        double tp = parameters.at(t+1);
        double tm = parameters.at(t-1);
-       double dp = tp - t0;
-       double dm = t0 - tm;
-       S += pow( dp - dm, 2 );
+
+       // curvature
+//       double Dp = ( tp - t0 );
+//       double Dm = ( t0 - tm );
+//       S += pow( Dp - Dm, 2 );
+
+       double Dp = ( (tp/wp) - (t0/w0) ) / ( cp - c0 );
+       double Dm = ( (t0/w0) - (tm/wm) ) / ( c0 - cm );
+       S += fabs( Dp - Dm ) / fabs( Dp + Dm );
     }
-//    std::cout << "DEBUG: S = " << (-S) << std::endl;
-    logL -= S;
+    S /= float(GetNParameters());
+    logL -= S; 
+//    std::cout << "DEBUG: logL = " << logL << " ::  S = " << (-S) << std::endl;
   }
 
 //  std::cout << "DEBUG: logL = " << logL << std::endl;
+*/
 
   return logL;
 }
@@ -626,6 +681,8 @@ pTH1D_t EikosUnfolder::MakeTruthHistogram( const std::vector<double>& parameters
 
 pTH1D_t EikosUnfolder::GetDiffxsAbs( const std::string hname )
 {
+   if( !m_obs_initialized ) throw std::runtime_error( "observables not initialized.\n" );
+
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
 //   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 
@@ -653,6 +710,8 @@ pTH1D_t EikosUnfolder::GetDiffxsAbs( const std::string hname )
 
 pTH1D_t EikosUnfolder::GetDiffxsRel( const std::string hname )
 {
+   if( !m_obs_initialized ) throw std::runtime_error( "observables not initialized.\n" );
+
    pTH1D_t p_diffxs = std::make_shared<TH1D>();
 //   pTH1D_t p_gen = GetSignalSample()->GetTruth();
 

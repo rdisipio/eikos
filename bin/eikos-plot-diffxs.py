@@ -239,7 +239,11 @@ def DoPlot( pconfig ):
 
    histograms['data'].Draw("p")
    histograms['statsyst'].Draw( 'e2 same' )
-#   histograms['statonly'].Draw( 'e2 same' )
+
+   if not histograms.has_key('statonly'): histograms['statonly'] = None
+
+   if not histograms['statonly'] == None:
+      histograms['statonly'].Draw( 'e2 same' )
 
    predictions = []
    ordered_samples = [ "" for i in range( len(histograms) ) ]
@@ -266,7 +270,7 @@ def DoPlot( pconfig ):
    leg.AddEntry( histograms['data'], samples_configuration['data'].latex, "ep" )
    for sname in ordered_samples:
       leg.AddEntry( histograms[sname], samples_configuration[sname].latex, "l" )
-#   leg.AddEntry( histograms['statonly'], "Stat. Unc.", "f" )
+   if not histograms['statonly'] == None: leg.AddEntry( histograms['statonly'], "Stat. Unc.", "f" )
    leg.AddEntry( histograms['statsyst'], "Stat. #oplus Syst. Unc.", "f" )
    leg.Draw()
    leg.SetY1( leg.GetY1() - lparams['height'] * leg.GetNRows() )
@@ -317,8 +321,8 @@ def DoPlot( pconfig ):
 
    yrange = [ 0.4, 1.6 ]
    if pconfig.meas in [ "abs", "AbsoluteDiffXs" ]:
-     #yrange = [ 0.4, 1.6 ]
-     yrange = [ 0., 2.4 ]
+     yrange = [ 0.4, 1.6 ]
+     #yrange = [ 0., 2.4 ]
    elif pconfig.meas in [ "rel", "RelativeDiffXs" ]:
       yrange = [ 0.4, 1.6 ]
       if pconfig.obs in [ 'tt_HT' ]: yrange = [ 0., 2.4 ]
@@ -327,7 +331,7 @@ def DoPlot( pconfig ):
       print "ERROR: unknwon type of measurement", pconfig.meas
    print "DEBUG:", pconfig.obs, yrange
 
-   frame, tot_unc, ratio = DrawRatio( histograms['statsyst'], predictions, plot.xtitle, yrange )   
+   frame, unc_tot, unc_stat, ratio = DrawRatio( predictions, histograms['statsyst'], histograms['statonly'], plot.xtitle, yrange )   
 
    if plot.scale in [ PlotScale.bilog, PlotScale.logx ]: 
      pad1.SetLogx(True)

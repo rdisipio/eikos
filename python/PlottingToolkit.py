@@ -80,11 +80,11 @@ def SetAxesStyle( hlist ):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def DrawRatio( data, predictions, xtitle = "", yrange = [ 0.4, 1.6 ] ):
+def DrawRatio( predictions, data_unc_tot, data_unc_stat=None, xtitle = "", yrange = [ 0.4, 1.6 ] ):
 
-    nbins = data.GetNbinsX()
-    xmin = data.GetXaxis().GetXmin()
-    xmax = data.GetXaxis().GetXmax()
+    nbins = data_unc_tot.GetNbinsX()
+    xmin = data_unc_tot.GetXaxis().GetXmin()
+    xmax = data_unc_tot.GetXaxis().GetXmax()
 
     # tt diffxs 7 TeV: [ 0.4, 1.6 ]    
     # tt diffxs 8 TeV: [ 0.7, 1.3 ]
@@ -100,7 +100,7 @@ def DrawRatio( data, predictions, xtitle = "", yrange = [ 0.4, 1.6 ] ):
     frame.GetXaxis().SetTitleOffset( 1.3 )
     
     frame.GetYaxis().SetLabelSize( 0.14 )
-    frame.GetYaxis().SetTitle( "#frac{Prediction}{Data}" )
+    frame.GetYaxis().SetTitle( "#frac{Prediction}{data_unc_tot}" )
     frame.GetYaxis().SetTitleSize( 0.14 )
     frame.GetYaxis().SetTitleOffset( 0.5 )
     
@@ -108,19 +108,30 @@ def DrawRatio( data, predictions, xtitle = "", yrange = [ 0.4, 1.6 ] ):
 
     frame.Draw()
     
-    unc_tot = MakeUncertaintyBand( data )
-
+    unc_tot  = MakeUncertaintyBand( data_unc_tot )
     unc_tot.Draw( "e2 same" )
+
+    unc_stat = None
+    if not data_unc_stat == None: 
+       unc_stat = MakeUncertaintyBand( data_unc_stat )
+       unc_stat.Draw( "e2 same" )
+
+    l = TLine()
+    l.SetLineStyle(kDotted)
+    l.SetLineWidth(1)
+    l.SetLineColor(kGray+3)
+    l.DrawLine( frame.GetXaxis().GetXmin(), 1.0, frame.GetXaxis().GetXmax(), 1.0 )
+
     ratios = []
     for prediction in predictions:
-        #r = MakeRatio( prediction, data )
+        #r = MakeRatio( prediction, data_unc_tot )
         r = prediction.Clone( prediction.GetName() + "_ratio" )
-        #r.Divide( data ) # wrong error propagation! double counting!
+        #r.Divide( data_unc_tot ) # wrong error propagation! double counting!
         r.Reset()
-        for ibin in range(data.GetNbinsX()):
+        for ibin in range(data_unc_tot.GetNbinsX()):
            y  = prediction.GetBinContent(ibin+1)
            dy = prediction.GetBinError(ibin+1)
-           d  = data.GetBinContent(ibin+1)
+           d  = data_unc_tot.GetBinContent(ibin+1)
 
            y  = y/d  if d > 0. else 0.
            dy = dy/d if d > 0. else 0.
@@ -140,7 +151,7 @@ def DrawRatio( data, predictions, xtitle = "", yrange = [ 0.4, 1.6 ] ):
 
     gPad.RedrawAxis()
 
-    return frame, unc_tot, ratios
+    return frame, unc_tot, unc_stat, ratios
 
 #########################################################
 

@@ -104,6 +104,8 @@ class EikosUnfolder : public BCModel, public TObject
 
     REGULARIZATION      m_regularization;
     RUN_STAGE           m_runStage;
+    bool                m_syst_initialized;
+    bool                m_obs_initialized;
     double              m_lumi;
     std::vector<double> m_xedges;
     std::vector<double>	m_bw;

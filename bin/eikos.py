@@ -29,11 +29,16 @@ gparams['LUMI']       = 36074.6
 gparams['INPUTPATH']  = "$PWD/data/tt_allhad_boosted"
 gparams['REGULARIZATION'] = 1
 gparams['OUTPUTPATH'] = "$PWD/output"
-gparams['OUTPUTTAG'] = "statonly"
-
+gparams['OUTPUTTAG']  = "test"
+gparams['NITR']       = 2
 systematics = {}
 
-BCLog.OpenLog("log.txt")
+#gparams['OUTPUTPATH'] = os.path.expandvars( gparams['OUTPUTPATH'] ) + "/" + gparams['OUTPUTTAG'] + "/"
+#if not os.path.exists( gparams['OUTPUTPATH'] ):
+#   os.makedirs( gparams['OUTPUTPATH'] )
+
+#BCLog.OpenLog( "%s/%s.log" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+BCLog.OpenLog( "log.txt" )
 BCLog.SetLogLevel(BCLog.detail)
 
 ##############################
@@ -304,7 +309,7 @@ class EikosPrompt( Cmd, object ):
      unfolder.SetLuminosity( lumi )
 
      unfolder.SetPrecision( int(gparams['PRECISION']) )
-     if int(gparams['PRECISION']) == 2:
+     if int(gparams['PRECISION']) == 0:
        unfolder.SetNChains( 5 )
        unfolder.SetNIterationsPreRunMax( 200000 )
        unfolder.SetNIterationsRun( 200000 )
@@ -312,35 +317,43 @@ class EikosPrompt( Cmd, object ):
 
      BCLog.OutSummary( "\033[92m\033[1mFirst run: estimating prior distribution...\033[0m" )
      run_stage = kStageEstimatePrior
-     unfolder.SetRegularization( 0 ) # start with unregularized
-     unfolder.PrepareForRun( run_stage )
-     BCLog.OutSummary( "Eikos: marginalize all: prior" )
-     unfolder.MarginalizeAll()
-     BCLog.OutSummary( "Eikos: find mode: prior" )
-     bestfit_prior = unfolder.FindMode( unfolder.GetBestFitParameters() )
-     unfolder.PrintSummary()
+#     unfolder.SetRegularization( 0 ) # start with unregularized
+     unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
 
-#     bestfit_prior = unfolder.GetBestFitParameters()
-     n = bestfit_prior.size()
-     for i in range(n):
-       print "BestFit :: prior :: %-2i) %f" % ( i, bestfit_prior[i] )
+     n_itr = int( gparams['NITR'] )
 
-     BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated.\033[0m" )
- 
-#     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_prior.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-#     unfolder.PrintAllMarginalized( "%s/%s_marginalized_prior.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     for k_itr in range( n_itr+1 ):
+       BCLog.OutSummary( "\033[92m\033[1mEikos: marginalize all: prior :: iteration %i\033[0m" % k_itr )
 
-     # Store prior for 2nd run stage
-     prior_abs = unfolder.GetDiffxsAbs( "prior_abs" )
-     prior_rel = unfolder.GetDiffxsRel( "prior_rel" )
+       unfolder.SetFlagIgnorePrevOptimization( True )
+       unfolder.PrepareForRun( run_stage )
+       unfolder.MarginalizeAll()
+       bestfit_prior = unfolder.FindMode( unfolder.GetBestFitParameters() )
+       unfolder.PrintSummary()
+
+       n = bestfit_prior.size()
+       for i in range(n):
+         print "BestFit :: prior :: %-2i) %f" % ( i, bestfit_prior[i] )
+
+       unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_prior_itr%i.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'], k_itr ) )
+       unfolder.PrintAllMarginalized( "%s/%s_marginalized_prior_itr%i.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'], k_itr ) )
+
+       # Store prior for 2nd run stage
+       prior_abs = unfolder.GetDiffxsAbs( "prior_abs" )
+       prior_rel = unfolder.GetDiffxsRel( "prior_rel" )
 #     xs_incl_prior = prior_abs.Integral()
 #     prior_rel = prior_abs.Clone( "prior_rel" )
 #     prior_rel.Scale( 1./xs_incl_prior )
+       unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
+       unfolder.SetPrior( prior_abs )
+
+     BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated.\033[0m" )
+ 
 
      BCLog.OutSummary( "\033[92m\033[1mStarting stat+syst run.\033[0m" )
      run_stage = kStageStatSyst
      unfolder.SetFlagIgnorePrevOptimization( True )
-     unfolder.SetPrior( prior_abs )
+#     unfolder.SetPrior( prior_abs )
      unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
 #     unfolder.ResetResults()
      unfolder.PrepareForRun( run_stage )
@@ -358,8 +371,8 @@ class EikosPrompt( Cmd, object ):
 
      BCLog.OutSummary( "\033[92m\033[1mEnd of second run: posterior distributions with stat+syst uncertainties estimated.\033[0m" )
 
-#     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_statsyst.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-#     unfolder.PrintAllMarginalized( "%s/%s_marginalized_statsyst.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_statsyst.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintAllMarginalized( "%s/%s_marginalized_statsyst.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 ##     unfolder.PrintCorrelationPlot( "%s/%s_correlations.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 ##     unfolder.PrintParameterPlot( "%s/%s_parameters.pdf"     % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 
@@ -410,10 +423,10 @@ class EikosPrompt( Cmd, object ):
      acceptance.SetLineWidth(2)
 
      data       = unfolder.GetData()
-     signal     = unfolder.GetSignalSample().GetDetector()
+     mcsignal   = unfolder.GetSignalSample().GetDetector()
 
-     prediction = signal.Clone( "prediction" )
-     dataminusbkg = data.Clone( "dataminusbkg" )
+     prediction   = mcsignal.get().Clone( "prediction" )
+     dataminusbkg = data.get().Clone( "dataminusbkg" )
 
      isClosureTest = True
      if unfolder.GetBackgroundSample().get() != None: isClosureTest = False 
@@ -463,7 +476,7 @@ class EikosPrompt( Cmd, object ):
         m_response.UseOverflow( False )
 
         unfolder_ib = RooUnfoldBayes( "IB", "Iterative Baysian" )
-        unfolder_ib.SetIterations( 4 )   
+        unfolder_ib.SetIterations( n_itr+1 )   
         unfolder_ib.SetVerbose( 0 )
         unfolder_ib.SetSmoothing( 0 )
 
@@ -514,8 +527,8 @@ class EikosPrompt( Cmd, object ):
 
      if	isClosureTest == False:
         background.get().Write( "background" )
-
-     signal.get().Write( "signal" )
+  
+     mcsignal.get().Write( "mcsignal" )
      prediction.Write( "prediction" )
      dataminusbkg.Write( "dataminusbkg" )
      closure.Write( "closure" )
@@ -599,8 +612,8 @@ class EikosPrompt( Cmd, object ):
 
      BCLog.OutSummary( "\033[92m\033[1mEnd of third run: posterior distributions with stat only uncertainty estimated.\033[0m" )
 
-#     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_statonly.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-#     unfolder.PrintAllMarginalized( "%s/%s_marginalized_statonly.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_statonly.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+     unfolder.PrintAllMarginalized( "%s/%s_marginalized_statonly.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 
      outfile.cd()
 
