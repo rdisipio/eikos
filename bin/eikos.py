@@ -18,11 +18,13 @@ from ROOT import *
 gROOT.ProcessLine("gErrorIgnoreLevel = kSysError;")
 gROOT.SetBatch(True)
 
+from PlottingToolkit import SetHistogramStyle
+
 unfolder = EikosUnfolder()
 
 gparams = {}
 # set some default
-gparams['ACCURACY']   = 'low'
+gparams['PRECISION']  = 'low'
 gparams['PHSPACE']    = "particle"
 gparams['OBS']        = "t1_pt"
 gparams['LUMI']       = 36074.6
@@ -31,23 +33,32 @@ gparams['REGULARIZATION'] = 1
 gparams['OUTPUTPATH'] = "$PWD/output"
 gparams['OUTPUTTAG']  = "test"
 gparams['NITR']       = 2
+
 systematics = {}
 
-#gparams['OUTPUTPATH'] = os.path.expandvars( gparams['OUTPUTPATH'] ) + "/" + gparams['OUTPUTTAG'] + "/"
-#if not os.path.exists( gparams['OUTPUTPATH'] ):
-#   os.makedirs( gparams['OUTPUTPATH'] )
+d_prior_shape    = { 'flat' : kPriorFlat, 'gauss' : kPriorGauss, 'gamma' : kPriorGamma }
+d_regularization = { 'unregularized' : kUnregularized, 'curvature' : kCurvature, 'multinormal' : kMultinormal }
+d_stage          = { 'prior' : kStageEstimatePrior, 'statsyst' : kStageStatSyst, 'statonly' : kStageStatonly, 'onesyst' : kStageTableOfSyst }
+d_precision      = { 'low' : 0, 'medium' : 1, 'high' : 2 }
 
-#BCLog.OpenLog( "%s/%s.log" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
 BCLog.OpenLog( "log.txt" )
 BCLog.SetLogLevel(BCLog.detail)
 
-##############################
+loaded_RooUnfold = gSystem.Load("libRooUnfold.so")
+if not loaded_RooUnfold == 0:
+  print "INFO: RooUnfold not found."
+else:
+  print "INFO: RooUnfold found. Output file will contain unfolded distributions with (unregularized) Matrix Inversion and (regularized) Iterative Bayesian with Nitr=4"
 
+##############################
 
 class EikosPrompt( Cmd, object ):
 
    def __init__(self):
      super( EikosPrompt, self ).__init__()
+     self.outfilename = "diffxs.root"
+     self.outfile = None
+     self.lumi = 1.00
 
    def do_EOF(self, line):
      return True
@@ -264,12 +275,44 @@ class EikosPrompt( Cmd, object ):
                print "ERROR: unknown type of systematic", type
                exit(1)  
 
+      elif what == "precision":
+         p = tokens[1].lower()
+         precision = int( d_precision[p] )
+         unfolder.SetPrecision( precision )
+
+      elif what == "regularization":
+         r = tokens[1].lower()
+         reg = int( d_regularization[r] )
+         unfolder.SetRegularization( reg )
+
+      elif what == "prior":
+         s = tokens[1] 
+         unfolder.SetPriorShape( d_prior_shape[s] )
+
+      elif what == "luminosity":
+         self.lumi = float( tokens[1] )
+         unfolder.SetLuminosity( self.lumi ) 
+
+      elif what == "outfile":
+         fpath = tokens[1]
+         fpath = fpath.replace( "@OBS@", gparams['OBS'] )
+         fpath = fpath.replace( "@OUTPUTTAG@", gparams['OUTPUTTAG'] )
+         self.outfilename = os.path.expandvars( fpath )
+
+         fname = self.outfilename.split('/')[-1]
+         fdir  = self.outfilename.replace( fname, "" )
+         if not os.path.exists(fdir): os.makedirs( fdir )
+
+         self.outfile = TFile.Open( self.outfilename, "RECREATE" )
+         BCLog.OutSummary( "\033[92m\033[1mOutput file name: %s\033[0m" % self.outfilename )
+
+
    ###################
 
    def do_get( self, args ):
       tokens = args.split()
       if len(tokens) < 2:
-        BClog.OutSummary( "Invalid command" )
+        BCLog.OutSummary( "Invalid command" )
         return
       what = tokens[0]
       if what == "param":
@@ -292,12 +335,157 @@ class EikosPrompt( Cmd, object ):
 
    ###################
 
+   def write_hist_statsyst( self ):
+      self.outfile.cd()
+
+      migrations = unfolder.GetSignalSample().GetMigrations()
+      migrations.SetMinimum( 0. )
+      migrations.SetMaximum( 1.0 )
+      migrations.get().Write( "migrations" )      
+
+      efficiency = unfolder.GetSignalSample().GetEfficiency()
+      efficiency.SetMinimum( 0. )
+      efficiency.SetMaximum( 1.0 )
+      SetHistogramStyle( efficiency, color=kRed )
+      efficiency.get().Write( "efficiency" )
+
+      acceptance = unfolder.GetSignalSample().GetAcceptance()
+      acceptance.SetMinimum( 0. )
+      acceptance.SetMaximum( 1.0 )
+      SetHistogramStyle( acceptance, color=kBlue )
+      acceptance.get().Write( "acceptance" )
+
+      theory_abs = unfolder.GetSignalSample().GetTruth()
+      theory_abs.Scale( 1./self.lumi )
+      xs_incl_theory = theory_abs.Integral()
+      theory_rel = theory_abs.Clone( "theory_rel" )
+      theory_rel.Scale( 1./xs_incl_theory )
+      theory_abs.Write( "theory_abs" )
+      theory_rel.Write( "theory_rel" )
+
+      diffxs_abs = unfolder.GetDiffxsAbs()
+      diffxs_rel = unfolder.GetDiffxsRel() 
+      diffxs_abs.get().Write( "diffxs_abs" )
+      diffxs_rel.get().Write( "diffxs_rel" )
+      
+      data       = unfolder.GetData()
+      mcsignal   = unfolder.GetSignalSample().GetDetector()
+      prediction   = mcsignal.get().Clone( "prediction" )
+      dataminusbkg = data.get().Clone( "dataminusbkg" )
+
+      if unfolder.GetBackgroundSample().get() != None: 
+        background = unfolder.GetBackgroundSample().GetDetector()
+        prediction.Add( background.get() )
+        dataminusbkg.Add( background.get(), -1.0 )
+
+      SetHistogramStyle( prediction, color=kGreen+2, markersize=0, fillstyle=1001, fillcolor=kGreen+2 )
+      SetHistogramStyle( dataminusbkg, color=kRed )
+
+      data.get().Write( "data" )
+      mcsignal.get().Write( "mcsignal" )
+      prediction.Write( "prediction" )
+      dataminusbkg.Write( "dataminusbkg" )
+
+      prior_abs = unfolder.GetPrior()
+      prior_abs.get().Write( "prior_abs" )
+      xs_incl_prior = prior_abs.Integral()
+      prior_rel = prior_abs.Clone( "prior_rel" )
+      prior_rel.Scale( 1./xs_incl_prior )
+      prior_rel.Write( "prior_rel" )
+
+      closure = diffxs_abs.get().Clone( "closure" )
+      closure.Divide( theory_abs.get() )
+      closure.Write( "closure" )
+
+      xs_incl_statsyst = unfolder.GetMarginalizedHistogram( "xs_incl" )
+      xs_incl_statsyst.Write( "xs_incl_statsyst" ) 
+
+      pulls = unfolder.GetSystematicsPullHistogram()
+      pulls.Write( "pulls" ) 
+
+   ###################
+
+   def write_hist_statonly( self ):
+      pass
+
+   ###################
+
    def do_run( self, args ):
-     loaded_RooUnfold = gSystem.Load("libRooUnfold.so")
-     if not loaded_RooUnfold == 0:
-        print "INFO: RooUnfold not found."
-     else:
-        print "INFO: RooUnfold found. Output file will contain unfolded distributions with (unregularized) Matrix Inversion and (regularized) Iterative Bayesian with Nitr=4"
+
+     run_stage = kStageEstimatePrior
+     n_itr = 0
+     draw_plots = False
+     write_hist = False
+     for arg in args.split(): 
+        param, val = arg.split(':')
+
+        if param == "nitr": 
+           n_itr = int( val )
+        elif param == "drawplots":
+           if val.lower() in [ "yes", "true" ]: draw_plots = True
+        elif param == "writehist":
+           if val.lower() in [ "yes", "true" ]: write_hist = True
+        elif param == "stage":
+           run_stage = d_stage[val]
+
+     # Print out run start message
+     if run_stage == kStageEstimatePrior:
+       BCLog.OutSummary( "\033[92m\033[1mFirst run: estimating prior distribution...\033[0m" )
+     elif run_stage == kStageStatSyst:
+       BCLog.OutSummary( "\033[92m\033[1mStarting stat+syst run.\033[0m" )
+     elif run_stage == kStageStatonly:
+       BCLog.OutSummary( "\033[92m\033[1mStarting stat only run.\033[0m" )
+
+     # Do run with iterations
+     for k_itr in range( n_itr+1 ):
+       unfolder.SetFlagIgnorePrevOptimization( True )
+       unfolder.PrepareForRun( run_stage )
+
+       unfolder.MarginalizeAll()
+       bestfit = unfolder.FindMode( unfolder.GetBestFitParameters() )
+
+       unfolder.PrintSummary()
+       for i in range( bestfit.size() ):
+         print "BestFit :: %-2i) %f" % ( i, bestfit[i] )
+
+       if draw_plots == True:
+          pdir = self.outfilename.replace( self.outfilename.split('/')[-1], '' )
+          rtag = "stage_unknown"
+          if   run_stage == kStageEstimatePrior: rtag = "prior"
+          elif run_stage == kStageStatSyst:      rtag = "statsyst"
+          elif run_stage == kStageStatonly:      rtag = "statonly"
+
+          unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_%s_itr%i.pdf"  % ( pdir, gparams['OBS'], rtag, k_itr ) )
+          unfolder.PrintAllMarginalized( "%s/%s_marginalized_%s_itr%i.pdf" % ( pdir, gparams['OBS'], rtag, k_itr ) )
+
+       # Post-run
+       if run_stage == kStageEstimatePrior:
+          prior_abs = unfolder.GetDiffxsAbs( "prior_abs" )
+          prior_rel = unfolder.GetDiffxsRel( "prior_rel" )
+          unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
+          unfolder.SetPrior( prior_abs )
+       elif run_stage == kStageStatSyst:
+          pass
+       elif run_stage == kStageStatOnly:
+          pass
+      
+     # end iterations
+
+     # Write out histograms
+     if write_hist == True:
+       if   run_stage == kStageStatSyst: self.write_hist_statsyst()
+       elif run_stage == kStageStatOnly: self.write_hist_statonly()
+
+     # Print out run end message
+     if run_stage == kStageEstimatePrior:
+        BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated.\033[0m" )
+     elif run_stage == kStageStatSyst:
+        BCLog.OutSummary( "\033[92m\033[1mEnd of second run: stat+syst distribution estimated.\033[0m" )
+     elif run_stage == kStageStatonly:
+        BCLog.OutSummary( "\033[92m\033[1mEnd of third run: stat only distribution estimated.\033[0m" )
+
+##########################
+   def do_run_old( self, args ):
 
      # create output directory
      gparams['OUTPUTPATH'] = os.path.expandvars( gparams['OUTPUTPATH'] ) + "/" + gparams['OUTPUTTAG'] + "/"
@@ -323,7 +511,7 @@ class EikosPrompt( Cmd, object ):
      n_itr = int( gparams['NITR'] )
 
      for k_itr in range( n_itr+1 ):
-       BCLog.OutSummary( "\033[92m\033[1mEikos: marginalize all: prior :: iteration %i\033[0m" % k_itr )
+       BCLog.OutSummary( "\033[92m\033[1mEikos: marginalize all :: iteration %i\033[0m" % k_itr )
 
        unfolder.SetFlagIgnorePrevOptimization( True )
        unfolder.PrepareForRun( run_stage )
@@ -592,46 +780,40 @@ class EikosPrompt( Cmd, object ):
      if	pvalue_diffxs_vs_theory_rel < 0.05: BCLog.OutSummary( "Diffxs (rel) incompatible with theory model" )
      if	pvalue_diffxs_vs_prior_rel  < 0.05: BCLog.OutSummary( "Diffxs (rel) incompatible with prior" )
 
-     BCLog.OutSummary( "\033[92m\033[1mStarting stat only run.\033[0m" )
-     run_stage = kStageStatonly
-#     unfolder.SetPrior( prior_abs )
-#     unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
-     unfolder.SetFlagIgnorePrevOptimization( False )
-     unfolder.PrepareForRun( run_stage )
-     BCLog.OutSummary( "Eikos: marginalize all: stat only" )
-     unfolder.MarginalizeAll()
-#     bestfit = unfolder.GetBestFitParameters()
-     BCLog.OutSummary( "Eikos: find mode: stat only" )
-     bestfit_statonly = unfolder.FindMode( unfolder.GetBestFitParameters() )
-     unfolder.PrintSummary()
-
-#     bestfit_statonly = unfolder.GetBestFitParameters()
-     n = bestfit_statonly.size()
-     for i in range(n):
-       print "BestFit :: statonly %-2i) %f" % ( i, bestfit_statonly[i] )
-
-     BCLog.OutSummary( "\033[92m\033[1mEnd of third run: posterior distributions with stat only uncertainty estimated.\033[0m" )
-
-     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_statonly.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-     unfolder.PrintAllMarginalized( "%s/%s_marginalized_statonly.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
-
-     outfile.cd()
-
-     diffxs_abs_statonly = unfolder.GetDiffxsAbs( "diffxs_abs_statonly" ) #.get().Clone( "diffxs_abs_statonly" )
-     diffxs_abs_statonly.SetLineColor(kBlack)
-     diffxs_abs_statonly.SetMarkerColor(kBlack)
-     diffxs_abs_statonly.SetLineWidth(2)
-
-     diffxs_rel_statonly = unfolder.GetDiffxsRel( "diffxs_rel_statonly" ) #.get().Clone( "diffxs_rel" )
-     diffxs_rel_statonly.SetLineColor(kBlack)
-     diffxs_rel_statonly.SetMarkerColor(kBlack)
-     diffxs_rel_statonly.SetLineWidth(2)
-
-     xs_incl_statonly = unfolder.GetMarginalizedHistogram( "xs_incl" )
-
-     diffxs_abs_statonly.get().Write( "diffxs_abs_statonly" )
-     diffxs_rel_statonly.get().Write( "diffxs_rel_statonly" )
-     xs_incl_statonly.Write( "xs_incl_statonly" )
+#     BCLog.OutSummary( "\033[92m\033[1mStarting stat only run.\033[0m" )
+#     run_stage = kStageStatonly
+#     unfolder.SetFlagIgnorePrevOptimization( False )
+#     unfolder.PrepareForRun( run_stage )
+#     BCLog.OutSummary( "Eikos: marginalize all: stat only" )
+#     unfolder.MarginalizeAll()
+#     BCLog.OutSummary( "Eikos: find mode: stat only" )
+#     bestfit_statonly = unfolder.FindMode( unfolder.GetBestFitParameters() )
+#     unfolder.PrintSummary()
+#
+#     n = bestfit_statonly.size()
+#     for i in range(n):
+#       print "BestFit :: statonly %-2i) %f" % ( i, bestfit_statonly[i] )
+#
+#     BCLog.OutSummary( "\033[92m\033[1mEnd of third run: posterior distributions with stat only uncertainty estimated.\033[0m" )
+#
+#     unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_statonly.pdf"  % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+#     unfolder.PrintAllMarginalized( "%s/%s_marginalized_statonly.pdf" % ( gparams['OUTPUTPATH'], gparams['OBS'] ) )
+#
+#     outfile.cd()
+#
+#     diffxs_abs_statonly = unfolder.GetDiffxsAbs( "diffxs_abs_statonly" ) #.get().Clone( "diffxs_abs_statonly" )
+#     diffxs_abs_statonly.SetLineColor(kBlack)
+#     diffxs_abs_statonly.SetMarkerColor(kBlack)
+#     diffxs_abs_statonly.SetLineWidth(2)
+#     diffxs_rel_statonly = unfolder.GetDiffxsRel( "diffxs_rel_statonly" ) #.get().Clone( "diffxs_rel" )
+#     diffxs_rel_statonly.SetLineColor(kBlack)
+#     diffxs_rel_statonly.SetMarkerColor(kBlack)
+#     diffxs_rel_statonly.SetLineWidth(2)
+#     xs_incl_statonly = unfolder.GetMarginalizedHistogram( "xs_incl" )
+#
+#     diffxs_abs_statonly.get().Write( "diffxs_abs_statonly" )
+#     diffxs_rel_statonly.get().Write( "diffxs_rel_statonly" )
+#     xs_incl_statonly.Write( "xs_incl_statonly" )
 
      outfile.Close()
      BCLog.OutSummary( "Output file created: %s" % outfile.GetName() )

@@ -1,10 +1,11 @@
 // Header files passed as explicit arguments
 #include "include/EikosUnfolder.h"
+#include "BAT/BCMath.h"
 
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins(-1), m_regularization(kUnregularized), m_syst_initialized(false), m_obs_initialized(false),
+  m_nbins(-1), m_regularization(kUnregularized), m_prior_shape(kPriorFlat), m_syst_initialized(false), m_obs_initialized(false),
   m_lumi(1.), m_h_data(NULL), m_h_prior(NULL)
 {
    gErrorIgnoreLevel = kSysError;
@@ -187,30 +188,40 @@ void EikosUnfolder::SetPrior( pTH1D_t h	)
    h->Copy( (*m_h_prior) );
    m_h_prior->SetName( "prior" );
 
-   for( int i = 0 ; i < m_h_prior->GetNbinsX() ; ++i ) { 
+   SetPriorShape(); 
+}
+
+void EikosUnfolder::SetPriorShape( PRIOR_SHAPE s )          
+{
+   m_prior_shape = s; 
+
+   if( GetPrior() == NULL ) return;
+
+   for( int i = 0 ; i < m_h_prior->GetNbinsX() ; ++i ) {
       std::cout << "DEBUG: prior :: bin " << (i+1) << " y = " << m_h_prior->GetBinContent(i+1) << std::endl;
 
-      if( m_regularization == kUnregularized ) {
+      if( m_prior_shape == kPriorFlat ) {
          GetParameter(i).SetPriorConstant();
          GetParameter(i).SetLimits( -1., 2. );
       }
-      else if( m_regularization == kMultinomial ) {
+      else if( m_prior_shape == kPriorGauss ) {
 //          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
          GetParameter(i).SetPrior( new BCGaussianPrior( 0., 0.5 ) );
          GetParameter(i).SetLimits( -1., 2. );
       }
-      else if( m_regularization == kCurvature ) {
-         GetParameter(i).SetPriorConstant();
-//         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
+      else if( m_prior_shape == kPriorGamma ) {
+         std::cout << "WARNING: Gamma prior not yet implemented. Using gaussian for now" << std::endl;
+         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 0.5 ) );
          GetParameter(i).SetLimits( -1., 2. );
       }
       else {
-          std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
-          throw std::runtime_error( "unknown regularization method\n" );
+          std::cout << "ERROR: unknown prior shape " << m_regularization << std::endl;
+          throw std::runtime_error( "unknown prior shape\n" );
       }
   }
 
 }
+
 
 /////////////////////////////////
 
@@ -401,31 +412,6 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
   char b_latex[32];
   double xs_incl = GetPrior()->Integral();
 
-/*
-  for( int i = 0 ; i < m_nbins ; i++ ) {
-      double y = GetPrior()->GetBinContent( i+1 );
-      xs_incl += y;
- 
-      if( m_regularization == kUnregularized ) {
-         GetParameter(i).SetPriorConstant();
-         GetParameter(i).SetLimits( -1., 2. );
-      }
-      else if( m_regularization == kMultinomial ) { 
-//          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
-         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1. ) );
-         GetParameter(i).SetLimits( -1., 2. );
-      }
-      else if( m_regularization == kCurvature ) {
-         GetParameter(i).SetPriorConstant();
-//         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 1.0 ) );
-         GetParameter(i).SetLimits( -1., 2. );
-      } 
-      else {
-          std::cout << "ERROR: unknown regularization method " << m_regularization << std::endl;
-          throw std::runtime_error( "unknown regularization method\n" );
-      }
-  }
-*/
   // additional observables
   if( !m_obs_initialized ) {
       AddObservable( "xs_incl", 0, 2.*xs_incl, "#sigma_{incl}" );
@@ -517,7 +503,9 @@ double EikosUnfolder::LogAPrioriProbability(const std::vector<double>& parameter
 double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 {
   double logL = 0.;
-  double alpha = 1.; // ( m_nbins+m_syst_index.size() ) / float(m_nbins);
+//  double alpha = 1.;
+  double alpha = ( m_nbins + m_syst_index.size() ) / float(m_nbins);
+  double beta = 1. / m_nbins;
 
   pTH1D_t p_bkg = GetBackgroundSample() ? GetBackgroundSample()->GetDetector() : NULL;
   pTH1D_t p_nominal = GetSignalSample()->GetDetector();
@@ -534,7 +522,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        double delta_S = 0.;
        for( size_t i = 0 ; i < m_syst_index.size() ; ++i ) {
 //          const std::string& sname   = m_syst_names.at(i);
-          SystPair_t spair           = m_syst_pairs.at(i); 
+          SystPair_t spair           = m_syst_pairs.at(i);
 
           SystValues_t * syst_values = &( m_syst_values.at(i) );
           double sigma_u = syst_values->first.at(r);
@@ -604,41 +592,45 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 
   } // loop over bins
 
+  // Regularizing term (if any)
+  double S = 0.;
+  if( m_regularization == kCurvature ) {
+       for( int t = 1 ; t < (m_nbins-1) ; t++ ) {
+         double w0 = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1);
+         double wp = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1+1);
+         double wm = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t-1+1);
 
-//  if( m_regularization == kCurvature ) {
-    if( m_regularization != kUnregularized ) {
-    // bins' prior is constant. add a curvature term
+         double c0  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1);
+         double cp  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1+1);
+         double cm  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t-1+1);
 
-    double S = 0.;
-    for( int t = 1 ; t < (m_nbins-1) ; t++ ) {
-       double w0 = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1);
-       double wp = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1+1);
-       double wm = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t-1+1);
-
-       double c0  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1);
-       double cp  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1+1);
-       double cm  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t-1+1);
-
-       double t0 = parameters.at(t);
-       double tp = parameters.at(t+1);
-       double tm = parameters.at(t-1);
+         double t0 = parameters.at(t);
+         double tp = parameters.at(t+1);
+         double tm = parameters.at(t-1);
 
        // curvature
 //       double Dp = ( tp - t0 );
 //       double Dm = ( t0 - tm );
 //       S += pow( Dp - Dm, 2 );
 
-       double Dp = ( (tp/wp) - (t0/w0) ) / ( cp - c0 );
-       double Dm = ( (t0/w0) - (tm/wm) ) / ( c0 - cm );
-       S += fabs( Dp - Dm ) / fabs( Dp + Dm );
-    }
-//    S /= float(m_nbins);
-    logL -= S; 
+         double Dp = ( (tp/wp) - (t0/w0) ) / ( cp - c0 );
+         double Dm = ( (t0/w0) - (tm/wm) ) / ( c0 - cm );
+
+         S += fabs( Dp - Dm ) / fabs( Dp + Dm );
+       } 
+       logL -= alpha * S;
+  } // Curvature
+  else if( m_regularization == kMultinormal ) {
+     for( int t = 0 ; t < m_nbins ; ++t  ) {
+        double x = parameters.at(t);
+        double u = GetPrior()->GetBinContent(t+1);
+        double s = u / alpha;
+        S += BCMath::LogGaus( x, u, s, false );
+     }
+     logL =+ S;
+  } // Multinormal
+
 //    std::cout << "DEBUG: logL = " << logL << " ::  S = " << (-S) << std::endl;
-  }
-
-//  std::cout << "DEBUG: logL = " << logL << std::endl;
-
 
   return logL;
 }

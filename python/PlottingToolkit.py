@@ -52,7 +52,7 @@ def DivideByBinWidth( h ):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def SetTH1FStyle( h, color = kBlack, linewidth = 1, fillcolor = 0, fillstyle = 0, markerstyle = 21, markersize = 1.3, linestyle=kSolid, fill_alpha = 0 ):
+def SetHistogramStyle( h, color = kBlack, linewidth = 1, fillcolor = 0, fillstyle = 0, markerstyle = 21, markersize = 1.3, linestyle=kSolid, fill_alpha = 0 ):
     '''Set the style with a long list of parameters'''
 
     h.SetLineColor( color )
@@ -158,7 +158,7 @@ def DrawRatio( predictions, data_unc_tot, data_unc_stat=None, xtitle = "", yrang
 def MakeUncertaintyBand( prediction ):
     unc = TGraphAsymmErrors()
     
-    SetTH1FStyle( unc, color=prediction.GetLineColor(), fillstyle=1001, fillcolor=prediction.GetFillColor(), linewidth=0, markersize=0 )
+    SetHistogramStyle( unc, color=prediction.GetLineColor(), fillstyle=1001, fillcolor=prediction.GetFillColor(), linewidth=0, markersize=0 )
     
     i = 0
 
@@ -202,7 +202,7 @@ def MakeUncertaintyBand( prediction ):
 def MakeRatio( data, prediction ):
     ratio = TGraphAsymmErrors()
     
-    SetTH1FStyle( ratio, color=data.GetMarkerColor(), markerstyle=data.GetMarkerStyle(), linewidth=2 )
+    SetHistogramStyle( ratio, color=data.GetMarkerColor(), markerstyle=data.GetMarkerStyle(), linewidth=2 )
     
     if data.Class() in [ TGraph().Class(), TGraphErrors.Class(), TGraphAsymmErrors().Class() ]:
        nbins = data.GetN()

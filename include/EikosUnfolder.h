@@ -24,7 +24,8 @@
 typedef std::pair< std::string, std::string >  SystPair_t;
 typedef std::pair< std::vector<double>, std::vector<double> > SystValues_t;
 
-enum REGULARIZATION  { kUnregularized = 0, kMultinomial = 1, kCurvature = 2 };
+enum REGULARIZATION  { kUnregularized = 0, kCurvature = 1,  kMultinormal = 2 };
+enum PRIOR_SHAPE     { kPriorFlat = 0, kPriorGauss = 1, kPriorGamma = 2 };         
 enum SYSTEMATIC_TYPE { kDetector = 0, kModelling = 1, kDataDriven = 3 }; 
 enum RUN_STAGE       { kStageEstimatePrior, kStageStatSyst, kStageStatonly, kStageTableOfSyst }; 
 
@@ -41,6 +42,8 @@ class EikosUnfolder : public BCModel, public TObject
     ~EikosUnfolder();
 
     void SetRegularization( REGULARIZATION r )   { m_regularization = r; };
+    void SetPriorShape( PRIOR_SHAPE s = kPriorFlat );
+
     inline size_t GetNSamples()       { return m_samples.size(); };
     inline size_t GetNSystematics()   { return m_syst_index.size(); };
 
@@ -103,6 +106,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector<double> m_parameters;
 
     REGULARIZATION      m_regularization;
+    PRIOR_SHAPE         m_prior_shape;
     RUN_STAGE           m_runStage;
     bool                m_syst_initialized;
     bool                m_obs_initialized;
