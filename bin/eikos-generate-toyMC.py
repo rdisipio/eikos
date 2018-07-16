@@ -13,7 +13,7 @@ class SystType:
 #~~~~~~~
 
 class Systematic(object):
-  def __init__( self, name="syst", type=SystType.multiplicative, effect=1.2, twosided=True ):
+  def __init__( self, name="syst", type=SystType.multiplicative, effect=10., twosided=True ):
     self.name     = name
     self.type     = type
     self.effect   = effect
@@ -24,10 +24,12 @@ class Systematic(object):
   def Apply(self, x):
     y = 0.
 
-    if type == 0:
+    if self.type == SystType.additive:
       y = x + self.effect
-    elif type == 1:
+    elif self.type == SystType.multiplicative:
       y = x * ( 1 + self.effect/100.)
+    else:
+      print "ERROR: unknown systematic type", self.type
 
     return y
 
@@ -61,6 +63,7 @@ _h = {
 }
 for syst in known_systematics:
   _h[syst.name] = _h['nominal'].Clone( "x_%s"%syst.name )
+  print "INFO: systematic %-10s: %.2f %i" % ( syst.name, syst.effect, syst.type )
 for h in _h.values(): h.Sumw2()
 
 f_gamma = TF1("fgamma", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
