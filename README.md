@@ -10,7 +10,7 @@ Introductory slides: https://www.dropbox.com/s/uxfdtn74z7fxqpx/disipio_2017_10_1
 
 To download the code
 ```bash
-git clone https://:@gitlab.cern.ch:8443/disipio/Eikos.git
+git clone https://gitlab.cern.ch/disipio/Eikos.git
 ```
 
 To set up the environment:
