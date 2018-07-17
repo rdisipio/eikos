@@ -56,8 +56,8 @@ known_systematics = [
   Systematic( name="syst1_d", type=SystType.multiplicative, effect=-5.00, twosided=True ),
   Systematic( name="syst2_u", type=SystType.multiplicative, effect=-2.00, twosided=True ),
   Systematic( name="syst2_d", type=SystType.multiplicative, effect=3.00,  twosided=True ),
-  Systematic( name="syst3_u", type=SystType.additive,       effect=5.00,   twosided=True ),
-  Systematic( name="syst3_d", type=SystType.additive,       effect=-5.00,  twosided=True ),
+  Systematic( name="syst3_u", type=SystType.additive,       effect=2.00,   twosided=True ),
+  Systematic( name="syst3_d", type=SystType.additive,       effect=-2.00,  twosided=True ),
 ]
 
 ofilename = "toymc.root"
