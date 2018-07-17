@@ -172,11 +172,11 @@ for ievent in range(Nevents):
 
   x_reco  = ApplyMigrations( x_truth )
 
-  # Acceptance filter
-  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
-
   _h['reco_nominal'].Fill( x_reco, w )
-  _h['response_nominal'].Fill( x_reco, x_truth, w )
+
+  # Acceptance filter
+  if rng.Uniform() < f_acc_nominal.Eval(x_reco): 
+     _h['response_nominal'].Fill( x_reco, x_truth, w )
 
   for syst in known_systematics:
     y_reco = syst.Apply(x_reco)
@@ -194,11 +194,11 @@ for ievent in range(Nevents):
 
   x_reco  = ApplyMigrations( x_truth )
 
-  # Acceptance filter
-  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
-
   _h['reco_modelling_1'].Fill( x_reco, w )
-  _h['response_modelling_1'].Fill( x_reco, x_truth, w )
+
+  # Acceptance filter
+  if rng.Uniform() < f_acc_nominal.Eval(x_reco): 
+    _h['response_modelling_1'].Fill( x_reco, x_truth, w )
 
 
 for ievent in range(Nevents):
@@ -211,11 +211,11 @@ for ievent in range(Nevents):
 
   x_reco  = ApplyMigrations( x_truth )
 
-  # Acceptance filter
-  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
-
   _h['reco_modelling_2'].Fill( x_reco, w )
-  _h['response_modelling_2'].Fill( x_reco, x_truth, w )
+
+  # Acceptance filter
+  if rng.Uniform() < f_acc_nominal.Eval(x_reco): 
+    _h['response_modelling_2'].Fill( x_reco, x_truth, w )
 
 
 # Fill pseudo-data histogram (signal)
