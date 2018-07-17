@@ -62,7 +62,7 @@ known_systematics = [
   Systematic( name="syst3_d", type=SystType.additive,       effect=-20.,  twosided=True ),
 ]
 
-ofilename = "toymc.%s.root" % ( syst )
+ofilename = "toymc.root"
 ofile = TFile.Open( outpath + ofilename, "RECREATE" )
 ofile.cd()
 
