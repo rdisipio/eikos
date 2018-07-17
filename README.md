@@ -21,6 +21,19 @@ source bin/eikos-setenv.sh
 
 This script will also create the directories output and img if not present.
 
+
+Generate toy MC sample
+======================
+
+```
+cd run
+eikos-generate-toyMC.py
+```
+
+You'll find a new file called ```toymc.root``` . It contains data, background, signal and prediction for the nominal, a few systematics and two alternative models.
+The signal model is given by a Gamma distribution with shape parameter kappa and scale parameter theta. The two alternative models have a different value of either parameter.
+The systematics are of two types: multiplicative (i.e. x' = a*x ) or additive (i.e. x' = x + a). 
+
 To execute the program (batch mode):
 ```
 eikos.py config.txt
