@@ -5,4 +5,5 @@ export PYTHONPATH=$PWD/python:$PYTHONPATH
 [ ! -d output/img ] && mkdir -p output/img
 
 setupATLAS
-lsetup "lcgenv -p LCG_93 x86_64-centos7-gcc62-opt ROOT git"
+lsetup "lcgenv -p LCG_93 x86_64-centos7-gcc62-opt ROOT"
+lsetup git
