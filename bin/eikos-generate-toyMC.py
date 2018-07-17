@@ -41,8 +41,8 @@ class Systematic(object):
 
 def ApplyMigrations(x):
    s  = 0.1 + x / 100. 
-   dy = rng.Gaus( 0., s )
-   y  = y + dy
+   dx = rng.Gaus( 0., s )
+   y  = x + dx
    return y
 
 #############################
@@ -69,9 +69,9 @@ ofile.cd()
 
 # Truth and reco bins do not have to be the same
 xedges_truth = array( 'd', [ 0., 10., 15., 20., 25., 30., 40., 50., 70.,  100. ] )
-Nbins_truth  = len(xedges)-1
+Nbins_truth  = len(xedges_truth)-1
 xedges_reco  = array( 'd', [ 0., 10., 15., 20., 25., 30., 40., 50., 70.,  100. ] )
-Nbins_reco   = len(xedges)-1
+Nbins_reco   = len(xedges_reco)-1
 
 _h = {}
 
@@ -80,11 +80,11 @@ _h['reco_nominal']           = TH1F( "reco_nominal",  "Observable X", Nbins_trut
 _h['response_nominal']       = TH2F( "response_nominal", "Response matrix", Nbins_truth, xedges_truth, Nbins_reco, xedges_reco )
 
 _h['truth_modelling_1']      = _h['truth_nominal'].Clone("truth_modelling_1")
-_h['reco_modeling_1']        = _h['reco_nominal'].Clone("reco_modelling_1")
+_h['reco_modelling_1']       = _h['reco_nominal'].Clone("reco_modelling_1")
 _h['response_modelling_1']   = _h['response_nominal'].Clone("response_modelling_1")
 
 _h['truth_modelling_2']      = _h['truth_nominal'].Clone("truth_modelling_2")
-_h['reco_modeling_2']        = _h['reco_nominal'].Clone("reco_modelling_2")
+_h['reco_modelling_2']       = _h['reco_nominal'].Clone("reco_modelling_2")
 _h['response_modelling_2']   = _h['response_nominal'].Clone("response_modelling_2")
 
 for syst in known_systematics:
