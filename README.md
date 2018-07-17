@@ -39,7 +39,7 @@ eikos-plot-systematics_pulls.py
 Configuration file
 ==================
 
-This is a non-working example. Modeling systematics just need the reco-level. Modelling systematics need also the truth-level and response matrix in order to calcualte the correction factors.
+This is a non-working example. Detector systematics just need the reco-level. Modelling systematics need also the truth-level and response matrix in order to calcualte the correction factors.
 
 ```
 set param  INPUTPATH /path/to/root/file/containing/histograms
