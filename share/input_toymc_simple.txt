@@ -1,0 +1,31 @@
+set param  INPUTPATH $PWD
+set param  OUTPUTPATH $PWD/output
+set param  OUTPUTTAG toymc_simple
+set param  LUMI 1.0
+set param  PRECISION 2
+set param  REGULARIZATION 1
+set param  OBS x
+set data   path @INPUTPATH@/toymc.root:data
+add sample S
+set sample S type signal
+set sample S path nominal reco @INPUTPATH@/toymc.root:reco_nominal
+set sample S path nominal resp @INPUTPATH@/toymc.root:response_nominal
+set sample S path nominal gen  @INPUTPATH@/toymc.root:truth_nominal
+add sample B
+set sample B type background
+set sample B path nominal reco @INPUTPATH@/toymc.root:bkg_nominal
+
+set outfile $PWD/output/@OUTPUTTAG@/toymc.output.root
+set luminosity 1.0
+set regularization curvature
+
+set precision low
+set prior flat
+run stage:prior nitr:2 drawplots:yes
+
+set precision low
+set prior gauss
+run stage:statsyst nitr:1 drawplots:yes writehist:yes
+
+
+exit
