@@ -322,3 +322,17 @@ void myMarkerText(Double_t x,Double_t y,Int_t color,Int_t mstyle,char *text,Floa
   l.DrawLatex(x,y,text);
 }
 
+////////////////////
+
+void DivideByBinWidth( TH1 * h )
+{
+  const Int_t Nbins = h->GetNbinsX();
+  for( Int_t i = 0 ; i < Nbins ; ++i ) {
+     const Double_t  y = h->GetBinContent(i+1);
+     const Double_t bw = h->GetBinWidth(i+1);
+     const Double_t dy = h->GetBinError(i+1);
+
+     h->SetBinContent( i+1, y/bw );
+     h->SetBinError( i+1, dy/bw );
+  }
+}

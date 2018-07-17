@@ -40,15 +40,13 @@ class Systematic(object):
 #~~~~~~~
 
 def ApplyMigrations(x):
-   s  = 0.1 + x / 100. 
+   s  = 0.1 + x / 100.
    dx = rng.Gaus( 0., s )
    y  = x + dx
    return y
 
 #############################
 
-
-outpath = "data/toymc/"
 
 syst = "nominal"
 Nevents = 100000
@@ -63,7 +61,7 @@ known_systematics = [
 ]
 
 ofilename = "toymc.root"
-ofile = TFile.Open( outpath + ofilename, "RECREATE" )
+ofile = TFile.Open( ofilename, "RECREATE" )
 ofile.cd()
 
 

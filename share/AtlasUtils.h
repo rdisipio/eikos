@@ -33,5 +33,7 @@ void myBoxText(Double_t x, Double_t y,Double_t boxsize,Int_t mcolor,char *text);
 
 void myMarkerText(Double_t x,Double_t y,Int_t color,Int_t mstyle,char *text,Float_t msize=2.); 
 
+void DivideByBinWidth( TH1 * h );
+
 #endif // __ATLASUTILS_H
 
