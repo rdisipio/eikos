@@ -51,15 +51,15 @@ def ApplyMigrations(x):
 outpath = "data/toymc/"
 
 syst = "nominal"
-Nevents = 10000
+Nevents = 100000
 
 known_systematics = [
   Systematic( name="syst1_u", type=SystType.multiplicative, effect=5.00,  twosided=True ),
   Systematic( name="syst1_d", type=SystType.multiplicative, effect=-5.00, twosided=True ),
   Systematic( name="syst2_u", type=SystType.multiplicative, effect=-2.00, twosided=True ),
   Systematic( name="syst2_d", type=SystType.multiplicative, effect=3.00,  twosided=True ),
-  Systematic( name="syst3_u", type=SystType.additive,       effect=20.,   twosided=True ),
-  Systematic( name="syst3_d", type=SystType.additive,       effect=-20.,  twosided=True ),
+  Systematic( name="syst3_u", type=SystType.additive,       effect=5.00,   twosided=True ),
+  Systematic( name="syst3_d", type=SystType.additive,       effect=-5.00,  twosided=True ),
 ]
 
 ofilename = "toymc.root"
@@ -97,9 +97,27 @@ for h in _h.values(): h.Sumw2()
 # Observable (think of pT) is drawn from a Gamma distribution
 # then smeared according to the chosen systematic
 # Modelling systematics have different values of the shape and scale parameters, e.g. 4+-1 and 10+-1
-f_gamma_nominal = TF1("gamma_nominal", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
-f_gamma_nominal.SetParameters( 4., 0., 10. )
 
+kappa_nominal = 2.5
+mu_nominal    = 0.
+theta_nominal = 10.
+kappa_modelling_1 = kappa_nominal - 0.25
+mu_modelling_1    = mu_nominal
+theta_modelling_1 = theta_nominal
+kappa_modelling_2 = kappa_nominal
+mu_modelling_2    = mu_nominal
+theta_modelling_2 = theta_nominal + 1.0
+
+f_gamma_nominal = TF1("gamma_nominal", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
+f_gamma_nominal.SetParameters( kappa_nominal, mu_nominal, theta_nominal )
+
+f_gamma_alt1 = TF1("gamma_alt1", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
+f_gamma_alt1.SetParameters( kappa_modelling_1, mu_modelling_1, theta_modelling_1 )
+
+f_gamma_alt2 = TF1("gamma_alt2", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
+f_gamma_alt2.SetParameters( kappa_modelling_2, mu_modelling_2, theta_modelling_2 )
+
+# Efficiency and acceptance corrections
 eff_nominal = 0.30
 acc_nominal = 0.80
 eff_modelling_1 = 0.25
@@ -128,8 +146,6 @@ for ievent in range(Nevents):
     _h["reco_"+syst.name].Fill( y_reco )
 
 # Do modelling systematics
-f_gamma_alt1 = TF1("gamma_alt1", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
-f_gamma_alt1.SetParameters( 5., 0., 10. )
 
 for ievent in range(Nevents):
   x_truth = f_gamma_alt1.GetRandom()
@@ -147,9 +163,6 @@ for ievent in range(Nevents):
 
   _h['reco_modelling_1'].Fill( x_reco )
 
-
-f_gamma_alt2 = TF1("gamma_alt2", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
-f_gamma_alt2.SetParameters( 4., 0., 11. )
 
 for ievent in range(Nevents):
   x_truth = f_gamma_alt2.GetRandom()
