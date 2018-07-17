@@ -53,7 +53,7 @@ library: src/EikosUnfolderDict.o $(CXXOBJS)
 	@echo
 	@echo Building shared library libEikos.so
 	@echo 
-	$(CXX) -shared -fPIC -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(LIBS) -lc
+	$(CXX) -g -shared -fPIC -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(LIBS) -lc
 
 install:
 	mv libEikos.so $(BATINSTALLDIR)/lib

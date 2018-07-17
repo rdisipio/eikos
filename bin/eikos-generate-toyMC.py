@@ -151,6 +151,16 @@ f_eff_modelling_1.SetParameters( eff_modelling_1/3., 2.*eff_modelling_1/3., 0.05
 f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
 f_eff_modelling_2.SetParameters( eff_modelling_2/3., 2.*eff_modelling_2/3., 0.05 )
 
+#f_eff_nominal     = TF1( "f_eff_nominal",     "[0]", 0., 100. )
+#f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0]", 0., 100. )
+#f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0]", 0., 100. )
+#f_acc_nominal     = TF1( "f_acc_nominal",     "[0]", 0., 100. )
+
+#f_eff_nominal.SetParameter( 0, eff_nominal )
+#f_eff_modelling_1.SetParameter( 0, eff_nominal*1.1 )
+#f_eff_modelling_2.SetParameter( 0, eff_nominal*0.9 )
+#f_acc_nominal.SetParameter( 0, acc_nominal )
+
 print "INFO: generating %i pseudo-signal events with weight %.2f" % ( Nevents, w )
 for ievent in range(Nevents):
 
@@ -161,12 +171,12 @@ for ievent in range(Nevents):
   if rng.Uniform() > f_eff_nominal.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
-  _h['response_nominal'].Fill( x_reco, x_truth, w )
 
   # Acceptance filter
   if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
   _h['reco_nominal'].Fill( x_reco, w )
+  _h['response_nominal'].Fill( x_reco, x_truth, w )
 
   for syst in known_systematics:
     y_reco = syst.Apply(x_reco)
@@ -183,12 +193,12 @@ for ievent in range(Nevents):
   if rng.Uniform() > f_eff_modelling_1.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
-  _h['response_modelling_1'].Fill( x_reco, x_truth, w )
 
   # Acceptance filter
   if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
   _h['reco_modelling_1'].Fill( x_reco, w )
+  _h['response_modelling_1'].Fill( x_reco, x_truth, w )
 
 
 for ievent in range(Nevents):
@@ -200,12 +210,12 @@ for ievent in range(Nevents):
   if rng.Uniform() > f_eff_modelling_2.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
-  _h['response_modelling_2'].Fill( x_reco, x_truth, w )
 
   # Acceptance filter
   if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
   _h['reco_modelling_2'].Fill( x_reco, w )
+  _h['response_modelling_2'].Fill( x_reco, x_truth, w )
 
 
 # Fill pseudo-data histogram (signal)
