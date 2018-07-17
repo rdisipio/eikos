@@ -220,20 +220,20 @@ for hname, h in _h.iteritems():
 # now add background
 # data and prediction drawn from the same distribution
 # but statistically independent
-for ievent in range(Nevents/50):
+for ievent in range(Nevents/100):
   x_reco = f_exp_bkg.GetRandom()
   _h['data'].Fill( x_reco )
 
-for ievent in range(Nevents/50):
+for ievent in range(Nevents/100):
   x_reco = f_exp_bkg.GetRandom()
   _h['bkg'].Fill( x_reco )
 
 
 # create prediction histograms
-_h['prediction_nominal'] = _h['nominal'].Clone("prediction_nominal")
+_h['prediction_nominal'] = _h['reco_nominal'].Clone("prediction_nominal")
 _h['prediction_nominal'].Add( _h['bkg'] )
 for syst in known_systematics:
-  _h['prediction_%s'%syst.name] = _h['nominal'].Clone("prediction_%s"%syst.name)
+  _h['prediction_%s'%syst.name] = _h['reco_nominal'].Clone("prediction_%s"%syst.name)
   _h['prediction_%s'%syst.name].Add( _h['bkg'] )
 
 # Write out to file
