@@ -117,20 +117,20 @@ f_gamma_alt2.SetParameters( kappa_modelling_2, mu_modelling_2, theta_modelling_2
 
 # Efficiency and acceptance corrections
 eff_nominal = 0.30
-acc_nominal = 0.80
 eff_modelling_1 = 0.25
 eff_modelling_2 = 0.35
+acc_nominal = 0.80
 
-f_eff_nominal = TF1( "f_eff_nominal", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_eff_nominal = TF1( "f_eff_nominal", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
 f_eff_nominal.SetParameters( eff_nominal/3., 2.*eff_nominal/3., 0.05 )
 
-f_acc_nominal = TF1( "f_acc_nominal", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_acc_nominal = TF1( "f_acc_nominal", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
 f_acc_nominal.SetParameters( acc_nominal/3., 2.*acc_nominal/3., 0.05 )
 
-f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
 f_eff_modelling_1.SetParameters( eff_modelling_1/3., 2.*eff_modelling_1/3., 0.05 )
 
-f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
 f_eff_modelling_2.SetParameters( eff_modelling_2/3., 2.*eff_modelling_2/3., 0.05 )
 
 
