@@ -228,6 +228,14 @@ for ievent in range(Nevents/50):
   x_reco = f_exp_bkg.GetRandom()
   _h['bkg'].Fill( x_reco )
 
+
+# create prediction histograms
+_h['prediction_nominal'] = _h['nominal'].Clone("prediction_nominal")
+_h['prediction_nominal'].Add( _h['bkg'] )
+for syst in known_systematics:
+  _h['prediction_%s'%syst.name] = _h['nominal'].Clone("prediction_%s"%syst.name)
+  _h['prediction_%s'%syst.name].Add( _h['bkg'] )
+
 # Write out to file
 ofile.Write()
 ofile.Close()
