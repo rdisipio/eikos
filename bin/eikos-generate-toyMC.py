@@ -106,22 +106,33 @@ kappa_modelling_2 = kappa_nominal
 mu_modelling_2    = mu_nominal
 theta_modelling_2 = theta_nominal + 1.0
 
-f_gamma_nominal = TF1("gamma_nominal", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
+f_gamma_nominal = TF1("gamma_nominal", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_nominal.SetParameters( kappa_nominal, mu_nominal, theta_nominal )
 
-f_gamma_alt1 = TF1("gamma_alt1", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
+f_gamma_alt1 = TF1("gamma_alt1", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_alt1.SetParameters( kappa_modelling_1, mu_modelling_1, theta_modelling_1 )
 
-f_gamma_alt2 = TF1("gamma_alt2", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 );
+f_gamma_alt2 = TF1("gamma_alt2", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_alt2.SetParameters( kappa_modelling_2, mu_modelling_2, theta_modelling_2 )
 
 # Efficiency and acceptance corrections
 eff_nominal = 0.30
 acc_nominal = 0.80
 eff_modelling_1 = 0.25
-acc_modelling_1 = 0.80
 eff_modelling_2 = 0.35
-acc_modelling_2 = 0.80
+
+f_eff_nominal = TF1( "f_eff_nominal", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_eff_nominal.SetParameters( eff_nominal/3., 2.*eff_nominal/3., 0.05 )
+
+f_acc_nominal = TF1( "f_acc_nominal", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_acc_nominal.SetParameters( acc_nominal/3., 2.*acc_nominal/3., 0.05 )
+
+f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_eff_modelling_1.SetParameters( eff_modelling_1/3., 2.*eff_modelling_1/3., 0.05 )
+
+f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*(1. 0- TMath::Exp(-[2]*x", 0, 100 )
+f_eff_modelling_2.SetParameters( eff_modelling_2/3., 2.*eff_modelling_2/3., 0.05 )
+
 
 for ievent in range(Nevents):
 
@@ -129,13 +140,13 @@ for ievent in range(Nevents):
   _h['truth_nominal'].Fill(x_truth)
 
   # Efficiency filter
-  if rng.Uniform() > eff_nominal: continue
+  if rng.Uniform() > f_eff_nominal.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
   _h['response_nominal'].Fill( x_reco, x_truth )
 
   # Acceptance filter
-  if rng.Uniform() > acc_nominal: continue
+  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
   _h['reco_nominal'].Fill( x_reco )
 
@@ -151,13 +162,13 @@ for ievent in range(Nevents):
   _h['truth_modelling_1'].Fill( x_truth )
 
   # Efficiency filter
-  if rng.Uniform() > eff_modelling_1: continue
+  if rng.Uniform() > f_eff_modelling_1.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
   _h['response_modelling_1'].Fill( x_reco, x_truth )
 
   # Acceptance filter
-  if rng.Uniform() > acc_modelling_1: continue
+  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
   _h['reco_modelling_1'].Fill( x_reco )
 
@@ -168,13 +179,13 @@ for ievent in range(Nevents):
   _h['truth_modelling_2'].Fill( x_truth )
 
   # Efficiency filter
-  if rng.Uniform() > eff_modelling_2: continue
+  if rng.Uniform() > f_eff_modelling_2.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
   _h['response_modelling_2'].Fill( x_reco, x_truth )
 
   # Acceptance filter
-  if rng.Uniform() > acc_modelling_2: continue
+  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
   _h['reco_modelling_2'].Fill( x_reco )
 
