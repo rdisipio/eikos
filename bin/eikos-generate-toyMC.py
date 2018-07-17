@@ -53,9 +53,12 @@ def ApplyMigrations(x):
 
 #############################
 
+xs    = 250.
+iLumi = 1000.
+Nevents = 1000000
+w = xs * iLumi / float(Nevents)
 
 syst = "nominal"
-Nevents = 100000
 
 known_systematics = [
   Systematic( name="syst1_u", type=SystType.multiplicative, effect=5.00,  twosided=True ),
@@ -148,65 +151,67 @@ f_eff_modelling_1.SetParameters( eff_modelling_1/3., 2.*eff_modelling_1/3., 0.05
 f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
 f_eff_modelling_2.SetParameters( eff_modelling_2/3., 2.*eff_modelling_2/3., 0.05 )
 
-
+print "INFO: generating %i pseudo-signal events with weight %.2f" % ( Nevents, w )
 for ievent in range(Nevents):
 
   x_truth = f_gamma_nominal.GetRandom()
-  _h['truth_nominal'].Fill(x_truth)
+  _h['truth_nominal'].Fill(x_truth, w)
 
   # Efficiency filter
   if rng.Uniform() > f_eff_nominal.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
-  _h['response_nominal'].Fill( x_reco, x_truth )
+  _h['response_nominal'].Fill( x_reco, x_truth, w )
 
   # Acceptance filter
   if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
-  _h['reco_nominal'].Fill( x_reco )
+  _h['reco_nominal'].Fill( x_reco, w )
 
   for syst in known_systematics:
     y_reco = syst.Apply(x_reco)
-    _h["reco_"+syst.name].Fill( y_reco )
+    _h["reco_"+syst.name].Fill( y_reco, w )
 
 # Do modelling systematics
 
 for ievent in range(Nevents):
   x_truth = f_gamma_alt1.GetRandom()
 
-  _h['truth_modelling_1'].Fill( x_truth )
+  _h['truth_modelling_1'].Fill( x_truth, w )
 
   # Efficiency filter
   if rng.Uniform() > f_eff_modelling_1.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
-  _h['response_modelling_1'].Fill( x_reco, x_truth )
+  _h['response_modelling_1'].Fill( x_reco, x_truth, w )
 
   # Acceptance filter
   if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
-  _h['reco_modelling_1'].Fill( x_reco )
+  _h['reco_modelling_1'].Fill( x_reco, w )
 
 
 for ievent in range(Nevents):
   x_truth = f_gamma_alt2.GetRandom()
 
-  _h['truth_modelling_2'].Fill( x_truth )
+  _h['truth_modelling_2'].Fill( x_truth, w )
 
   # Efficiency filter
   if rng.Uniform() > f_eff_modelling_2.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
-  _h['response_modelling_2'].Fill( x_reco, x_truth )
+  _h['response_modelling_2'].Fill( x_reco, x_truth, w )
 
   # Acceptance filter
   if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
 
-  _h['reco_modelling_2'].Fill( x_reco )
+  _h['reco_modelling_2'].Fill( x_reco, w )
 
 
 # Fill pseudo-data histogram (signal)
-for ievent in range(Nevents/10):
+Nevents_data = int(xs * iLumi)
+print "INFO: generating %i unweighted pseudo-data events" % Nevents_data
+for ievent in range(Nevents_data):
   x_truth = f_gamma_data.GetRandom()
   if rng.Uniform() > f_eff_nominal.Eval(x_truth): continue
   x_reco = ApplyMigrations( x_truth )
@@ -220,11 +225,12 @@ for hname, h in _h.iteritems():
 # now add background
 # data and prediction drawn from the same distribution
 # but statistically independent
-for ievent in range(Nevents/100):
+Nevents_bkg = int(Nevents_data/10)
+for ievent in range(Nevents_bkg):
   x_reco = f_exp_bkg.GetRandom()
   _h['data'].Fill( x_reco )
 
-for ievent in range(Nevents/100):
+for ievent in range(Nevents_bkg):
   x_reco = f_exp_bkg.GetRandom()
   _h['bkg'].Fill( x_reco )
 

@@ -13,7 +13,7 @@ set sample S path nominal resp @INPUTPATH@/toymc.root:response_nominal
 set sample S path nominal gen  @INPUTPATH@/toymc.root:truth_nominal
 add sample B
 set sample B type background
-set sample B path nominal reco @INPUTPATH@/toymc.root:bkg_nominal
+set sample B path nominal reco @INPUTPATH@/toymc.root:bkg
 
 set outfile $PWD/output/@OUTPUTTAG@/toymc.output.root
 set luminosity 1.0
