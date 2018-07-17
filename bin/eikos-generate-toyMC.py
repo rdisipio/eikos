@@ -8,6 +8,12 @@ rng = TRandom3()
 
 #############################
 
+def Normalize( h, sf=1.0 ):
+  area = h.Integral("width")
+  h.Scale( sf/area )
+
+#############################
+
 class SystType:
    additive       = 0
    multiplicative = 1
@@ -85,6 +91,9 @@ _h['truth_modelling_2']      = _h['truth_nominal'].Clone("truth_modelling_2")
 _h['reco_modelling_2']       = _h['reco_nominal'].Clone("reco_modelling_2")
 _h['response_modelling_2']   = _h['response_nominal'].Clone("response_modelling_2")
 
+_h['data'] = _h['reco_nominal'].Clone("data")
+_h['bkg']  = _h['reco_nominal'].Clone("bkg")
+
 for syst in known_systematics:
   _h["reco_"+syst.name] = _h['reco_nominal'].Clone( "reco_%s"%syst.name )
   print "INFO: systematic %-10s: %.2f %i" % ( syst.name, syst.effect, syst.type )
@@ -114,6 +123,12 @@ f_gamma_alt1.SetParameters( kappa_modelling_1, mu_modelling_1, theta_modelling_1
 
 f_gamma_alt2 = TF1("gamma_alt2", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_alt2.SetParameters( kappa_modelling_2, mu_modelling_2, theta_modelling_2 )
+
+f_gamma_data = TF1("gamma_data", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
+f_gamma_data.SetParameters( kappa_nominal+0.1, mu_nominal, theta_nominal-0.2 )
+
+f_exp_bkg = TF1( "exp_bkg", "[0] * TMath::Exp( -x / [1] )", 0, 100 )
+f_exp_bkg.SetParameters( 50., 100. )
 
 # Efficiency and acceptance corrections
 eff_nominal = 0.30
@@ -189,5 +204,30 @@ for ievent in range(Nevents):
 
   _h['reco_modelling_2'].Fill( x_reco )
 
+
+# Fill pseudo-data histogram (signal)
+for ievent in range(Nevents/10):
+  x_truth = f_gamma_data.GetRandom()
+  if rng.Uniform() > f_eff_nominal.Eval(x_truth): continue
+  x_reco = ApplyMigrations( x_truth )
+  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
+  _h['data'].Fill( x_reco )
+
+Nevents_data = _h['data'].Integral("width")
+for hname, h in _h.iteritems():
+  if hname.startswith("reco_"): Normalize(h, Nevents_data )
+
+# now add background
+# data and prediction drawn from the same distribution
+# but statistically independent
+for ievent in range(Nevents/50):
+  x_reco = f_exp_bkg.GetRandom()
+  _h['data'].Fill( x_reco )
+
+for ievent in range(Nevents/50):
+  x_reco = f_exp_bkg.GetRandom()
+  _h['bkg'].Fill( x_reco )
+
+# Write out to file
 ofile.Write()
 ofile.Close()
