@@ -53,10 +53,6 @@ def ApplyMigrations(x):
 
 #############################
 
-xs    = 250.
-iLumi = 1000.
-Nevents = 1000000
-w = xs * iLumi / float(Nevents)
 
 syst = "nominal"
 
@@ -131,7 +127,7 @@ f_gamma_data = TF1("gamma_data", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_data.SetParameters( kappa_nominal+0.1, mu_nominal, theta_nominal-0.2 )
 
 f_exp_bkg = TF1( "exp_bkg", "[0] * TMath::Exp( -x / [1] )", 0, 100 )
-f_exp_bkg.SetParameters( 50., 100. )
+f_exp_bkg.SetParameters( 50., 25. )
 
 # Efficiency and acceptance corrections
 eff_nominal = 0.30
@@ -139,30 +135,37 @@ eff_modelling_1 = 0.25
 eff_modelling_2 = 0.35
 acc_nominal = 0.80
 
-f_eff_nominal = TF1( "f_eff_nominal", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
-f_eff_nominal.SetParameters( eff_nominal/3., 2.*eff_nominal/3., 0.05 )
+# N = xs * eff * L
+xs    = 25.
+iLumi = 1000.
+Nevents_data = int(xs * iLumi * eff_nominal / acc_nominal) # a smallish number
+Nevents_mc   = 1000000    # or any large number
+w = Nevents_data / float(Nevents_mc)
 
-f_acc_nominal = TF1( "f_acc_nominal", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
-f_acc_nominal.SetParameters( acc_nominal/3., 2.*acc_nominal/3., 0.05 )
+#f_eff_nominal = TF1( "f_eff_nominal", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
+#f_eff_nominal.SetParameters( eff_nominal/3., 2.*eff_nominal/3., 0.05 )
 
-f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
-f_eff_modelling_1.SetParameters( eff_modelling_1/3., 2.*eff_modelling_1/3., 0.05 )
+#f_acc_nominal = TF1( "f_acc_nominal", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
+#f_acc_nominal.SetParameters( acc_nominal/3., 2.*acc_nominal/3., 0.05 )
 
-f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
-f_eff_modelling_2.SetParameters( eff_modelling_2/3., 2.*eff_modelling_2/3., 0.05 )
+#f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
+#f_eff_modelling_1.SetParameters( eff_modelling_1/3., 2.*eff_modelling_1/3., 0.05 )
 
-#f_eff_nominal     = TF1( "f_eff_nominal",     "[0]", 0., 100. )
-#f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0]", 0., 100. )
-#f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0]", 0., 100. )
-#f_acc_nominal     = TF1( "f_acc_nominal",     "[0]", 0., 100. )
+#f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
+#f_eff_modelling_2.SetParameters( eff_modelling_2/3., 2.*eff_modelling_2/3., 0.05 )
 
-#f_eff_nominal.SetParameter( 0, eff_nominal )
-#f_eff_modelling_1.SetParameter( 0, eff_nominal*1.1 )
-#f_eff_modelling_2.SetParameter( 0, eff_nominal*0.9 )
-#f_acc_nominal.SetParameter( 0, acc_nominal )
+f_eff_nominal     = TF1( "f_eff_nominal",     "[0]", 0., 100. )
+f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0]", 0., 100. )
+f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0]", 0., 100. )
+f_acc_nominal     = TF1( "f_acc_nominal",     "[0]", 0., 100. )
 
-print "INFO: generating %i pseudo-signal events with weight %.2f" % ( Nevents, w )
-for ievent in range(Nevents):
+f_eff_nominal.SetParameter( 0, eff_nominal )
+f_eff_modelling_1.SetParameter( 0, eff_nominal*1.1 )
+f_eff_modelling_2.SetParameter( 0, eff_nominal*0.9 )
+f_acc_nominal.SetParameter( 0, acc_nominal )
+
+print "INFO: generating %i pseudo-signal events with weight %.3f" % ( Nevents_mc, w )
+for ievent in range(Nevents_mc):
 
   x_truth = f_gamma_nominal.GetRandom()
   _h['truth_nominal'].Fill(x_truth, w)
@@ -184,7 +187,7 @@ for ievent in range(Nevents):
 
 # Do modelling systematics
 
-for ievent in range(Nevents):
+for ievent in range(Nevents_mc):
   x_truth = f_gamma_alt1.GetRandom()
 
   _h['truth_modelling_1'].Fill( x_truth, w )
@@ -201,7 +204,7 @@ for ievent in range(Nevents):
     _h['response_modelling_1'].Fill( x_reco, x_truth, w )
 
 
-for ievent in range(Nevents):
+for ievent in range(Nevents_mc):
   x_truth = f_gamma_alt2.GetRandom()
 
   _h['truth_modelling_2'].Fill( x_truth, w )
@@ -219,23 +222,27 @@ for ievent in range(Nevents):
 
 
 # Fill pseudo-data histogram (signal)
-Nevents_data = int(xs * iLumi)
+
 print "INFO: generating %i unweighted pseudo-data events" % Nevents_data
 for ievent in range(Nevents_data):
   x_truth = f_gamma_data.GetRandom()
+
+  # Efficiency filter
   if rng.Uniform() > f_eff_nominal.Eval(x_truth): continue
+  
   x_reco = ApplyMigrations( x_truth )
-  if rng.Uniform() > f_acc_nominal.Eval(x_reco): continue
   _h['data'].Fill( x_reco )
 
-Nevents_data = _h['data'].Integral("width")
-for hname, h in _h.iteritems():
-  if hname.startswith("reco_"): Normalize(h, Nevents_data )
+#for hname, h in _h.iteritems():
+#  if hname.startswith("reco_"): Normalize(h, Nevents_data )
 
 # now add background
 # data and prediction drawn from the same distribution
 # but statistically independent
+
 Nevents_bkg = int(Nevents_data/10)
+print "INFO: generating %i background events" % Nevents_bkg
+
 for ievent in range(Nevents_bkg):
   x_reco = f_exp_bkg.GetRandom()
   _h['data'].Fill( x_reco )
