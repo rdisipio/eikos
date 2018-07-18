@@ -6,10 +6,9 @@ ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
   m_nbins(-1), m_regularization(kUnregularized), m_prior_shape(kPriorFlat), m_syst_initialized(false), m_obs_initialized(false),
-  m_lumi(1.), m_h_data(NULL), m_h_prior(NULL)
+  m_lumi(1.), m_h_data(NULL), m_h_prior(NULL), m_stage_iteration(0), m_runStage(kStageUninitialized), m_bkg_name("background")
 {
    gErrorIgnoreLevel = kSysError;
-   m_runStage = kStageEstimatePrior;
 }
 
 EikosUnfolder::~EikosUnfolder()
@@ -42,6 +41,13 @@ pSample_t EikosUnfolder::AddSample( const pSample_t sample )
 {
    const std::string& name = sample->GetName();
    m_samples[name] = sample;
+
+   if( sample->GetType() == kBackground ) { 
+      m_bkg_name = sample->GetName();
+      std::cout << "INFO: Background sample name set to " << m_bkg_name << std::endl;
+   }
+
+   std::cout << "DEBUG: EikosUnfolder: added new sample " << name << std::endl;
    return m_samples[name];
 }
 
@@ -61,6 +67,13 @@ pSample_t EikosUnfolder::AddSample( const std::string& name, SAMPLE_TYPE type, c
   p_sample->SetColor( color );
   p_sample->SetFillStyle( fillstyle );
   p_sample->SetLineStyle( linestyle );
+
+  if( type == kBackground ) {
+     m_bkg_name = name;
+     std::cout << "INFO: Background sample name set to " << m_bkg_name << std::endl;
+  }
+
+  std::cout << "DEBUG: EikosUnfolder: added new sample " << name << std::endl;
 
   return m_samples[name];
 }
@@ -85,7 +98,7 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
 
   GetParameter(index).SetPrior(new BCGaussianPrior( 0., 1. ) );
 
-  std::cout << "Added systematic " << sname << " with index " << index << std::endl;
+  std::cout << "INFO: Added systematic " << sname << " with index " << index << std::endl;
 
   return index;
 }
@@ -103,7 +116,7 @@ void EikosUnfolder::SetSystematicType( int index, SYSTEMATIC_TYPE type )
 {
    m_syst_types[index] = type;
    const std::string& sname = m_syst_names[index];
-   std::cout << "Systematic " << sname << "(" << index << ") :: type = " << m_syst_types[index] << std::endl;
+   std::cout << "INFO: Systematic " << sname << "(" << index << ") :: type = " << m_syst_types[index] << std::endl;
 }
 
 SYSTEMATIC_TYPE EikosUnfolder::GetSystematicType( int index ) const
@@ -131,7 +144,7 @@ void EikosUnfolder::SetSystematicVariations( const std::string& sname, const std
    m_syst_pairs[i].first  = var_u;
    m_syst_pairs[i].second = var_d;
 
-   std::cout << "Systematic " << sname << "(" << i << ") :: up = " << m_syst_pairs[i].first << " :: down = " << m_syst_pairs[i].second << std::endl;
+   std::cout << "INFO: Systematic " << sname << "(" << i << ") :: up = " << m_syst_pairs[i].first << " :: down = " << m_syst_pairs[i].second << std::endl;
 }
 
 
@@ -228,7 +241,7 @@ void EikosUnfolder::SetPriorShape( PRIOR_SHAPE s )
 void EikosUnfolder::SetSignalSample( const std::string& name )
 {
    m_signal_sample = name; 
-   std::cout << "Signal sample is " << m_signal_sample << std::endl;
+   std::cout << "INFO: Signal sample is " << m_signal_sample << std::endl;
 }
 
 pSample_t EikosUnfolder::GetSignalSample()
@@ -238,6 +251,8 @@ pSample_t EikosUnfolder::GetSignalSample()
 
 pSample_t EikosUnfolder::GetBackgroundSample( const std::string& name )
 {
+  if( name == "") return m_samples[m_bkg_name];
+
   return m_samples[name];
 }
 
@@ -343,19 +358,39 @@ void EikosUnfolder::PrepareSystematics()
 
 void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
 {
-  std::cout << "DEBUG: run stage " << run_stage << std::endl;
-
   std::string syst_name = "nominal";
 
+  // increment iteration number
+  if( run_stage == m_runStage ) {
+    // same stage, next iteration
+    m_stage_iteration++;
+  }
+  else {
+    // reset iteration
+    m_stage_iteration = 0;
+  }
+  m_runStage = run_stage;
+
+  std::cout << "INFO: run stage " << run_stage << " :: iteration " << (m_stage_iteration+1) <<  std::endl;
+
   // Print out summary of samples  
-  std::cout << "List of defined samples:" << std::endl;
+  std::cout << "INFO: List of defined samples (" << m_samples.size() << "):" << std::endl;
   for( SampleCollection_itr_t itr = m_samples.begin() ; itr != m_samples.end() ; ++itr ) {
+     std::cout << "* ";
      pSample_t p_sample = itr->second; 
+
+     if ( p_sample == NULL ) {
+        std::cout << "WARNING: invalid sample " << std::endl;
+        continue;
+     }
+
      SAMPLE_TYPE type = p_sample->GetType();
 
-     std::cout << "Sample " << p_sample->GetName() << " :: type=" << type << std::endl;
+     std::cout << "Sample " << p_sample->GetName() << " :: type=" << type << " index=" << p_sample->GetIndex() << std::endl;
 
      if( run_stage != kStageEstimatePrior ) continue;
+
+     if( m_stage_iteration > 0 ) continue;
 
      if( type==SAMPLE_TYPE::kSignal ) {
         p_sample->CalculateAcceptance();
@@ -364,7 +399,8 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
      } 
 
   }
-  
+  std::cout << "-- end list of samples --" << std::endl;
+
   // check if a prior has been set
   if( GetPrior() == NULL ) {
      std::cout << "INFO: no prior set. Using nominal Monte Carlo truth to start with." << std::endl;
@@ -376,9 +412,16 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
 
      SetPrior( h_truth_nominal );
   }
+  else {
+     std::cout << "INFO: prior already set. Nothing to be done here." << std::endl;
+  }
 
   if( !m_syst_initialized ) {
+    std::cout << "INFO: initializing systematics..." << std::endl;
     PrepareSystematics();
+  }
+  else {
+    std::cout << "INFO: systematics already initialized. Nothing to be done here." << std::endl;
   }
 
   // Fix or Unfix systematics:
@@ -411,9 +454,12 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
   char b_name[32];
   char b_latex[32];
   double xs_incl = GetPrior()->Integral();
+  std::cout << "INFO: prior integral = " << xs_incl << std::endl;
 
   // additional observables
   if( !m_obs_initialized ) {
+      std::cout << "INFO: adding observables (xs incl, diffxs abs and rel)" << std::endl;
+
       AddObservable( "xs_incl", 0, 2.*xs_incl, "#sigma_{incl}" );
 
       // absolute diffxs
@@ -507,8 +553,11 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
   double alpha = ( m_nbins + m_syst_index.size() ) / float(m_nbins);
   double beta = 1. / m_nbins;
 
-  pTH1D_t p_bkg = GetBackgroundSample() ? GetBackgroundSample()->GetDetector() : NULL;
-  pTH1D_t p_nominal = GetSignalSample()->GetDetector();
+  auto p_bkg = GetBackgroundSample();
+  auto p_sig = GetSignalSample();
+
+  pTH1D_t p_bkg_n = p_bkg ? p_bkg->GetDetector() : NULL;
+  pTH1D_t p_sig_n = p_sig ? p_sig->GetDetector() : NULL;
 
   pTH1D_t p_exp = MakeFoldedHistogram( parameters );
   
@@ -537,8 +586,8 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        }
        S = S * ( 1. + delta_S );
 
-       // Background
-       double B = p_bkg ? p_bkg->GetBinContent( r+1 ) : 0.;
+       // Background (if any)
+       double B = p_bkg_n ? p_bkg_n->GetBinContent( r+1 ) : 0.;
        double delta_B = 0.;
        for( size_t i = 0 ; i < m_syst_index.size() ; ++i ) {
 
@@ -550,15 +599,40 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        	  double sigma_u = 0.;
        	  double sigma_d = 0.;
 
-          pTH1D_t p_bkg_u = GetBackgroundSample()->GetDetector(sname_u);
-          sigma_u = ( p_bkg_u->GetBinContent(r+1) - p_bkg->GetBinContent(r+1) ) / p_bkg->GetBinContent(r+1); 
+          if( p_bkg == NULL ) {
+             std::cout << "WARNING: invalid background sample." << std::endl;
+             return 0.;
+          }
+
+          pTH1D_t p_bkg_u, p_bkg_d;
+
+          // upward variation
+          try {
+            p_bkg_u = GetBackgroundSample()->GetDetector(sname_u);
+          }
+          catch(...) {
+            p_bkg_u = GetBackgroundSample()->GetDetector("nominal");
+          }
+          if( p_bkg_u == NULL ) { 
+             std::cout << "ERROR: invalid background for upward systematic " << sname_u << std::endl;
+          }
+          sigma_u = ( p_bkg_u->GetBinContent(r+1) - p_bkg_n->GetBinContent(r+1) ) / p_bkg_n->GetBinContent(r+1); 
        	  
+          // downward or symmetryzed variation
        	  if( sname_d == "@symmetrize@"	) {
        	     sigma_d = -sigma_u;
           }
        	  else {
-             pTH1D_t p_bkg_d = GetBackgroundSample()->GetDetector(sname_d);
-             sigma_d = ( p_bkg_d->GetBinContent(r+1) - p_bkg->GetBinContent(r+1) ) / p_bkg->GetBinContent(r+1);
+             try { 
+               p_bkg_d = p_bkg->GetDetector(sname_d);
+             }
+             catch(...) {
+               p_bkg_d = GetBackgroundSample()->GetDetector("nominal");
+             }
+             if( p_bkg_d == NULL ) {
+                std::cout << "ERROR: invalid background for downward systematic " << sname_d << std::endl;
+             }
+             sigma_d = ( p_bkg_d->GetBinContent(r+1) - p_bkg_n->GetBinContent(r+1) ) / p_bkg_n->GetBinContent(r+1);
        	  }
 
           if( (sigma_u>0.) && (sigma_d>0.) ) {

@@ -27,7 +27,7 @@ typedef std::pair< std::vector<double>, std::vector<double> > SystValues_t;
 enum REGULARIZATION  { kUnregularized = 0, kCurvature = 1,  kMultinormal = 2 };
 enum PRIOR_SHAPE     { kPriorFlat = 0, kPriorGauss = 1, kPriorGamma = 2 };         
 enum SYSTEMATIC_TYPE { kDetector = 0, kModelling = 1, kDataDriven = 3 }; 
-enum RUN_STAGE       { kStageEstimatePrior, kStageStatSyst, kStageStatOnly, kStageTableOfSyst }; 
+enum RUN_STAGE       { kStageUninitialized = 0, kStageEstimatePrior, kStageStatSyst, kStageStatOnly, kStageTableOfSyst }; 
 
 //enum StatusCode { kSuccess = 0, kWarning = 1, kError = 2 };
 
@@ -55,7 +55,7 @@ class EikosUnfolder : public BCModel, public TObject
     void SetSignalSample( const std::string& name );
     pSample_t GetSample( const std::string& name ) { return m_samples.at(name); };
     pSample_t GetSignalSample();
-    pSample_t GetBackgroundSample( const std::string& name = "background" );
+    pSample_t GetBackgroundSample( const std::string& name = "" );
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
     void SetSystematicVariations( const std::string& sname, const std::string& var_u, const std::string& var_d );
@@ -104,10 +104,12 @@ class EikosUnfolder : public BCModel, public TObject
     std::string m_name;
     int         m_nbins;
     std::vector<double> m_parameters;
+    std::string m_bkg_name;
 
     REGULARIZATION      m_regularization;
     PRIOR_SHAPE         m_prior_shape;
     RUN_STAGE           m_runStage;
+    int                 m_stage_iteration;
     bool                m_syst_initialized;
     bool                m_obs_initialized;
     double              m_lumi;

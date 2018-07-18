@@ -126,8 +126,8 @@ class EikosPrompt( Cmd, object ):
    def set_sample_type( self, sname, t ):
       itype = 2
       if t in [ 'data', 'Data' ]: itype = 0
-      elif t in [ 'signal', 'Signal' ]: itype = 1
-      elif t in [ 'background', "Background", 'bkg', 'Bkg' ]: itype = 2
+      elif t in [ 's', 'S', 'signal', 'Signal' ]: itype = 1
+      elif t in [ 'b', 'B', 'background', "Background", 'bkg', 'Bkg' ]: itype = 2
       elif t in [ 'datadriven', "DataDriven", "dd", "DD" ]: itype = 3
       else: itype = 2
 
@@ -406,7 +406,8 @@ class EikosPrompt( Cmd, object ):
    ###################
 
    def write_hist_statonly( self ):
-      pass
+      BCLog.OutSummary( "No histograms to be saved for stat only." )
+      return
 
    ###################
 
@@ -438,9 +439,11 @@ class EikosPrompt( Cmd, object ):
 
      # Do run with iterations
      for k_itr in range( n_itr+1 ):
+       BCLog.OutSummary( "\033[92m\033[1mIteration %i/%i\033[0m" % (k_itr+1,n_itr+1) )
        unfolder.SetFlagIgnorePrevOptimization( True )
        unfolder.PrepareForRun( run_stage )
 
+       BCLog.OutSummary( "\033[92m\033[1mStarting Marginalization...\033[0m" )
        unfolder.MarginalizeAll()
        bestfit = unfolder.FindMode( unfolder.GetBestFitParameters() )
 
