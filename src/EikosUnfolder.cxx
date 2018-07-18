@@ -617,6 +617,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
           catch(...) {
             p_bkg_u = GetBackgroundSample()->GetDetector("nominal");
           }
+
           if( p_bkg_u == NULL ) { 
              std::cout << "ERROR: invalid background for upward systematic " << sname_u << std::endl;
           }
@@ -633,6 +634,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
              catch(...) {
                p_bkg_d = GetBackgroundSample()->GetDetector("nominal");
              }
+
              if( p_bkg_d == NULL ) {
                 std::cout << "ERROR: invalid background for downward systematic " << sname_d << std::endl;
              }

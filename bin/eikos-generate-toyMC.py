@@ -17,7 +17,8 @@ def Normalize( h, sf=1.0 ):
 class SystType:
    additive       = 0
    multiplicative = 1
-   modelling      = 2
+   weight         = 2
+   modelling      = 3
 
 #~~~~~~~
 
@@ -31,22 +32,28 @@ class Systematic(object):
 
   #~~~~~~~
 
-  def Apply(self, x):
+  def Apply(self, x, w):
     y = 0.
-
+    u = 1.
     if self.type == SystType.additive:
       y = x + self.effect
+      u = w
     elif self.type == SystType.multiplicative:
       y = x * ( 1 + self.effect/100.)
+      u = w
+    elif self.type == SystType.weight:
+      y = x
+      u = w * ( 1. + self.effect/100. )
     else:
       print "ERROR: unknown systematic type", self.type
+      return (x, w )
 
-    return y
+    return ( y, u )
 
 #~~~~~~~
 
 def ApplyMigrations(x):
-   s  = 0.1 + x / 100.
+   s  = 0.1 + x / 20.
    dx = rng.Gaus( 0., s )
    y  = x + dx
    return y
@@ -59,10 +66,10 @@ syst = "nominal"
 known_systematics = [
   Systematic( name="syst1_u", type=SystType.multiplicative, effect=5.00,  twosided=True ),
   Systematic( name="syst1_d", type=SystType.multiplicative, effect=-5.00, twosided=True ),
-  Systematic( name="syst2_u", type=SystType.multiplicative, effect=-2.00, twosided=True ),
-  Systematic( name="syst2_d", type=SystType.multiplicative, effect=3.00,  twosided=True ),
-  Systematic( name="syst3_u", type=SystType.additive,       effect=2.00,   twosided=True ),
-  Systematic( name="syst3_d", type=SystType.additive,       effect=-2.00,  twosided=True ),
+  Systematic( name="syst2_u", type=SystType.weight,         effect=-5.00, twosided=True ),
+  Systematic( name="syst2_d", type=SystType.weight,         effect=5.00,  twosided=True ),
+  Systematic( name="syst3_u", type=SystType.additive,       effect=2.50,   twosided=True ),
+  Systematic( name="syst3_d", type=SystType.additive,       effect=-2.50,  twosided=True ),
 ]
 
 ofilename = "toymc.root"
@@ -182,8 +189,8 @@ for ievent in range(Nevents_mc):
      _h['response_nominal'].Fill( x_reco, x_truth, w )
 
   for syst in known_systematics:
-    y_reco = syst.Apply(x_reco)
-    _h["reco_"+syst.name].Fill( y_reco, w )
+    y_reco, u = syst.Apply(x_reco, w)
+    _h["reco_"+syst.name].Fill( y_reco, u )
 
 # Do modelling systematics
 
@@ -255,8 +262,9 @@ for ievent in range(Nevents_bkg):
 # create prediction histograms
 _h['prediction_nominal'] = _h['reco_nominal'].Clone("prediction_nominal")
 _h['prediction_nominal'].Add( _h['bkg'] )
+
 for syst in known_systematics:
-  _h['prediction_%s'%syst.name] = _h['reco_nominal'].Clone("prediction_%s"%syst.name)
+  _h['prediction_%s'%syst.name] = _h['reco_%s'%syst.name].Clone("prediction_%s"%syst.name)
   _h['prediction_%s'%syst.name].Add( _h['bkg'] )
 
 # Write out to file
