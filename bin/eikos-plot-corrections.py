@@ -9,6 +9,7 @@ gROOT.LoadMacro( "AtlasUtils.C" )
 gROOT.SetBatch(1)
 
 xtitle = {
+"x"       : "Observable",
 "inclusive" : "Inclusive cross-section [pb]",
 "t1_pt"   : "p_{T}^{t,1} [GeV]",
 "t1_y"    : "|y^{t,1}|",

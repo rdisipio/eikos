@@ -199,11 +199,11 @@ def SetHistogramsStyle( hlist ):
        alpha    = samples_configuration[sample].alpha
 
        if type == SampleType.data:
-           SetTH1FStyle( h, color=kBlack, markersize=1, markerstyle=20, linewidth=lw )  
+           SetHistogramStyle( h, color=kBlack, markersize=1, markerstyle=20, linewidth=lw )  
        if type == SampleType.signal:      
-          SetTH1FStyle( h, color=col, markersize=1, markerstyle=ms, linewidth=lw, linestyle=ls, fillcolor=0, fillstyle=0 )
+          SetHistogramStyle( h, color=col, markersize=1, markerstyle=ms, linewidth=lw, linestyle=ls, fillcolor=0, fillstyle=0 )
        if type == SampleType.uncertainty:
-          SetTH1FStyle( h, color=col, markersize=0, markerstyle=0, linewidth=0, fillcolor=fill_col, fillstyle=fill_sty, fill_alpha=alpha )
+          SetHistogramStyle( h, color=col, markersize=0, markerstyle=0, linewidth=0, fillcolor=fill_col, fillstyle=fill_sty, fill_alpha=alpha )
 
     SetAxesStyle( hlist.values() )
 

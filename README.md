@@ -34,9 +34,9 @@ You'll find a new file called ```toymc.root``` . It contains data, background, s
 The signal model is given by a Gamma distribution with shape parameter kappa and scale parameter theta. The two alternative models have a different value of either parameter.
 The systematics are of two types: multiplicative (i.e. x' = a*x ) or additive (i.e. x' = x + a). 
 
-To execute the program (batch mode):
+To execute the program (batch mode) and store the output on a text file:
 ```
-eikos.py config.txt
+eikos.py input_toymc_simple.txt | tee stdout.txt
 ```
 
 To create diffxs plots

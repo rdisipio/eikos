@@ -5,7 +5,7 @@ set param  LUMI 1.0
 set param  PRECISION 2
 set param  REGULARIZATION 1
 set param  OBS x
-set data   path @INPUTPATH@/toymc.root:data
+set data   path @INPUTPATH@/x.root:data
 
 add sample S
 set sample S type signal
@@ -44,11 +44,11 @@ set regularization unregularized
 
 set precision medium
 set prior flat
-run stage:prior nitr:1 drawplots:no
+run stage:prior nitr:1 drawplots:yes
 
 set precision medium
 set prior gauss
-run stage:statsyst nitr:1 drawplots:no writehist:yes
+run stage:statsyst nitr:1 drawplots:yes writehist:yes
 
 
 exit

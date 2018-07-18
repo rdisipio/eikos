@@ -1,4 +1,5 @@
 pretty_names = {
+  'x'         : "x",
   'inclusive' : "\\sigma_{\\rm fid}",
   't1_pt'   : "p_{T}^{t,1}",
   't1_y' : "|y^{t,1}|",
@@ -16,6 +17,7 @@ pretty_names = {
 }
 
 units = {
+  'x'         : "",
   'inclusive' : "pb",
   't1_pt'     : "GeV",
   't1_y'      : "",
