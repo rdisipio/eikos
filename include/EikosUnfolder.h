@@ -27,7 +27,7 @@ typedef std::pair< std::vector<double>, std::vector<double> > SystValues_t;
 enum REGULARIZATION  { kUnregularized = 0, kCurvature = 1,  kMultinormal = 2 };
 enum PRIOR_SHAPE     { kPriorFlat = 0, kPriorGauss = 1, kPriorGamma = 2 };         
 enum SYSTEMATIC_TYPE { kDetector = 0, kModelling = 1, kDataDriven = 3 }; 
-enum RUN_STAGE       { kStageEstimatePrior, kStageStatSyst, kStageStatonly, kStageTableOfSyst }; 
+enum RUN_STAGE       { kStageEstimatePrior, kStageStatSyst, kStageStatOnly, kStageTableOfSyst }; 
 
 //enum StatusCode { kSuccess = 0, kWarning = 1, kError = 2 };
 

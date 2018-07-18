@@ -38,7 +38,7 @@ systematics = {}
 
 d_prior_shape    = { 'flat' : kPriorFlat, 'gauss' : kPriorGauss, 'gamma' : kPriorGamma }
 d_regularization = { 'unregularized' : kUnregularized, 'curvature' : kCurvature, 'multinormal' : kMultinormal }
-d_stage          = { 'prior' : kStageEstimatePrior, 'statsyst' : kStageStatSyst, 'statonly' : kStageStatonly, 'onesyst' : kStageTableOfSyst }
+d_stage          = { 'prior' : kStageEstimatePrior, 'statsyst' : kStageStatSyst, 'statonly' : kStageStatOnly, 'onesyst' : kStageTableOfSyst }
 d_precision      = { 'low' : 0, 'medium' : 1, 'high' : 2 }
 
 BCLog.OpenLog( "log.txt" )
@@ -433,7 +433,7 @@ class EikosPrompt( Cmd, object ):
        BCLog.OutSummary( "\033[92m\033[1mFirst run: estimating prior distribution...\033[0m" )
      elif run_stage == kStageStatSyst:
        BCLog.OutSummary( "\033[92m\033[1mStarting stat+syst run.\033[0m" )
-     elif run_stage == kStageStatonly:
+     elif run_stage == kStageStatOnly:
        BCLog.OutSummary( "\033[92m\033[1mStarting stat only run.\033[0m" )
 
      # Do run with iterations
@@ -453,21 +453,25 @@ class EikosPrompt( Cmd, object ):
           rtag = "stage_unknown"
           if   run_stage == kStageEstimatePrior: rtag = "prior"
           elif run_stage == kStageStatSyst:      rtag = "statsyst"
-          elif run_stage == kStageStatonly:      rtag = "statonly"
+          elif run_stage == kStageStatOnly:      rtag = "statonly"
 
           unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_%s_itr%i.pdf"  % ( pdir, gparams['OBS'], rtag, k_itr ) )
           unfolder.PrintAllMarginalized( "%s/%s_marginalized_%s_itr%i.pdf" % ( pdir, gparams['OBS'], rtag, k_itr ) )
+          print "INFO: finished printing plots for stage %s" % rtag
 
        # Post-run
        if run_stage == kStageEstimatePrior:
           prior_abs = unfolder.GetDiffxsAbs( "prior_abs" )
           prior_rel = unfolder.GetDiffxsRel( "prior_rel" )
+          print "DEBUG: post run: set regularization method %i" % int(gparams['REGULARIZATION'])
           unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
+
+          print "DEBUG: post run: now set new prior"
           unfolder.SetPrior( prior_abs )
        elif run_stage == kStageStatSyst:
-          pass
+          print "INFO: post run: nothing to do for stat+syst"
        elif run_stage == kStageStatOnly:
-          pass
+          print "INFO: post run: nothing to do for statonly"
       
      # end iterations
 
@@ -481,7 +485,7 @@ class EikosPrompt( Cmd, object ):
         BCLog.OutSummary( "\033[92m\033[1mEnd of first run: prior distribution estimated.\033[0m" )
      elif run_stage == kStageStatSyst:
         BCLog.OutSummary( "\033[92m\033[1mEnd of second run: stat+syst distribution estimated.\033[0m" )
-     elif run_stage == kStageStatonly:
+     elif run_stage == kStageStatOnly:
         BCLog.OutSummary( "\033[92m\033[1mEnd of third run: stat only distribution estimated.\033[0m" )
 
 ##########################
@@ -781,7 +785,7 @@ class EikosPrompt( Cmd, object ):
      if	pvalue_diffxs_vs_prior_rel  < 0.05: BCLog.OutSummary( "Diffxs (rel) incompatible with prior" )
 
 #     BCLog.OutSummary( "\033[92m\033[1mStarting stat only run.\033[0m" )
-#     run_stage = kStageStatonly
+#     run_stage = kStageStatOnly
 #     unfolder.SetFlagIgnorePrevOptimization( False )
 #     unfolder.PrepareForRun( run_stage )
 #     BCLog.OutSummary( "Eikos: marginalize all: stat only" )

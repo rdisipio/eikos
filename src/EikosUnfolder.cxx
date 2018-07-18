@@ -391,7 +391,7 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
      else if( run_stage == kStageStatSyst ) {
         GetParameter(m_syst_index[sname]).Unfix();
      }
-     else if( run_stage == kStageStatonly ) {
+     else if( run_stage == kStageStatOnly ) {
         int i = m_syst_index[sname];
         double s0 = GetMarginalized(i).GetHistogram()->GetMean();
 //        double s0 =  GetBestFitParameters()[i];

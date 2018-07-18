@@ -21,11 +21,6 @@ set regularization unregularized
 
 set precision medium
 set prior flat
-run stage:prior nitr:1 drawplots:no
-
-set precision medium
-set prior gauss
-run stage:statsyst nitr:1 drawplots:no writehist:yes
-
+run stage:prior nitr:0 drawplots:no writehist:yes
 
 exit
