@@ -373,6 +373,7 @@ class EikosPrompt( Cmd, object ):
       prediction   = mcsignal.get().Clone( "prediction" )
       dataminusbkg = data.get().Clone( "dataminusbkg" )
 
+      background = None
       if unfolder.GetBackgroundSample().get() != None: 
         background = unfolder.GetBackgroundSample().GetDetector()
         prediction.Add( background.get() )
@@ -382,6 +383,7 @@ class EikosPrompt( Cmd, object ):
       SetHistogramStyle( dataminusbkg, color=kRed )
 
       data.get().Write( "data" )
+      if not background == None: background.get().Write( "background" )
       mcsignal.get().Write( "mcsignal" )
       prediction.Write( "prediction" )
       dataminusbkg.Write( "dataminusbkg" )

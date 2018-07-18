@@ -42,11 +42,11 @@ set outfile $PWD/output/@OUTPUTTAG@/toymc.output.root
 set luminosity 1.0
 set regularization unregularized
 
-set precision low
+set precision medium
 set prior flat
 run stage:prior nitr:1 drawplots:no
 
-set precision low
+set precision medium
 set prior gauss
 run stage:statsyst nitr:1 drawplots:no writehist:yes
 

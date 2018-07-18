@@ -251,9 +251,12 @@ pSample_t EikosUnfolder::GetSignalSample()
 
 pSample_t EikosUnfolder::GetBackgroundSample( const std::string& name )
 {
-  if( name == "") return m_samples[m_bkg_name];
-
-  return m_samples[name];
+   if( name == "") {
+     return m_samples[m_bkg_name];
+   }
+   else {
+     return m_samples[name];
+   }
 }
 
 /////////////////////////////////
@@ -587,6 +590,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        S = S * ( 1. + delta_S );
 
        // Background (if any)
+       if( p_bkg_n == NULL ) std::cout << "WARNING: invalid nominal background" << std::endl;
        double B = p_bkg_n ? p_bkg_n->GetBinContent( r+1 ) : 0.;
        double delta_B = 0.;
        for( size_t i = 0 ; i < m_syst_index.size() ; ++i ) {
