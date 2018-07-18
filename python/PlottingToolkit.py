@@ -100,7 +100,7 @@ def DrawRatio( predictions, data_unc_tot, data_unc_stat=None, xtitle = "", yrang
     frame.GetXaxis().SetTitleOffset( 1.3 )
     
     frame.GetYaxis().SetLabelSize( 0.14 )
-    frame.GetYaxis().SetTitle( "#frac{Prediction}{data_unc_tot}" )
+    frame.GetYaxis().SetTitle( "#frac{Prediction}{Data}" )
     frame.GetYaxis().SetTitleSize( 0.14 )
     frame.GetYaxis().SetTitleOffset( 0.5 )
     
