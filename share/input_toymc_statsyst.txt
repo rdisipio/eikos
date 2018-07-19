@@ -45,6 +45,23 @@ set sample S path syst4_d reco @INPUTPATH@/toymc.root:reco_syst4_d
 set sample B path syst4_u reco @INPUTPATH@/toymc.root:bkg
 set sample B path syst4_d reco @INPUTPATH@/toymc.root:bkg
 
+add systematic syst_mod_kappa -5 5
+set systematic syst_mod_kappa type modelling
+set systematic syst_mod_kappa variations syst_mod_kappa_u @symmetrize@
+set sample S path syst_mod_kappa_u reco @INPUTPATH@/toymc.root:reco_modelling_kappa
+set sample S path syst_mod_kappa_u resp @INPUTPATH@/toymc.root:response_modelling_kappa
+set sample S path syst_mod_kappa_u gen  @INPUTPATH@/toymc.root:truth_modelling_kappa
+set sample B path syst_mod_kappa_u reco @INPUTPATH@/toymc.root:bkg
+
+add systematic syst_mod_theta -5 5
+set systematic syst_mod_theta type modelling
+set systematic syst_mod_theta variations syst_mod_theta_u @symmetrize@
+set sample S path syst_mod_theta_u reco @INPUTPATH@/toymc.root:reco_modelling_theta
+set sample S path syst_mod_theta_u resp @INPUTPATH@/toymc.root:response_modelling_theta  
+set sample S path syst_mod_theta_u gen  @INPUTPATH@/toymc.root:truth_modelling_theta
+set sample B path syst_mod_theta_u reco @INPUTPATH@/toymc.root:bkg
+
+
 set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statsyst.root
 set luminosity 1.0
 set regularization curvature

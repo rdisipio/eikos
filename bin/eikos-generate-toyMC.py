@@ -80,9 +80,9 @@ ofile.cd()
 
 
 # Truth and reco bins do not have to be the same
-xedges_truth = array( 'd', [ 0., 5., 10., 15., 20., 25., 30., 40., 50., 70., 100. ] )
+xedges_truth = array( 'd', [ 0., 10., 15., 20., 25., 30., 40., 50., 70., 100. ] )
 Nbins_truth  = len(xedges_truth)-1
-xedges_reco  = array( 'd', [ 0., 5., 10., 15., 20., 25., 30., 40., 50., 70., 100. ] )
+xedges_reco  = array( 'd', [ 0., 10., 15., 20., 25., 30., 40., 50., 70., 100. ] )
 Nbins_reco   = len(xedges_reco)-1
 
 _h = {}
@@ -91,13 +91,13 @@ _h['truth_nominal']          = TH1F( "truth_nominal", "Observable X", Nbins_trut
 _h['reco_nominal']           = TH1F( "reco_nominal",  "Observable X", Nbins_truth, xedges_truth )
 _h['response_nominal']       = TH2F( "response_nominal", "Response matrix", Nbins_truth, xedges_truth, Nbins_reco, xedges_reco )
 
-_h['truth_modelling_1']      = _h['truth_nominal'].Clone("truth_modelling_1")
-_h['reco_modelling_1']       = _h['reco_nominal'].Clone("reco_modelling_1")
-_h['response_modelling_1']   = _h['response_nominal'].Clone("response_modelling_1")
+_h['truth_modelling_kappa']      = _h['truth_nominal'].Clone("truth_modelling_kappa")
+_h['reco_modelling_kappa']       = _h['reco_nominal'].Clone("reco_modelling_kappa")
+_h['response_modelling_kappa']   = _h['response_nominal'].Clone("response_modelling_kappa")
 
-_h['truth_modelling_2']      = _h['truth_nominal'].Clone("truth_modelling_2")
-_h['reco_modelling_2']       = _h['reco_nominal'].Clone("reco_modelling_2")
-_h['response_modelling_2']   = _h['response_nominal'].Clone("response_modelling_2")
+_h['truth_modelling_theta']      = _h['truth_nominal'].Clone("truth_modelling_theta")
+_h['reco_modelling_theta']       = _h['reco_nominal'].Clone("reco_modelling_theta")
+_h['response_modelling_theta']   = _h['response_nominal'].Clone("response_modelling_theta")
 
 _h['data'] = _h['reco_nominal'].Clone("data")
 _h['bkg']  = _h['reco_nominal'].Clone("bkg")
@@ -116,21 +116,21 @@ for h in _h.values(): h.Sumw2()
 kappa_nominal = 2.5
 mu_nominal    = 0.
 theta_nominal = 10.
-kappa_modelling_1 = kappa_nominal - 0.25
-mu_modelling_1    = mu_nominal
-theta_modelling_1 = theta_nominal
-kappa_modelling_2 = kappa_nominal
-mu_modelling_2    = mu_nominal
-theta_modelling_2 = theta_nominal + 1.0
+kappa_modelling_kappa = kappa_nominal - 0.25
+mu_modelling_kappa    = mu_nominal
+theta_modelling_kappa = theta_nominal
+kappa_modelling_theta = kappa_nominal
+mu_modelling_theta    = mu_nominal
+theta_modelling_theta = theta_nominal + 0.5
 
 f_gamma_nominal = TF1("gamma_nominal", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_nominal.SetParameters( kappa_nominal, mu_nominal, theta_nominal )
 
 f_gamma_alt1 = TF1("gamma_alt1", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
-f_gamma_alt1.SetParameters( kappa_modelling_1, mu_modelling_1, theta_modelling_1 )
+f_gamma_alt1.SetParameters( kappa_modelling_kappa, mu_modelling_kappa, theta_modelling_kappa )
 
 f_gamma_alt2 = TF1("gamma_alt2", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
-f_gamma_alt2.SetParameters( kappa_modelling_2, mu_modelling_2, theta_modelling_2 )
+f_gamma_alt2.SetParameters( kappa_modelling_theta, mu_modelling_theta, theta_modelling_theta )
 
 f_gamma_data = TF1("gamma_data", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_data.SetParameters( kappa_nominal, mu_nominal, theta_nominal )
@@ -140,8 +140,8 @@ f_exp_bkg.SetParameters( 50., 25. )
 
 # Efficiency and acceptance corrections
 eff_nominal = 0.30
-eff_modelling_1 = 0.25
-eff_modelling_2 = 0.35
+eff_modelling_kappa = 0.25
+eff_modelling_theta = 0.35
 acc_nominal = 0.80
 
 # N = xs * eff * L
@@ -157,20 +157,20 @@ w = Nevents_data / float(Nevents_mc)
 #f_acc_nominal = TF1( "f_acc_nominal", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
 #f_acc_nominal.SetParameters( acc_nominal/3., 2.*acc_nominal/3., 0.05 )
 
-#f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
-#f_eff_modelling_1.SetParameters( eff_modelling_1/3., 2.*eff_modelling_1/3., 0.05 )
+#f_eff_modelling_kappa = TF1( "f_eff_modelling_kappa", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
+#f_eff_modelling_kappa.SetParameters( eff_modelling_kappa/3., 2.*eff_modelling_kappa/3., 0.05 )
 
-#f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
-#f_eff_modelling_2.SetParameters( eff_modelling_2/3., 2.*eff_modelling_2/3., 0.05 )
+#f_eff_modelling_theta = TF1( "f_eff_modelling_theta", "[0] + [1]*( 1.0 - TMath::Exp( -[2]*x ) )", 0, 100 )
+#f_eff_modelling_theta.SetParameters( eff_modelling_theta/3., 2.*eff_modelling_theta/3., 0.05 )
 
 f_eff_nominal     = TF1( "f_eff_nominal",     "[0]", 0., 100. )
-f_eff_modelling_1 = TF1( "f_eff_modelling_1", "[0]", 0., 100. )
-f_eff_modelling_2 = TF1( "f_eff_modelling_2", "[0]", 0., 100. )
+f_eff_modelling_kappa = TF1( "f_eff_modelling_kappa", "[0]", 0., 100. )
+f_eff_modelling_theta = TF1( "f_eff_modelling_theta", "[0]", 0., 100. )
 f_acc_nominal     = TF1( "f_acc_nominal",     "[0]", 0., 100. )
 
 f_eff_nominal.SetParameter( 0, eff_nominal )
-f_eff_modelling_1.SetParameter( 0, eff_nominal*1.1 )
-f_eff_modelling_2.SetParameter( 0, eff_nominal*0.9 )
+f_eff_modelling_kappa.SetParameter( 0, eff_nominal*1.1 )
+f_eff_modelling_theta.SetParameter( 0, eff_nominal*0.9 )
 f_acc_nominal.SetParameter( 0, acc_nominal )
 
 print "INFO: generating %i pseudo-signal events with weight %.3f" % ( Nevents_mc, w )
@@ -199,35 +199,35 @@ for ievent in range(Nevents_mc):
 for ievent in range(Nevents_mc):
   x_truth = f_gamma_alt1.GetRandom()
 
-  _h['truth_modelling_1'].Fill( x_truth, w )
+  _h['truth_modelling_kappa'].Fill( x_truth, w )
 
   # Efficiency filter
-  if rng.Uniform() > f_eff_modelling_1.Eval(x_truth): continue
+  if rng.Uniform() > f_eff_modelling_kappa.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
 
-  _h['reco_modelling_1'].Fill( x_reco, w )
+  _h['reco_modelling_kappa'].Fill( x_reco, w )
 
   # Acceptance filter
   if rng.Uniform() < f_acc_nominal.Eval(x_reco): 
-    _h['response_modelling_1'].Fill( x_reco, x_truth, w )
+    _h['response_modelling_kappa'].Fill( x_reco, x_truth, w )
 
 
 for ievent in range(Nevents_mc):
   x_truth = f_gamma_alt2.GetRandom()
 
-  _h['truth_modelling_2'].Fill( x_truth, w )
+  _h['truth_modelling_theta'].Fill( x_truth, w )
 
   # Efficiency filter
-  if rng.Uniform() > f_eff_modelling_2.Eval(x_truth): continue
+  if rng.Uniform() > f_eff_modelling_theta.Eval(x_truth): continue
 
   x_reco  = ApplyMigrations( x_truth )
 
-  _h['reco_modelling_2'].Fill( x_reco, w )
+  _h['reco_modelling_theta'].Fill( x_reco, w )
 
   # Acceptance filter
   if rng.Uniform() < f_acc_nominal.Eval(x_reco): 
-    _h['response_modelling_2'].Fill( x_reco, x_truth, w )
+    _h['response_modelling_theta'].Fill( x_reco, x_truth, w )
 
 
 # Fill pseudo-data histogram (signal)
