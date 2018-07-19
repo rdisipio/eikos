@@ -676,8 +676,10 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        const double mu = S + B;
 
  //      std::cout << "r=" << r << " D=" << D << " S=" << S << " B=" << B << " :: mu=" << mu << std::endl; 
+
+       const double this_logL = BCMath::LogPoisson( D, mu );
        
-       logL += alpha * BCMath::LogPoisson( D, mu );
+       logL += alpha * this_logL;
 
   } // loop over bins
 
@@ -685,35 +687,50 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
   double S = 0.;
   if( m_regularization == kCurvature ) {
        for( int t = 1 ; t < (m_nbins-1) ; t++ ) {
-         double w0 = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1);
-         double wp = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1+1);
-         double wm = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t-1+1);
 
-         double c0  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1);
-         double cp  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1+1);
-         double cm  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t-1+1);
+         const double wm = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t-1+1);
+         const double w0 = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1);
+         const double wp = GetSignalSample()->GetTruth("nominal")->GetBinWidth(t+1+1);
 
+         const double cm  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t-1+1);
+         const double c0  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1);
+         const double cp  = GetSignalSample()->GetTruth("nominal")->GetBinCenter(t+1+1);
+
+         // apply curvature to absolute diffxs
+
+         const int offset = m_nbins;
+         double tm = parameters.at(t-1);
          double t0 = parameters.at(t);
          double tp = parameters.at(t+1);
-         double tm = parameters.at(t-1);
+
+/*
+         const double t0 = GetObservable(1+t).Value();
+         const double tp = GetObservable(1+t+1).Value();
+         const double tm = GetObservable(1+t-1).Value();
+*/
 
        // curvature
 //       double Dp = ( tp - t0 );
 //       double Dm = ( t0 - tm );
 //       S += pow( Dp - Dm, 2 );
 
-         double Dp = ( (tp/wp) - (t0/w0) ) / ( cp - c0 );
-         double Dm = ( (t0/w0) - (tm/wm) ) / ( c0 - cm );
+         const double Dp = ( (tp/wp) - (t0/w0) ) / ( cp - c0 );
+         const double Dm = ( (t0/w0) - (tm/wm) ) / ( c0 - cm );
 
-         S += fabs( Dp - Dm ) / fabs( Dp + Dm );
+         const double curvature = fabs( Dp - Dm ) / fabs( Dp + Dm );
+//         std::cout << "tm=" << tm << " t0=" << t0 << " tp=" << tp << " curv=" << curvature << " logL=" << logL << std::endl;
+
+         S += curvature;
        } 
        logL -= alpha * S;
   } // Curvature
   else if( m_regularization == kMultinormal ) {
      for( int t = 0 ; t < m_nbins ; ++t  ) {
-        double x = parameters.at(t);
-        double u = GetPrior()->GetBinContent(t+1);
-        double s = u / alpha;
+//        const double x = parameters.at(m_nbins+1+t);
+        const double x = GetObservable(1+t).Value();
+        const double u = GetPrior()->GetBinContent(t+1);
+        const double s = u / alpha;
+        //std::cout << " x=" << x << " u=" << u << " alpha=" << alpha << " s=" << s << std::endl;
         S += BCMath::LogGaus( x, u, s, false );
      }
      logL =+ S;

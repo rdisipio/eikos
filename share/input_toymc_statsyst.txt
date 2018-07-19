@@ -17,6 +17,13 @@ add sample B
 set sample B type background
 set sample B path nominal reco @INPUTPATH@/toymc.root:bkg
 
+add systematic syst1 -5 5
+set systematic syst1 variations syst1_u syst1_d
+set sample S path syst1_u reco @INPUTPATH@/toymc.root:reco_syst1_u
+set sample S path syst1_d reco @INPUTPATH@/toymc.root:reco_syst1_d
+set sample B path syst1_u reco @INPUTPATH@/toymc.root:bkg
+set sample B path syst1_d reco @INPUTPATH@/toymc.root:bkg
+
 add systematic syst2 -5 5
 set systematic syst2 variations syst2_u syst2_d 
 set sample S path syst2_u reco @INPUTPATH@/toymc.root:reco_syst2_u
@@ -31,13 +38,20 @@ set sample S path syst3_d reco @INPUTPATH@/toymc.root:reco_syst3_d
 set sample B path syst3_u reco @INPUTPATH@/toymc.root:bkg
 set sample B path syst3_d reco @INPUTPATH@/toymc.root:bkg
 
+add systematic syst4 -5 5
+set systematic syst4 variations syst4_u syst4_d
+set sample S path syst4_u reco @INPUTPATH@/toymc.root:reco_syst4_u
+set sample S path syst4_d reco @INPUTPATH@/toymc.root:reco_syst4_d
+set sample B path syst4_u reco @INPUTPATH@/toymc.root:bkg
+set sample B path syst4_d reco @INPUTPATH@/toymc.root:bkg
+
 set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statsyst.root
 set luminosity 1.0
-set regularization unregularized
+set regularization curvature
 
 set precision medium
 set prior flat
-run stage:prior nitr:0 drawplots:no
+run stage:prior nitr:0 drawplots:yes
 
 set precision high
 set prior gauss
