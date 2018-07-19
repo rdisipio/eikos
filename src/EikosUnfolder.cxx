@@ -429,12 +429,18 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
 
   // Fix or Unfix systematics:
   // check if systematics have to be fixed to estimate prior
+  if( m_syst_names.size() == 0 ) {
+     std::cout << "INFO: there are no systematics defined." << std::endl;
+  }
+
   for( auto sname : m_syst_names ) {
  
      if( run_stage == kStageEstimatePrior ) {
+        std::cout << "INFO: stage:prior :: systematic " << sname << " is fixed to 0." << std::endl;
         GetParameter(m_syst_index[sname]).Fix(0.);
      }
      else if( run_stage == kStageStatSyst ) {
+        std::cout << "INFO: stage:statsyst :: systematic " << sname << " unfixed." << std::endl;
         GetParameter(m_syst_index[sname]).Unfix();
      }
      else if( run_stage == kStageStatOnly ) {
@@ -442,13 +448,16 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
         double s0 = GetMarginalized(i).GetHistogram()->GetMean();
 //        double s0 =  GetBestFitParameters()[i];
         GetParameter(m_syst_index[sname]).Fix(s0);
-        std::cout << "DEBUG: Parameter " << sname << "(" << i << ") fixed to " << std::setprecision(4)  << s0 << " :: best-fit = " << GetBestFitParameters()[i] << std::endl;
+        std::cout << "INFO: stage:statonly :: systematic " << sname << " fixed to best-fit value " << s0 << std::endl;
+
+//        std::cout << "DEBUG: Parameter " << sname << "(" << i << ") fixed to " << std::setprecision(4)  << s0 << " :: best-fit = " << GetBestFitParameters()[i] << std::endl;
      }
      else if( run_stage == kStageTableOfSyst ) {
         GetParameter(m_syst_index[sname]).Unfix();
      }
      else {
         GetParameter(m_syst_index[sname]).Unfix();
+        std::cout << "WARNING: unknown run stage " << run_stage << " :: systematic " << sname << " unfixed." << std::endl;
      }
 
   } // end loop over systematics

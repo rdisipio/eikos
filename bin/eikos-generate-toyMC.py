@@ -66,10 +66,12 @@ syst = "nominal"
 known_systematics = [
   Systematic( name="syst1_u", type=SystType.multiplicative, effect=3.00,  twosided=True ),
   Systematic( name="syst1_d", type=SystType.multiplicative, effect=-3.00, twosided=True ),
-  Systematic( name="syst2_u", type=SystType.weight,         effect=-3.00, twosided=True ),
-  Systematic( name="syst2_d", type=SystType.weight,         effect=3.00,  twosided=True ),
-  Systematic( name="syst3_u", type=SystType.additive,       effect=2.50,   twosided=True ),
-  Systematic( name="syst3_d", type=SystType.additive,       effect=-2.50,  twosided=True ),
+  Systematic( name="syst2_u", type=SystType.weight,         effect=5.00, twosided=True ),
+  Systematic( name="syst2_d", type=SystType.weight,         effect=-5.00,  twosided=True ),
+  Systematic( name="syst3_u", type=SystType.weight,         effect=-3.00, twosided=True ),
+  Systematic( name="syst3_d", type=SystType.weight,         effect=3.00,  twosided=True ),
+  Systematic( name="syst4_u", type=SystType.additive,       effect=2.50,   twosided=True ),
+  Systematic( name="syst4_d", type=SystType.additive,       effect=-2.50,  twosided=True ),
 ]
 
 ofilename = "toymc.root"
@@ -78,9 +80,9 @@ ofile.cd()
 
 
 # Truth and reco bins do not have to be the same
-xedges_truth = array( 'd', [ 0., 10., 15., 20., 25., 30., 40., 50., 70.,  100. ] )
+xedges_truth = array( 'd', [ 0., 5., 10., 15., 20., 25., 30., 40., 50., 70., 100. ] )
 Nbins_truth  = len(xedges_truth)-1
-xedges_reco  = array( 'd', [ 0., 10., 15., 20., 25., 30., 40., 50., 70.,  100. ] )
+xedges_reco  = array( 'd', [ 0., 5., 10., 15., 20., 25., 30., 40., 50., 70., 100. ] )
 Nbins_reco   = len(xedges_reco)-1
 
 _h = {}
@@ -131,7 +133,7 @@ f_gamma_alt2 = TF1("gamma_alt2", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_alt2.SetParameters( kappa_modelling_2, mu_modelling_2, theta_modelling_2 )
 
 f_gamma_data = TF1("gamma_data", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
-f_gamma_data.SetParameters( kappa_nominal+0.1, mu_nominal, theta_nominal-0.2 )
+f_gamma_data.SetParameters( kappa_nominal, mu_nominal, theta_nominal )
 
 f_exp_bkg = TF1( "exp_bkg", "[0] * TMath::Exp( -x / [1] )", 0, 100 )
 f_exp_bkg.SetParameters( 50., 25. )

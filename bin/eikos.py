@@ -60,6 +60,10 @@ class EikosPrompt( Cmd, object ):
      self.outfile = None
      self.lumi = 1.00
 
+   def parseline(self,line):
+     if line.startswith('#'): return self.emptyline()
+     else: return Cmd.parseline(self, line)
+
    def do_EOF(self, line):
      return True
 
@@ -471,12 +475,12 @@ class EikosPrompt( Cmd, object ):
           print "DEBUG: post run: set regularization method %i" % int(gparams['REGULARIZATION'])
           unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
 
-          print "DEBUG: post run: now set new prior"
+          print "DEBUG: stage:prior :: post run: set diffxs -> prior"
           unfolder.SetPrior( prior_abs )
        elif run_stage == kStageStatSyst:
-          print "INFO: post run: nothing to do for stat+syst"
+          print "INFO: stage:stat+syst :: post run: nothing to do for stat+syst"
        elif run_stage == kStageStatOnly:
-          print "INFO: post run: nothing to do for statonly"
+          print "INFO: stage:statonly :: post run: nothing to do for statonly"
       
      # end iterations
 

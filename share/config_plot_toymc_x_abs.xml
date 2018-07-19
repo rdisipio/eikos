@@ -10,10 +10,10 @@
  <sample name="statsyst"   hpath="diffxs_abs"   type="unc"    latex="Stat.+Syst. unc."        color="921" fillcolor="921" alpha="1.0" linewidth="0" />
 </samples>
 <inputfiles>
-  <file sample="data"       path="output/toymc_simple/x.toymc.root"   />
-  <file sample="ToyMC"      path="output/toymc_simple/x.toymc.root"   />
-<!--  <file sample="statonly"   path="output/toymc_simple/x.toymc.root"   /> -->
-  <file sample="statsyst"   path="output/toymc_simple/x.toymc.root"   />
+  <file sample="data"       path="output/toymc_statsyst/x.toymc.statsyst.root"   />
+  <file sample="ToyMC"      path="output/toymc_statsyst/x.toymc.statsyst.root"   />
+<!--  <file sample="statonly"   path="output/toymc_statsyst/x.toymc.statsyst.root"   /> -->
+  <file sample="statsyst"   path="output/toymc_statsyst/x.toymc.statsyst.root"   />
 </inputfiles>
 </config>
 <!-- marker styles: https://root.cern.ch/root/html/TAttMarker.html -->

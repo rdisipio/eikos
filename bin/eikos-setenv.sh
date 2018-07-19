@@ -21,3 +21,6 @@ export PYTHONPATH=$PWD/python:$PYTHONPATH
 #setupATLAS -c slc6
 #lsetup root
 #lsetup git
+
+alias root='root -l'
+
