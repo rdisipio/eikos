@@ -8,8 +8,8 @@ rng = TRandom3()
 
 #############################
 
-def Normalize( h, sf=1.0 ):
-  area = h.Integral("width")
+def Normalize( h, sf=1.0, opt="width" ):
+  area = h.Integral( opt )
   h.Scale( sf/area )
 
 #############################
@@ -242,9 +242,6 @@ for ievent in range(Nevents_data):
   x_reco = ApplyMigrations( x_truth )
   _h['data'].Fill( x_reco )
 
-#for hname, h in _h.iteritems():
-#  if hname.startswith("reco_"): Normalize(h, Nevents_data )
-
 # now add background
 # data and prediction drawn from the same distribution
 # but statistically independent
@@ -268,6 +265,13 @@ _h['prediction_nominal'].Add( _h['bkg'] )
 for syst in known_systematics:
   _h['prediction_%s'%syst.name] = _h['reco_%s'%syst.name].Clone("prediction_%s"%syst.name)
   _h['prediction_%s'%syst.name].Add( _h['bkg'] )
+
+# save also normalized theory spectra
+_h['truth_modelling_kappa_normalized'] = _h['truth_modelling_kappa'].Clone( "truth_modelling_kappa_normalized" )
+Normalize( _h['truth_modelling_kappa_normalized'], 1.0, "" )
+
+_h['truth_modelling_theta_normalized'] = _h['truth_modelling_theta'].Clone( "truth_modelling_theta_normalized" )
+Normalize( _h['truth_modelling_theta_normalized'], 1.0, "" )
 
 # Write out to file
 ofile.Write()

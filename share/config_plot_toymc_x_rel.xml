@@ -4,14 +4,18 @@
   <plot obs="x"  xtitle="X"          ytitle="1/#sigma #upoint d #sigma / dX [pb]"        scale="linear" />
 </plots>
 <samples>
- <sample name="data"       hpath="diffxs_rel"   type="data"   latex="Data"             color="1"   markerstyle="0"  linewidth="0" linestyle="1" />
+ <sample name="data"       hpath="diffxs_statsyst_rel"   type="data"   latex="Data"             color="1"   markerstyle="0"  linewidth="0" linestyle="1" />
  <sample name="ToyMC"      hpath="theory_rel"   type="signal" latex="Toy MC"           color="2"   markerstyle="20" linewidth="3" linestyle="1" />
+ <sample name="ToyMC_alt1" hpath="truth_modelling_kappa_normalized"  type="signal" latex="ToyMC, alternative k" color="414" linewidth="3" linestyle="2" />
+ <sample name="ToyMC_alt2" hpath="truth_modelling_theta_normalized"  type="signal" latex="ToyMC, alternative #theta" color="600" linewidth="3" linestyle="3" />
 <!-- <sample name="statonly"   hpath="diffxs_rel_statonly" type="unc"    latex="Stat. unc."       color="920" fillcolor="920" alpha="1.0" linewidth="0" /> -->
  <sample name="statsyst"   hpath="diffxs_statsyst_rel"   type="unc"    latex="Stat.+Syst. unc."        color="921" fillcolor="921" alpha="1.0" linewidth="0" />
 </samples>
 <inputfiles>
   <file sample="data"       path="output/toymc_statsyst/x.toymc.statsyst.root"   />
   <file sample="ToyMC"      path="output/toymc_statsyst/x.toymc.statsyst.root"   />
+  <file sample="ToyMC_alt1" path="toymc.root" />
+  <file sample="ToyMC_alt2" path="toymc.root" />
 <!--  <file sample="statonly"   path="output/toymc_statsyst/x.toymc.statsyst.root"   /> -->
   <file sample="statsyst"   path="output/toymc_statsyst/x.toymc.statsyst.root"   />
 </inputfiles>
