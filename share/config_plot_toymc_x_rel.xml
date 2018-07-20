@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<plots tag="MCGEN" phspace="particle" latex="Fiducial phase space" meas="rel" >
+  <plot obs="x"  xtitle="X"          ytitle="1/#sigma #upoint d #sigma / dX [pb]"        scale="linear" />
+</plots>
+<samples>
+ <sample name="data"       hpath="diffxs_rel"   type="data"   latex="Data"             color="1"   markerstyle="0"  linewidth="0" linestyle="1" />
+ <sample name="ToyMC"      hpath="theory_rel"   type="signal" latex="Toy MC"           color="2"   markerstyle="20" linewidth="3" linestyle="1" />
+<!-- <sample name="statonly"   hpath="diffxs_rel_statonly" type="unc"    latex="Stat. unc."       color="920" fillcolor="920" alpha="1.0" linewidth="0" /> -->
+ <sample name="statsyst"   hpath="diffxs_rel"   type="unc"    latex="Stat.+Syst. unc."        color="921" fillcolor="921" alpha="1.0" linewidth="0" />
+</samples>
+<inputfiles>
+  <file sample="data"       path="output/toymc_statsyst/x.toymc.statsyst.root"   />
+  <file sample="ToyMC"      path="output/toymc_statsyst/x.toymc.statsyst.root"   />
+<!--  <file sample="statonly"   path="output/toymc_statsyst/x.toymc.statsyst.root"   /> -->
+  <file sample="statsyst"   path="output/toymc_statsyst/x.toymc.statsyst.root"   />
+</inputfiles>
+</config>
+<!-- marker styles: https://root.cern.ch/root/html/TAttMarker.html -->
+

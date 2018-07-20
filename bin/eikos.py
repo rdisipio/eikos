@@ -39,7 +39,7 @@ systematics = {}
 d_prior_shape    = { 'flat' : kPriorFlat, 'gauss' : kPriorGauss, 'gamma' : kPriorGamma }
 d_regularization = { 'unregularized' : kUnregularized, 'curvature' : kCurvature, 'multinormal' : kMultinormal }
 d_stage          = { 'prior' : kStageEstimatePrior, 'statsyst' : kStageStatSyst, 'statonly' : kStageStatOnly, 'onesyst' : kStageTableOfSyst }
-d_precision      = { 'low' : 0, 'medium' : 1, 'high' : 2 }
+d_precision      = { 'low':0, 'quick':1, 'medium':2, 'high':2, 'veryhigh':3 }
 
 BCLog.OpenLog( "log.txt" )
 BCLog.SetLogLevel(BCLog.detail)
