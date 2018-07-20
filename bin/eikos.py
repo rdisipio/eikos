@@ -409,6 +409,70 @@ class EikosPrompt( Cmd, object ):
       pulls = unfolder.GetSystematicsPullHistogram()
       pulls.Write( "pulls" ) 
 
+      if loaded_RooUnfold == 0:
+         print "INFO: unfolding histogram with Iterative Bayesian method"
+   
+         diffxs_ib_abs = None
+         diffxs_ib_rel = None
+         diffxs_mi_abs = None
+         diffxs_mi_rel = None
+
+         h_psig = dataminusbkg.Clone( "pseudosignal" )
+         h_psig.Multiply( acceptance.get() )
+
+         h_response = unfolder.GetSignalSample().GetResponse().get()
+         m_response = RooUnfoldResponse( 0, 0, h_response, h_response.GetName(), h_response.GetTitle() )
+         m_response.UseOverflow( False )
+
+         unfolder_ib = RooUnfoldBayes( "IB", "Iterative Baysian" )
+         unfolder_ib.SetIterations( 4 )   
+         unfolder_ib.SetVerbose( 0 )
+         unfolder_ib.SetSmoothing( 0 )
+
+         unfolder_ib.SetResponse( m_response ) 
+         unfolder_ib.SetMeasured( h_psig ) 
+ 
+         diffxs_ib_abs = unfolder_ib.Hreco() # RooUnfold.kNoError ) 
+         diffxs_ib_abs.SetName( "diffxs_IB_abs" )
+         diffxs_ib_abs.Divide( efficiency.get() )
+         diffxs_ib_abs.Scale( 1./self.lumi )
+         diffxs_ib_abs.SetLineColor(kGreen+3)
+         diffxs_ib_abs.SetLineWidth(2)
+         diffxs_ib_abs.SetMarkerColor(kGreen+3)
+
+         xs_incl_ib = diffxs_ib_abs.Integral()
+         diffxs_ib_rel = diffxs_ib_abs.Clone( "diffxs_IB_rel" )
+         diffxs_ib_rel.Scale( 1./xs_incl_ib )
+
+         unfolder_ib.Reset()
+
+         print "INFO: unfolding histogram with Matrix Inversion method"
+         unfolder_mi = RooUnfoldInvert( "MI", "Matrix Inversion" )
+         unfolder_mi.SetVerbose( 0 )
+
+         unfolder_mi.SetResponse( m_response )
+         unfolder_mi.SetMeasured( h_psig )
+
+         diffxs_mi_abs = unfolder_mi.Hreco() # RooUnfold.kNoError )
+         diffxs_mi_abs.SetName( "diffxs_MI_abs" )
+         diffxs_mi_abs.Divide( efficiency.get() )
+         diffxs_mi_abs.Scale( 1./self.lumi )
+         diffxs_mi_abs.SetLineColor(kBlue)
+         diffxs_mi_abs.SetLineWidth(2)
+         diffxs_mi_abs.SetMarkerColor(kBlue)
+
+         xs_incl_mi = diffxs_mi_abs.Integral()
+         diffxs_mi_rel = diffxs_mi_abs.Clone( "diffxs_MI_rel" )
+         diffxs_mi_rel.Scale( 1./xs_incl_mi )
+
+         unfolder_mi.Reset()
+
+         diffxs_mi_abs.Write( "diffxs_MI_abs" )
+         diffxs_mi_rel.Write( "diffxs_MI_rel" ) 
+
+         diffxs_ib_abs.Write( "diffxs_IB_abs" )
+         diffxs_ib_rel.Write( "diffxs_IB_rel" ) 
+
    ###################
 
    def write_hist_statonly( self ):
@@ -669,6 +733,8 @@ class EikosPrompt( Cmd, object ):
      diffxs_mi_abs = None
      diffxs_mi_rel = None
      if loaded_RooUnfold == 0:
+        print "INFO: unfolding histogram with Iterative Bayesian method"
+
         h_psig = dataminusbkg.Clone( "pseudosignal" )
         h_psig.Multiply( acceptance.get() )
 
@@ -698,6 +764,7 @@ class EikosPrompt( Cmd, object ):
 
         unfolder_ib.Reset()
 
+        print "INFO: unfolding histogram with Matrix Inversion method"
         unfolder_mi = RooUnfoldInvert( "MI", "Matrix Inversion" )
         unfolder_mi.SetVerbose( 0 )
 
@@ -750,6 +817,7 @@ class EikosPrompt( Cmd, object ):
      pulls.get().Write( "pulls" )
  
      if loaded_RooUnfold == 0:
+       print "INFO: writing out MI and IB unfolded histograms"
        diffxs_mi_abs.Write( "diffxs_MI_abs" )
        diffxs_mi_rel.Write( "diffxs_MI_rel" ) 
 

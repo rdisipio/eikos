@@ -275,7 +275,7 @@ def DoPlot( pconfig ):
    leg.Draw()
    leg.SetY1( leg.GetY1() - lparams['height'] * leg.GetNRows() )
 
-   PrintATLASLabel( 0.23, 0.87, "Internal", iLumi )
+#   PrintATLASLabel( 0.23, 0.87, "Internal", iLumi )
 #   PrintATLASLabel( 0.23, 0.87, "Preliminary", iLumiAll )
 
    txt = TLatex()
@@ -283,12 +283,12 @@ def DoPlot( pconfig ):
    txt.SetTextFont(42)
    if pconfig.phspace == "particle": 
      txt.SetTextSize(0.05)
-     txt.DrawLatex( 0.23, 0.75, "%s" % pconfig.latex )
+     txt.DrawLatex( 0.23, 0.87, "%s" % pconfig.latex )
    else:                             
      txt.SetTextSize(0.04)
-     txt.DrawLatex( 0.23, 0.775, "%s" % "Parton level" )
-     txt.SetTextSize(0.035)
-     txt.DrawLatex( 0.23, 0.73,"%s" % pconfig.latex)
+     txt.DrawLatex( 0.23, 0.87, "%s" % "Parton level" )
+#     txt.SetTextSize(0.035)
+#     txt.DrawLatex( 0.23, 0.73,"%s" % pconfig.latex)
 
    
    #if pconfig.phspace == "particle":
