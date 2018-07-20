@@ -80,6 +80,11 @@ class EikosPrompt( Cmd, object ):
      super( EikosPrompt, self ).postloop()
 
    def do_exit( self, args ):
+
+     if not self.outfile == None:
+        self.outfile.Close()
+     BCLog.OutSummary("Output file saved: %s" % self.outfile.GetName() )
+   
      BCLog.OutSummary("Bye bye")
      return True
  
@@ -374,8 +379,8 @@ class EikosPrompt( Cmd, object ):
 
       diffxs_abs = unfolder.GetDiffxsAbs()
       diffxs_rel = unfolder.GetDiffxsRel() 
-      diffxs_abs.get().Write( "diffxs_abs" )
-      diffxs_rel.get().Write( "diffxs_rel" )
+      diffxs_abs.get().Write( "diffxs_statsyst_abs" )
+      diffxs_rel.get().Write( "diffxs_statsyst_rel" )
       
       data       = unfolder.GetData()
       mcsignal   = unfolder.GetSignalSample().GetDetector()
@@ -426,7 +431,11 @@ class EikosPrompt( Cmd, object ):
          h_psig.Multiply( acceptance.get() )
 
          h_response = unfolder.GetSignalSample().GetResponse().get()
-         m_response = RooUnfoldResponse( 0, 0, h_response, h_response.GetName(), h_response.GetTitle() )
+         if h_response == None: 
+           print "ERROR: invalid histogram: response matrix" 
+#         m_response = RooUnfoldResponse( 0, 0, h_response, h_response.GetName(), h_response.GetTitle() )
+         m_response = RooUnfoldResponse( h_response.GetName(), h_response.GetTitle() )
+         m_response.Setup( 0, 0, h_response )
          m_response.UseOverflow( False )
 
          unfolder_ib = RooUnfoldBayes( "IB", "Iterative Baysian" )
@@ -481,7 +490,11 @@ class EikosPrompt( Cmd, object ):
    ###################
 
    def write_hist_statonly( self ):
-      BCLog.OutSummary( "No histograms to be saved for stat only." )
+      diffxs_abs = unfolder.GetDiffxsAbs()
+      diffxs_rel = unfolder.GetDiffxsRel()
+      diffxs_abs.get().Write( "diffxs_statonly_abs" )
+      diffxs_rel.get().Write( "diffxs_statonly_rel" )
+
       return
 
    ###################

@@ -68,15 +68,15 @@ set regularization curvature
 
 set precision quick
 set prior flat
-run stage:prior nitr:0 drawplots:no
+run stage:prior nitr:0 drawplots:yes
 
 set precision custom
 set prior gauss
-run stage:statsyst nitr:0 drawplots:no writehist:yes
+run stage:statsyst nitr:0 drawplots:yes writehist:yes
 
-set precision medium
+set precision custom
 set prior gauss
-run stage:statonly nitr:0 drawplots:no writehist:no
+run stage:statonly nitr:0 drawplots:no writehist:yes
 
 exit
 
