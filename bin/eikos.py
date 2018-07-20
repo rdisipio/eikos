@@ -39,7 +39,7 @@ systematics = {}
 d_prior_shape    = { 'flat' : kPriorFlat, 'gauss' : kPriorGauss, 'gamma' : kPriorGamma }
 d_regularization = { 'unregularized' : kUnregularized, 'curvature' : kCurvature, 'multinormal' : kMultinormal }
 d_stage          = { 'prior' : kStageEstimatePrior, 'statsyst' : kStageStatSyst, 'statonly' : kStageStatOnly, 'onesyst' : kStageTableOfSyst }
-d_precision      = { 'low':0, 'quick':1, 'medium':2, 'high':2, 'veryhigh':3 }
+d_precision      = { 'low':0, 'quick':1, 'medium':2, 'high':2, 'veryhigh':3, 'custom':4 }
 
 BCLog.OpenLog( "log.txt" )
 BCLog.SetLogLevel(BCLog.detail)
@@ -282,7 +282,12 @@ class EikosPrompt( Cmd, object ):
       elif what == "precision":
          p = tokens[1].lower()
          precision = int( d_precision[p] )
-         unfolder.SetPrecision( precision )
+ 
+         if precision == 4:
+            unfolder.SetPrecision( 2 )
+            unfolder.SetNIterationsPreRunMax( 1000000 )
+         else:
+            unfolder.SetPrecision( precision )
 
       elif what == "regularization":
          r = tokens[1].lower()

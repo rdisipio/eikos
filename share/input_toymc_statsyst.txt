@@ -66,15 +66,15 @@ set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statsyst.root
 set luminosity 1.0
 set regularization curvature
 
-set precision medium
+set precision quick
 set prior flat
-run stage:prior nitr:0 drawplots:yes
+run stage:prior nitr:0 drawplots:no
 
-set precision high
+set precision custom
 set prior gauss
-run stage:statsyst nitr:0 drawplots:yes writehist:yes
+run stage:statsyst nitr:0 drawplots:no writehist:yes
 
-set precision high
+set precision medium
 set prior gauss
 run stage:statonly nitr:0 drawplots:no writehist:no
 
