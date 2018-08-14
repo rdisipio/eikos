@@ -123,6 +123,21 @@ class EikosPrompt( Cmd, object ):
       unfolder.SetData( h )
 
       f.Close()
+ 
+   #~~~~~~~~~~~~~~~~~~~~~~~~
+
+   def set_truth( self, fpath, hpath ):
+      f = TFile.Open( fpath )
+      h = f.Get( hpath )
+      if h == None:
+         BCLog.OutSummary("Invalid histogram %s in file %s" % ( hpath, fpath ) )
+      else:
+         BCLog.OutSummary("Truth file:      %s" % fpath )
+         BCLog.OutSummary("Truth histogram: %s" % hpath )
+
+      unfolder.SetTruth( h )
+
+      f.Close()
 
    #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -245,6 +260,11 @@ class EikosPrompt( Cmd, object ):
          if value == "path":
             fpath, hpath = self.unpack_path( tokens[2] )
             self.set_data( fpath, hpath )
+      elif what == "truth":
+         value = tokens[1]
+         if value == "path":
+            fpath, hpath = self.unpack_path( tokens[2] )
+            self.set_truth( fpath, hpath )
       elif what == "param":
          pname = tokens[1]
          value = tokens[2]
@@ -433,7 +453,6 @@ class EikosPrompt( Cmd, object ):
          h_response = unfolder.GetSignalSample().GetResponse().get()
          if h_response == None: 
            print "ERROR: invalid histogram: response matrix" 
-#         m_response = RooUnfoldResponse( 0, 0, h_response, h_response.GetName(), h_response.GetTitle() )
          m_response = RooUnfoldResponse( h_response.GetName(), h_response.GetTitle() )
          m_response.Setup( 0, 0, h_response )
          m_response.UseOverflow( False )

@@ -5,6 +5,8 @@ set param  LUMI 1.0
 set param  PRECISION 2
 set param  REGULARIZATION 1
 set param  OBS x
+
+set truth  path @INPUTPATH@/toymc.overconstrained.root:truth_nominal
 set data   path @INPUTPATH@/toymc.overconstrained.root:data
 
 add sample S

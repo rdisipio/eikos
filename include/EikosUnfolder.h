@@ -67,6 +67,9 @@ class EikosUnfolder : public BCModel, public TObject
     void    SetData( const TH1 * data );
     pTH1D_t GetData() { return m_h_data; };
 
+    void    SetTruth( const TH1 * truth );
+    pTH1D_t GetTruth() { return m_h_truth; };
+
     void    SetPrior( const TH1 * h );
     void    SetPrior( pTH1D_t h );
     pTH1D_t GetPrior() { return m_h_prior; };
@@ -102,7 +105,8 @@ class EikosUnfolder : public BCModel, public TObject
 //    TRandom3    m_rng;
 
     std::string m_name;
-    int         m_nbins;
+    int         m_nbins_truth;
+    int         m_nbins_reco;
     std::vector<double> m_parameters;
     std::string m_bkg_name;
 
@@ -113,8 +117,10 @@ class EikosUnfolder : public BCModel, public TObject
     bool                m_syst_initialized;
     bool                m_obs_initialized;
     double              m_lumi;
-    std::vector<double> m_xedges;
-    std::vector<double>	m_bw;
+    std::vector<double> m_xedges_truth;
+    std::vector<double>	m_bw_truth;
+    std::vector<double> m_xedges_reco;
+    std::vector<double> m_bw_reco;
 
     SampleCollection_t                     m_samples;
     std::map< const std::string, int >     m_samples_index;
@@ -127,6 +133,7 @@ class EikosUnfolder : public BCModel, public TObject
     std::vector<SYSTEMATIC_TYPE>                 m_syst_types;
 
     pTH1D_t   m_h_data;
+    pTH1D_t   m_h_truth;
     pTH1D_t   m_h_prior; 
 };
 
