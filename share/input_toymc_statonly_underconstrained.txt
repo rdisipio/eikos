@@ -24,7 +24,7 @@ set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statonly.underconstrained.root
 set luminosity 1.0
 set regularization curvature
 
-set precision quick
+set precision medium
 set prior flat
 run stage:prior nitr:0 drawplots:no
 
