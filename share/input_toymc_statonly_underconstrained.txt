@@ -25,12 +25,12 @@ set luminosity 1.0
 set regularization curvature
 
 set precision medium
-set prior flat
-run stage:prior nitr:0 drawplots:no
+set prior gauss
+run stage:prior nitr:0 drawplots:yes
 
 set precision custom
 set prior gauss
-run stage:statsyst nitr:0 drawplots:no writehist:yes
+run stage:statsyst nitr:0 drawplots:yes writehist:yes
 
 exit
 

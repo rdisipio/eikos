@@ -217,12 +217,16 @@ void EikosUnfolder::SetPrior( pTH1D_t h	)
    h->Copy( (*m_h_prior) );
    m_h_prior->SetName( "prior" );
 
-   SetPriorShape(); 
+   std::cout << "INFO: new prior set." << std::endl;
 }
+
+/////////////////////////////////
 
 void EikosUnfolder::SetPriorShape( PRIOR_SHAPE s )          
 {
    m_prior_shape = s; 
+
+   std::cout << "INFO: setting prior shape " << s << std::endl;
 
    if( GetPrior() == NULL ) return;
 
@@ -234,8 +238,7 @@ void EikosUnfolder::SetPriorShape( PRIOR_SHAPE s )
          GetParameter(i).SetLimits( -1., 2. );
       }
       else if( m_prior_shape == kPriorGauss ) {
-//          GetParameter(i).SetPrior(new BCPositiveDefinitePrior(new BCGaussianPrior( y, dy ) ) );
-         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 0.5 ) );
+         GetParameter(i).SetPrior( new BCGaussianPrior( 0., 0.3 ) );
          GetParameter(i).SetLimits( -1., 2. );
       }
       else if( m_prior_shape == kPriorGamma ) {
@@ -430,6 +433,7 @@ void EikosUnfolder::PrepareForRun( RUN_STAGE run_stage )
      h_truth_nominal->Scale( 1./m_lumi );	
 
      SetPrior( h_truth_nominal );
+     SetPriorShape( m_prior_shape );
   }
   else {
      std::cout << "INFO: prior already set. Nothing to be done here." << std::endl;
