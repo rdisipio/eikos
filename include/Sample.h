@@ -22,13 +22,13 @@ typedef std::shared_ptr<TH1D> pTH1D_t;
 typedef	std::shared_ptr<TH2D> pTH2D_t;
 typedef std::shared_ptr<TMatrixD> pTMatrixD_t;
 
-enum SAMPLE_TYPE { kData = 0, kSignal = 1, kBackground = 2, kNSampleTypes = 4 };
+enum SAMPLE_TYPE { kData = 0, kSignal = 1, kBackground = 2, kUndefined = 3, kNSampleTypes = 4 };
 
 class Sample : public TObject
 {
  public:
  
-   Sample( const std::string& name = "AnySample", const SAMPLE_TYPE type = SAMPLE_TYPE::kBackground, const std::string& latex = "Any sample you like" );
+   Sample( const std::string& name = "AnySample", const SAMPLE_TYPE type = SAMPLE_TYPE::kUndefined, const std::string& latex = "Any sample you like" );
    ~Sample();
 
    void SetName( const std::string& name )  { m_name  = name;    };

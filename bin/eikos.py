@@ -152,8 +152,8 @@ class EikosPrompt( Cmd, object ):
       if t in [ 'data', 'Data' ]: itype = 0
       elif t in [ 's', 'S', 'signal', 'Signal' ]: itype = 1
       elif t in [ 'b', 'B', 'background', "Background", 'bkg', 'Bkg' ]: itype = 2
-      elif t in [ 'datadriven', "DataDriven", "dd", "DD" ]: itype = 3
-      else: itype = 2
+#      elif t in [ 'datadriven', "DataDriven", "dd", "DD" ]: itype = 3
+      else: itype = 3
 
       unfolder.GetSample(sname).SetType( itype )
       if itype == 1: unfolder.SetSignalSample( sname )

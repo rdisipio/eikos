@@ -51,7 +51,7 @@ class EikosUnfolder : public BCModel, public TObject
     int GetSystematicIndex( const std::string& name );
 
     pSample_t AddSample( const pSample_t sample );
-    pSample_t AddSample( const std::string& name, SAMPLE_TYPE type = SAMPLE_TYPE::kBackground, const std::string& latex = "Sample", int color = -1, int fillstyle = -1, int linestyle = -1 );
+    pSample_t AddSample( const std::string& name, SAMPLE_TYPE type = SAMPLE_TYPE::kUndefined, const std::string& latex = "Sample", int color = -1, int fillstyle = -1, int linestyle = -1 );
     void SetSignalSample( const std::string& name );
     pSample_t GetSample( const std::string& name ) { return m_samples.at(name); };
     pSample_t GetSignalSample();

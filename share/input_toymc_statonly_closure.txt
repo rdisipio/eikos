@@ -1,0 +1,32 @@
+set param  INPUTPATH $PWD
+set param  OUTPUTPATH $PWD/output
+set param  OUTPUTTAG toymc_statonly_closure
+set param  LUMI 1.0
+set param  PRECISION 2
+set param  REGULARIZATION 1
+set param  OBS x
+
+set truth  path @INPUTPATH@/toymc.root:truth_nominal
+set data   path @INPUTPATH@/toymc.root:data
+
+add sample S
+set sample S type signal
+
+set sample S path nominal reco @INPUTPATH@/toymc.root:reco_nominal
+set sample S path nominal resp @INPUTPATH@/toymc.root:response_nominal
+set sample S path nominal gen  @INPUTPATH@/toymc.root:truth_nominal
+
+set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statonly.closure.root
+set luminosity 1.0
+set regularization curvature
+
+set precision quick
+set prior gauss
+run stage:prior nitr:0 drawplots:no
+
+set precision custom
+set prior gauss
+run stage:statsyst nitr:0 drawplots:no writehist:yes
+
+exit
+

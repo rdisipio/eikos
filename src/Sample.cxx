@@ -176,7 +176,7 @@ void Sample::CalculateMigrations( const std::string& syst_name )
    std::string hname = std::string("migrations_") + syst_name;
    m_h_migrations[syst_name]->SetName( hname.c_str() );
 
-   // normalize rows (should become configurable)
+   // normalize rows
    for(	int j = 0 ; j < h_resp->GetNbinsY() ; ++j ) {
       double sumw = 0.;
 
@@ -189,8 +189,23 @@ void Sample::CalculateMigrations( const std::string& syst_name )
          double z_new = ( sumw != 0. ) ? z_old / sumw : 0.;
          m_h_migrations[syst_name]->SetBinContent( i+1, j+1, z_new ); 
       }
-
    }
+
+/*
+   // normalize columns
+   for( int i = 0 ; i < h_resp->GetNbinsX() ; ++i ) { 
+      double sumw = 0.;
+      for( int j = 0 ; j < h_resp->GetNbinsY() ; ++j ) {
+        sumw += h_resp->GetBinContent( i+1, j+1 );
+      }
+
+      for( int j = 0 ; j < h_resp->GetNbinsY() ; ++j ) {
+         double z_old = h_resp->GetBinContent( i+1, j+1 );
+         double z_new = ( sumw != 0. ) ? z_old / sumw : 0.;
+         m_h_migrations[syst_name]->SetBinContent( i+1, j+1, z_new );
+      }
+   }
+*/
 }
 
 pTH2D_t Sample::GetMigrations( const std::string& syst_name )

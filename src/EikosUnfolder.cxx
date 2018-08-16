@@ -549,6 +549,7 @@ pTH1D_t EikosUnfolder::MakeFoldedHistogram( pTH1D_t p_h_truth, const std::string
         s += m * h_tmp->GetBinContent(j+1);
      }
      h_folded->SetBinContent( i+1, s );
+     h_folded->SetBinError( i+1, 0. );
    }
 
    h_folded->Divide( p_acc.get() );
@@ -616,7 +617,6 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        S = S * ( 1. + delta_S );
 
        // Background (if any)
-       if( p_bkg_n == NULL ) std::cout << "WARNING: invalid nominal background" << std::endl;
        double B = p_bkg_n ? p_bkg_n->GetBinContent( r+1 ) : 0.;
        double delta_B = 0.;
        for( size_t i = 0 ; i < m_syst_index.size() ; ++i ) {

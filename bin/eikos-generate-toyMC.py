@@ -12,6 +12,20 @@ def Normalize( h, sf=1.0, opt="width" ):
   area = h.Integral( opt )
   h.Scale( sf/area )
 
+
+def NormalizeRows(h):
+  nbins_x = h.GetNbinsX()
+  nbins_y = h.GetNbinsY()
+
+  for j in range(nbins_y):
+    sumw = 0.
+    for i in range(nbins_x):
+      sumw += h.GetBinContent(i+1, j+1)
+
+    for i in range(nbins_x):
+       z = h.GetBinContent(i+1, j+1)
+       h.SetBinContent( i+1, j+1, z/sumw ) 
+
 #############################
 
 class SystType:
@@ -287,6 +301,15 @@ Normalize( _h['truth_modelling_kappa_normalized'], 1.0, "" )
 
 _h['truth_modelling_theta_normalized'] = _h['truth_modelling_theta'].Clone( "truth_modelling_theta_normalized" )
 Normalize( _h['truth_modelling_theta_normalized'], 1.0, "" )
+
+_h['migrations_nominal'] = _h['response_nominal'].Clone( "migrations_nominal" )
+NormalizeRows( _h['migrations_nominal'] )
+
+_h['migrations_modelling_kappa'] = _h['response_modelling_kappa'].Clone( "migrations_modelling_kappa" )
+NormalizeRows( _h['migrations_modelling_kappa'] )
+
+_h['migrations_modelling_theta'] = _h['response_modelling_theta'].Clone( "migrations_modelling_theta" )
+NormalizeRows( _h['migrations_modelling_theta'] )
 
 # Write out to file
 ofile.Write()
