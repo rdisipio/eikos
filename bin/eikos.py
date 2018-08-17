@@ -157,6 +157,7 @@ class EikosPrompt( Cmd, object ):
 
       unfolder.GetSample(sname).SetType( itype )
       if itype == 1: unfolder.SetSignalSample( sname )
+      if itype == 2: unfolder.SetBackgroundSample( sname )
 
       BCLog.OutSummary( "Sample %s: type set to %i (%s)" % ( sname, unfolder.GetSample(sname).GetType(), t )  )
 
@@ -439,6 +440,11 @@ class EikosPrompt( Cmd, object ):
       pulls = unfolder.GetSystematicsPullHistogram()
       pulls.Write( "pulls" ) 
 
+      corr_abs = unfolder.GetCorrelationMatrixAbs()
+      corr_rel = unfolder.GetCorrelationMatrixRel()
+      corr_abs.Write( "corr_abs" )
+      corr_rel.Write( "corr_rel" )
+
       if loaded_RooUnfold == 0:
          print "INFO: unfolding histogram with Iterative Bayesian method"
    
@@ -513,6 +519,11 @@ class EikosPrompt( Cmd, object ):
       diffxs_rel = unfolder.GetDiffxsRel()
       diffxs_abs.get().Write( "diffxs_statonly_abs" )
       diffxs_rel.get().Write( "diffxs_statonly_rel" )
+
+      corr_abs = unfolder.GetCorrelationMatrixAbs()
+      corr_rel = unfolder.GetCorrelationMatrixRel()
+      corr_abs.Write( "corr_statonly_abs" )
+      corr_rel.Write( "corr_statonly_rel" )
 
       return
 

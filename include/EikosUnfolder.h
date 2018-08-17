@@ -55,6 +55,8 @@ class EikosUnfolder : public BCModel, public TObject
     void SetSignalSample( const std::string& name );
     pSample_t GetSample( const std::string& name ) { return m_samples.at(name); };
     pSample_t GetSignalSample();
+
+    void SetBackgroundSample( const std::string& name );
     pSample_t GetBackgroundSample( const std::string& name = "" );
 
     int AddSystematic( const std::string& sname, double min, double max, const std::string & latexname = "", const std::string & unitstring = ""  );
@@ -82,6 +84,9 @@ class EikosUnfolder : public BCModel, public TObject
     pTH1D_t GetDiffxsAbs( const std::string hname = "diffxs_abs" );
     pTH1D_t GetDiffxsRel( const std::string hname = "diffxs_rel" );
     pTH1D_t GetSystematicsPullHistogram();
+
+    pTH2D_t GetCorrelationMatrixAbs( const std::string hname = "corr_abs" );
+    pTH2D_t GetCorrelationMatrixRel( const std::string hname = "corr_rel" );
 
 //    virtual double LogAPrioriProbability(const std::vector<double>& parameters );
     virtual double LogLikelihood( const std::vector<double>& parameters );

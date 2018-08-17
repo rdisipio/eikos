@@ -96,8 +96,8 @@ ofile.cd()
 # Truth and reco bins do not have to be the same
 xedges_truth = array( 'd', [ 0., 10., 15., 20., 25., 30., 40., 50., 70., 100. ] )
 
-xedges_overconstrained   = array( 'd', [ 0., 5., 10., 15., 20., 25., 30., 35., 40., 45., 50., 55., 60., 70., 80., 100. ] )
-xedges_underconstrained  = array( 'd', [ 0., 10., 20., 30., 40., 50., 70., 100. ] )
+xedges_overconstrained   = array( 'd', [ 0., 5., 10., 15., 20., 25., 30., 35., 40., 45., 50., 55., 60., 70., 80., 90., 100. ] )
+xedges_underconstrained  = array( 'd', [ 0., 20., 30., 40., 70., 100. ] )
 
 # equal binning N_reco = N_truth
 xedges_reco = xedges_truth
@@ -296,6 +296,9 @@ for syst in known_systematics:
   _h['prediction_%s'%syst.name].Add( _h['bkg'] )
 
 # save also normalized theory spectra
+_h['truth_nominal_normalized'] = _h['truth_nominal'].Clone( "truth_nominal_normalized" )
+Normalize( _h['truth_nominal_normalized'], 1.0, "" )
+
 _h['truth_modelling_kappa_normalized'] = _h['truth_modelling_kappa'].Clone( "truth_modelling_kappa_normalized" )
 Normalize( _h['truth_modelling_kappa_normalized'], 1.0, "" )
 

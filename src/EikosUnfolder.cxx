@@ -263,6 +263,12 @@ void EikosUnfolder::SetSignalSample( const std::string& name )
    std::cout << "INFO: Signal sample is " << m_signal_sample << std::endl;
 }
 
+void EikosUnfolder::SetBackgroundSample( const std::string& name )
+{
+   m_bkg_name = name;
+   std::cout << "INFO: Background sample is " << m_bkg_name << std::endl;
+}
+
 pSample_t EikosUnfolder::GetSignalSample()
 {
   return m_samples[m_signal_sample]; 
@@ -630,7 +636,7 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
        	  double sigma_d = 0.;
 
           if( p_bkg == NULL ) {
-             std::cout << "WARNING: invalid background sample." << std::endl;
+             std::cout << "WARNING: invalid background." << std::endl;
              return 0.;
           }
 
@@ -905,4 +911,59 @@ pTH1D_t EikosUnfolder::GetSystematicsPullHistogram()
 
    return h_pull;
 } 
+
+
+//////////////////////////////
+
+pTH2D_t EikosUnfolder::GetCorrelationMatrixAbs( const std::string hname )
+{
+   pTH2D_t h_corr = std::make_shared<TH2D>( hname.c_str(), "Correlation Matrix (abs)", m_nbins_truth, 0.5, m_nbins_truth+0.5, m_nbins_truth, 0.5, m_nbins_truth+0.5 );
+
+   h_corr->SetMinimum(-1.0);
+   h_corr->SetMaximum(1.0);
+
+   const int offset_abs = GetNParameters() + 1;
+
+   for( int i = 0 ; i < m_nbins_truth ; ++i ) {
+      for( int j = i ; j < m_nbins_truth ; ++j ) {
+         double c = 1.;
+
+         if( i != j ) {
+           TH2D * h_post = (TH2D*)GetMarginalizedHistogram( offset_abs+i, offset_abs+j );
+           c = h_post->GetCorrelationFactor();
+         } 
+
+         h_corr->SetBinContent( i+1, j+1, c );
+         h_corr->SetBinContent( j+1, i+1, c );
+      }
+   }
+
+   return h_corr;
+}
+
+pTH2D_t EikosUnfolder::GetCorrelationMatrixRel( const std::string hname )
+{
+   pTH2D_t h_corr = std::make_shared<TH2D>( hname.c_str(), "Correlation Matrix (rel)", m_nbins_truth, 0.5, m_nbins_truth+0.5, m_nbins_truth, 0.5, m_nbins_truth+0.5 );
+
+   h_corr->SetMinimum(-1.0);
+   h_corr->SetMaximum(1.0);
+
+   const int offset_rel = GetNParameters() + 1 + m_nbins_truth;
+
+   for( int i = 0 ; i < m_nbins_truth ; ++i ) {
+      for( int j = i ; j < m_nbins_truth ; ++j ) {
+         double c = 1.;
+
+         if( i != j ) {
+           TH2D * h_post = (TH2D*)GetMarginalizedHistogram( offset_rel+i, offset_rel+j );
+           c = h_post->GetCorrelationFactor();
+         }
+
+         h_corr->SetBinContent( i+1, j+1, c );
+         h_corr->SetBinContent( j+1, i+1, c );
+      }
+   }
+
+   return h_corr;
+}
 

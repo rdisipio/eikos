@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 
-import os,sys
+import os, sys
+import argparse 
+import xml.etree.ElementTree as ET
+
+GeV = 1000.
+iLumi = 36.1
+
+from PlottingToolkit import *
+
 from ROOT import *
 
-gROOT.Macro( "rootlogon.C" )
-gROOT.LoadMacro( "AtlasUtils.C" )
-
+gROOT.Macro( "rootlogon.C" ) 
+gROOT.LoadMacro( "AtlasUtils.C" ) 
 gROOT.SetBatch(1)
+
+gStyle.SetErrorX(0)
 
 xtitle = {
 "x"       : "X",
@@ -59,7 +68,7 @@ def SetTH1FStyle( h, color = kBlack, linewidth = 1, linestyle=1, fillcolor = 0, 
 
 #########################################################
 
-def TH1F2TGraph(h, offset=0.):
+def TH1F2TGraph(h):
   g = TGraphErrors()
   g.SetName( "g_%s" % h.GetName() )
 
@@ -69,9 +78,7 @@ def TH1F2TGraph(h, offset=0.):
     y = h.GetBinContent( i+1 )
     bw = h.GetBinWidth( i+1 )
     dy = h.GetBinError( i+1 )
-    x += offset*bw
-#    dx = 0.
-    dx = 0. if not offset==0. else bw/2
+    dx = bw/2.
 
     g.SetPoint( i, x, y )
     g.SetPointError( i, dx, dy )
@@ -93,68 +100,60 @@ def DivideBy( h, h_ref ):
 
 #########################################################
 
-infilename = sys.argv[1]
-infile = TFile.Open( infilename )
+test_type = "closure"
+if len(sys.argv) > 1: test_type = sys.argv[1]
+if not test_type in [ "closure", "stress" ]:
+  print "ERROR: unknown type of test:", test_type
+  exit(1)
 
-obs = infilename.split('/')[-1].split('.')[0]
+print "INFO: performing a %s test" % test_type
 
-h_eikos = infile.Get( "diffxs_statsyst_rel" )
-h_IB    = infile.Get( "diffxs_IB_rel" )
-h_MI    = infile.Get( "diffxs_MI_rel" )
+infile_unf = TFile.Open( "output/toymc_statonly_%s/x.toymc.statonly.%s.root" % (test_type,test_type) )
+h_unf = infile_unf.Get( "diffxs_statsyst_rel" )
 
-h_unc = h_eikos.Clone("h_unc")
-DivideBy( h_unc, h_eikos )
-DivideBy( h_IB,  h_eikos )
-DivideBy( h_MI,  h_eikos )
+infile_gen = TFile.Open( "toymc.root" )
+h_truth_nominal = infile_gen.Get( "truth_nominal_normalized" )
+h_truth_other   = infile_gen.Get( "truth_modelling_theta_normalized" )
 
-SetTH1FStyle( h_IB, color=kBlue, linewidth=2, markerstyle=21 )
-SetTH1FStyle( h_MI, color=kRed,  linewidth=2, markerstyle=22 )
+if test_type == "closure":
+  h_truth = h_truth_nominal
+else:
+  h_truth = h_truth_other
+h_ratio = h_unf.Clone("h_ratio")
+h_unc   = h_truth.Clone("h_unc")
+DivideBy( h_unc, h_truth )
+DivideBy( h_ratio, h_truth )
 
-c = TCanvas( "corrections", "Corrections", 800, 800 )
-gPad.SetRightMargin(0.05)
+g_unc = TH1F2TGraph( h_unc )
+SetTH1FStyle( g_unc, fillstyle=1001, fillcolor=kYellow )
+g_unc.SetMinimum(0.8)
+g_unc.SetMaximum(1.3)
 
-g_unc = TH1F2TGraph( h_unc ) 
-g_IB  = TH1F2TGraph( h_IB, offset=0.1 )
-g_MI  = TH1F2TGraph( h_MI, offset=-0.1 )
+c = TCanvas("c", "C", 800, 800 )
+c.SetRightMargin(0.05)
 
-SetTH1FStyle( g_unc, fillcolor=kYellow, fillstyle=1001, linewidth=0, markersize=0 )
-SetTH1FStyle( g_IB, color=kBlue, markerstyle=20 )
-SetTH1FStyle( g_MI, color=kRed,  markerstyle=24 )
+g_unc.Draw("a e2")
 
-g_unc.SetMaximum( 1.5 )
-g_unc.SetMinimum( 0.5 )
-
-g_unc.GetXaxis().SetTitle( xtitle[obs] )
-g_unc.GetYaxis().SetTitle( "Other method / Eikos" )
-g_unc.GetXaxis().SetLabelOffset( 0.02 )
-
-g_unc.Draw( "a e2" )
 l = TLine()
 l.SetLineStyle(kDashed)
 l.SetLineWidth(2)
-l.SetLineColor(kYellow+1)
-l.DrawLine( 0, 1., 100., 1. )
+l.SetLineColor(kGray+3)
+l.DrawLine(0.,1.,100.,1.)
 
-g_IB.Draw( "p e same")
-g_MI.Draw( "p e same")
+h_ratio.Draw("p e same") 
 
-lparams = {
-        'xoffset' : 0.15,
-        'yoffset' : 0.90,
-        'width'   : 0.35,
-        'height'  : 0.04,
-        }
+g_unc.GetXaxis().SetTitle( "X" )
+g_unc.GetYaxis().SetTitle( "Unfolded / Truth" )
 
-leg = MakeLegend( lparams )
-leg.SetTextFont( 42 )
-leg.SetNColumns(1)
-leg.AddEntry( g_IB, "D'Agostini Unfolding (N_{itr}=4)", "lp" )
-leg.AddEntry( g_MI, "Simple Matrix Inversion", "lp" )
-leg.AddEntry( g_unc, "Eikos Stat. Unc.", "f" )
-leg.Draw()
-leg.SetY1( leg.GetY1() - lparams['height'] * leg.GetNRows() )
-
+txt = TLatex()
+txt.SetNDC()
+if test_type == "closure":
+  txt.DrawLatex( 0.15, 0.85, "Closure test" )
+elif test_type == "stress":
+  txt.DrawLatex( 0.15, 0.85, "Stress test" )
+else:
+  pass
 
 gPad.RedrawAxis()
 
-c.SaveAs( "output/img/comparison_IB_MI.pdf")
+c.SaveAs( "output/img/%s.pdf" % test_type )

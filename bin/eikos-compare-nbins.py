@@ -146,7 +146,7 @@ g_overconstrained.Print("all")
 lparams = {
         'xoffset' : 0.15,
         'yoffset' : 0.90,
-        'width'   : 0.70,
+        'width'   : 0.35,
         'height'  : 0.04,
         }
 

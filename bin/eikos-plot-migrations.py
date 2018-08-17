@@ -144,21 +144,28 @@ def MakeAllAbsValues( matrix ):
 
 
 def MakeUniformBins( h ):
-   nbins = h.GetNbinsX()
+   nbins_x = h.GetNbinsX()
    xmin = h.GetXaxis().GetXmin()
    xmax = h.GetXaxis().GetXmax()
 
-   hnew = TH2D( "hcorr", "hcorr", nbins, 0, nbins, nbins, 0, nbins )
+   nbins_y = h.GetNbinsY()
+   ymin = h.GetYaxis().GetXmin() 
+   ymax = h.GetYaxis().GetXmax()
+
+   hnew = TH2D( "hcorr", "hcorr", nbins_x, 0, nbins_x, nbins_y, 0, nbins_y )
 #   hnew = TH2D( "hcorr", "hcorr", nbins, xmin, xmax, nbins, xmin, xmax )
 
-   for i in range(nbins):
-      for j in range(nbins):
+   for i in range(nbins_x):
+      for j in range(nbins_y):
          y = h.GetBinContent( i+1, j+1 )
          hnew.SetBinContent( i+1, j+1, y )
 
-   for i in range(nbins):
-     hnew.GetXaxis().SetNdivisions( nbins, 0, 0 )
-     hnew.GetYaxis().SetNdivisions( nbins, 0, 0 )
+   for i in range(nbins_x):
+     hnew.GetXaxis().SetNdivisions( nbins_x, 0, 0 )
+
+   for i in range(nbins_y):
+     hnew.GetYaxis().SetNdivisions( nbins_y, 0, 0 )
+
 #     hnew.GetXaxis().SetBinLabel( i+1, "%i" % (i+1) )
 #     hnew.GetYaxis().SetBinLabel( i+1, "%i" % (i+1) )
      
@@ -252,8 +259,10 @@ xlabel = h.GetXaxis().GetBinLowEdge(1) - 0.1*h.GetXaxis().GetBinWidth(1)
 for i in range(h.GetNbinsX()+1):
    xlow = h_raw.GetXaxis().GetBinLowEdge(i+1)
    x = h.GetXaxis().GetBinLowEdge(i+1)
-   y = h.GetYaxis().GetBinLowEdge(i+1)
    labelX.DrawText( x, ylabel, "%g"%xlow )
+for i in range(h.GetNbinsY()+1):
+   xlow = h_raw.GetYaxis().GetBinLowEdge(i+1)
+   y = h.GetYaxis().GetBinLowEdge(i+1)
    labelY.DrawText( xlabel, y, "%g"%xlow )
 
 u = "[%s]"%units[obs] if not units[obs]=="" else ""
