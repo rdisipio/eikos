@@ -42,7 +42,7 @@ def MakeLegend( params ):
 #########################################################
 
 
-def SetTH1FStyle( h, color = kBlack, linewidth = 1, linestyle=1, fillcolor = 0, fillstyle = 0, markerstyle = 21, markersize = 1.3, fill_alpha=0.0 ):
+def SetTH1FStyle( h, color = kBlack, linewidth = 2, linestyle=1, fillcolor = 0, fillstyle = 0, markerstyle = 21, markersize = 1.5, fill_alpha=0.0 ):
     '''Set the style with a long list of parameters'''
     
     h.SetLineColor( color )
@@ -107,9 +107,6 @@ DivideBy( h_unc, h_eikos )
 DivideBy( h_IB,  h_eikos )
 DivideBy( h_MI,  h_eikos )
 
-SetTH1FStyle( h_IB, color=kBlue, linewidth=2, markerstyle=21 )
-SetTH1FStyle( h_MI, color=kRed,  linewidth=2, markerstyle=22 )
-
 c = TCanvas( "corrections", "Corrections", 800, 800 )
 gPad.SetRightMargin(0.05)
 
@@ -117,9 +114,9 @@ g_unc = TH1F2TGraph( h_unc )
 g_IB  = TH1F2TGraph( h_IB, offset=0.1 )
 g_MI  = TH1F2TGraph( h_MI, offset=-0.1 )
 
-SetTH1FStyle( g_unc, fillcolor=kYellow, fillstyle=1001, linewidth=0, markersize=0 )
-SetTH1FStyle( g_IB, color=kBlue, markerstyle=20 )
-SetTH1FStyle( g_MI, color=kRed,  markerstyle=24 )
+SetTH1FStyle( g_unc, fillcolor=kGray+2, fillstyle=3354, linewidth=0, markersize=0 )
+SetTH1FStyle( g_IB, color=kBlue, markerstyle=20, markersize=1.5 )
+SetTH1FStyle( g_MI, color=kRed,  markerstyle=25, markersize=1.5 )
 
 g_unc.SetMaximum( 1.5 )
 g_unc.SetMinimum( 0.5 )
@@ -132,7 +129,7 @@ g_unc.Draw( "a e2" )
 l = TLine()
 l.SetLineStyle(kDashed)
 l.SetLineWidth(2)
-l.SetLineColor(kYellow+1)
+l.SetLineColor(kGray+3)
 l.DrawLine( 0, 1., 100., 1. )
 
 g_IB.Draw( "p e same")

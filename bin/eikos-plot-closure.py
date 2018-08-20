@@ -125,9 +125,10 @@ DivideBy( h_unc, h_truth )
 DivideBy( h_ratio, h_truth )
 
 g_unc = TH1F2TGraph( h_unc )
-SetTH1FStyle( g_unc, fillstyle=1001, fillcolor=kYellow )
+#SetTH1FStyle( g_unc, fillstyle=1001, fillcolor=kYellow )
+SetTH1FStyle( g_unc, fillstyle=3354, fillcolor=kGray+2, linewidth=0, markersize=0)
 g_unc.SetMinimum(0.8)
-g_unc.SetMaximum(1.3)
+g_unc.SetMaximum(1.2)
 
 c = TCanvas("c", "C", 800, 800 )
 c.SetRightMargin(0.05)

@@ -269,7 +269,7 @@ u = "[%s]"%units[obs] if not units[obs]=="" else ""
 h.GetXaxis().SetTitle( "Detector level %s %s" % (pretty_names[obs], u ) )
 h.GetYaxis().SetTitle( "Truth level %s %s" % ( pretty_names[obs], u ) )
 
-h.SetMarkerSize(1.5)
+h.SetMarkerSize(2.0)
 
 gPad.RedrawAxis()
 
