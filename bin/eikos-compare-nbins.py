@@ -115,9 +115,7 @@ g_underconstrained = TH1F2TGraph( h_underconstrained, 0.1 )
 g_overconstrained  = TH1F2TGraph( h_overconstrained, -0.1 )
 
 #SetTH1FStyle( h_isoconstrained,   fillstyle=1001, color=kYellow, fillcolor=kYellow )
-SetTH1FStyle( h_isoconstrained,   fillstyle=3354, color=kGray+2, fillcolor=kGray+2, markersize=0, linewidth=0 )
-#SetTH1FStyle( g_underconstrained, fillstyle=3354, color=kBlue,   fillcolor=kBlue, fill_alpha=0.7 )
-#SetTH1FStyle( g_overconstrained,  fillstyle=3345, color=kRed,    fillcolor=kRed,  fill_alpha=0.7 )
+SetTH1FStyle( h_isoconstrained,   fillstyle=1001, color=kGray+2, fillcolor=kGray+2, markersize=0, linewidth=0 )
 SetTH1FStyle( g_underconstrained, color=kBlue, markerstyle=21 )
 SetTH1FStyle( g_overconstrained,  color=kRed, markerstyle=24 )
 
