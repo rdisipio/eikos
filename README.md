@@ -52,39 +52,90 @@ eikos-plot-systematics_pulls.py
 Configuration file
 ==================
 
-This is a non-working example. Detector systematics just need the reco-level. Modelling systematics need also the truth-level and response matrix in order to calcualte the correction factors.
+This is a working example to be used with the ToyMC generated file. Detector systematics just need the reco-level. Modelling systematics need also the truth-level and response matrix in order to calcualte the correction factors.
 
 ```
-set param  INPUTPATH /path/to/root/file/containing/histograms
-set param  LUMI 36074.6
+set param  INPUTPATH $PWD
+set param  OUTPUTPATH $PWD/output
+set param  OUTPUTTAG toymc_statsyst
+set param  LUMI 1.0
 set param  PRECISION 2
-set param  OBS tt_m
-set data   path @INPUTPATH@/data/dataAll_13TeV.DAOD_TOPQ4.TightTop.histograms.root:@OBS@_passed_J1_1t1b_J2_1t1b
-add sample ttAH
-set sample ttAH type signal
-set sample ttAH path nominal reco  @INPUTPATH@/nominal/mc.tt_pp8.nominal.root:@OBS@_passed_4j2b
-set sample ttAH path nominal resp  @INPUTPATH@/nominal/mc.tt_pp8.nominal.root:response_particle_@OBS@_passed_4j2b
-set sample ttAH path nominal gen   @INPUTPATH@/particle/mc.tt_pp8.nominal.root:@OBS@_passed_4j2b
-add sample background
-set sample background type background
-set sample background path nominal reco @INPUTPATH@/nominal/mc.bkg.nominal.root:@OBS@_passed_4j2b
+set param  REGULARIZATION 1
+set param  OBS x
 
-add systematic JES -5 5
-set systematic JES variations JES__1u JES__1d
-set sample ttAH       path JES__1u reco @INPUTPATH@/JES__1u/mc.tt_pp8.JES__1u.root:@OBS@_passed_4j2b
-set sample background path JES__1u reco @INPUTPATH@/JES__1u/mc.bkg.JES__1u.root:@OBS@_passed_4j2b
-set sample ttAH       path JES__1d reco @INPUTPATH@/JES__1d/mc.tt_pp8.JES__1d.root:@OBS@_passed_4j2b
-set sample background path JES__1d reco @INPUTPATH@/JES__1d/mc.bkg.JES__1d.root:@OBS@_passed_4j2b
+set truth  path @INPUTPATH@/toymc.root:truth_nominal
+set data   path @INPUTPATH@/toymc.root:data
 
-add systematic HardScattering -5 5
-set systematic HardScattering type modelling
-set systematic HardScattering variations mod_hs__1up @symmetrize@
-set sample ttAH       path mod_hs__1up reco @INPUTPATH@/mod_hs__1up/mc.tt_mg5_amcp8.nominal.root:@OBS@_passed_4j2b
-set sample ttAH       path mod_hs__1up resp @INPUTPATH@/mod_hs__1up/mc.tt_mg5_amcp8.nominal.root:response_particle_@OBS@_passed_4j2b
-set sample ttAH       path mod_hs__1up gen  @INPUTPATH@/particle/mc.tt_mg5_amcp8.nominal.root:@OBS@_passed_4j2b
-set sample background path mod_hs__1up reco @INPUTPATH@/mod_hs__1up/mc.bkg_mg5_amcp8.nominal.root:@OBS@_passed_4j2b
+add sample S
+set sample S type signal
+set sample S path nominal reco @INPUTPATH@/toymc.root:reco_nominal
+set sample S path nominal resp @INPUTPATH@/toymc.root:response_nominal
+set sample S path nominal gen  @INPUTPATH@/toymc.root:truth_nominal
 
-run
+add sample B
+set sample B type background
+set sample B path nominal reco @INPUTPATH@/toymc.root:bkg
+
+add systematic syst1 -5 5
+set systematic syst1 variations syst1_u syst1_d
+set sample S path syst1_u reco @INPUTPATH@/toymc.root:reco_syst1_u
+set sample S path syst1_d reco @INPUTPATH@/toymc.root:reco_syst1_d
+set sample B path syst1_u reco @INPUTPATH@/toymc.root:bkg
+set sample B path syst1_d reco @INPUTPATH@/toymc.root:bkg
+
+add systematic syst2 -5 5
+set systematic syst2 variations syst2_u syst2_d 
+set sample S path syst2_u reco @INPUTPATH@/toymc.root:reco_syst2_u
+set sample S path syst2_d reco @INPUTPATH@/toymc.root:reco_syst2_d
+set sample B path syst2_u reco @INPUTPATH@/toymc.root:bkg
+set sample B path syst2_d reco @INPUTPATH@/toymc.root:bkg
+
+add systematic syst3 -5 5
+set systematic syst3 variations syst3_u syst3_d 
+set sample S path syst3_u reco @INPUTPATH@/toymc.root:reco_syst3_u
+set sample S path syst3_d reco @INPUTPATH@/toymc.root:reco_syst3_d
+set sample B path syst3_u reco @INPUTPATH@/toymc.root:bkg
+set sample B path syst3_d reco @INPUTPATH@/toymc.root:bkg
+
+add systematic syst4 -5 5
+set systematic syst4 variations syst4_u syst4_d
+set sample S path syst4_u reco @INPUTPATH@/toymc.root:reco_syst4_u
+set sample S path syst4_d reco @INPUTPATH@/toymc.root:reco_syst4_d
+set sample B path syst4_u reco @INPUTPATH@/toymc.root:bkg
+set sample B path syst4_d reco @INPUTPATH@/toymc.root:bkg
+
+add systematic syst_mod_kappa -5 5
+set systematic syst_mod_kappa type modelling
+set systematic syst_mod_kappa variations syst_mod_kappa_u @symmetrize@
+set sample S path syst_mod_kappa_u reco @INPUTPATH@/toymc.root:reco_modelling_kappa
+set sample S path syst_mod_kappa_u resp @INPUTPATH@/toymc.root:response_modelling_kappa
+set sample S path syst_mod_kappa_u gen  @INPUTPATH@/toymc.root:truth_modelling_kappa
+set sample B path syst_mod_kappa_u reco @INPUTPATH@/toymc.root:bkg
+
+add systematic syst_mod_theta -5 5
+set systematic syst_mod_theta type modelling
+set systematic syst_mod_theta variations syst_mod_theta_u @symmetrize@
+set sample S path syst_mod_theta_u reco @INPUTPATH@/toymc.root:reco_modelling_theta
+set sample S path syst_mod_theta_u resp @INPUTPATH@/toymc.root:response_modelling_theta  
+set sample S path syst_mod_theta_u gen  @INPUTPATH@/toymc.root:truth_modelling_theta
+set sample B path syst_mod_theta_u reco @INPUTPATH@/toymc.root:bkg
+
+
+set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statsyst.root
+set luminosity 1.0
+set regularization curvature
+
+set precision quick
+set prior flat
+run stage:prior nitr:0 drawplots:yes
+
+set precision custom
+set prior gauss
+run stage:statsyst nitr:0 drawplots:yes writehist:yes
+
+set precision custom
+set prior gauss
+run stage:statonly nitr:0 drawplots:no writehist:yes
+
 exit
-
 ```
