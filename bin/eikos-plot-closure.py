@@ -51,7 +51,7 @@ def MakeLegend( params ):
 #########################################################
 
 
-def SetTH1FStyle( h, color = kBlack, linewidth = 1, linestyle=1, fillcolor = 0, fillstyle = 0, markerstyle = 21, markersize = 1.3, fill_alpha=0.0 ):
+def SetTH1FStyle( h, color = kBlack, linewidth = 1, linestyle=1, fillcolor = 0, fillstyle = 0, markerstyle = 21, markersize = 1.5, fill_alpha=0.0 ):
     '''Set the style with a long list of parameters'''
     
     h.SetLineColor( color )
@@ -125,8 +125,7 @@ DivideBy( h_unc, h_truth )
 DivideBy( h_ratio, h_truth )
 
 g_unc = TH1F2TGraph( h_unc )
-#SetTH1FStyle( g_unc, fillstyle=1001, fillcolor=kYellow )
-SetTH1FStyle( g_unc, fillstyle=3354, fillcolor=kGray+2, linewidth=0, markersize=0)
+SetTH1FStyle( g_unc, fillstyle=1001, fillcolor=kGray+1, linewidth=0, markersize=0)
 g_unc.SetMinimum(0.8)
 g_unc.SetMaximum(1.2)
 
