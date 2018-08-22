@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<plots tag="MCGEN" phspace="particle" latex="Fiducial phase space" meas="abs" >
+  <plot obs="tt_chi"  xtitle="#chi^{t#bar{t}}"          ytitle="d #sigma_{t#bar{t}} / d #chi^{t#bar{t}} [pb]"        scale="bilog" />
+</plots>
+<samples>
+ <sample name="data"       hpath="diffxs_abs"   type="data"   latex="Data"             color="1"   markerstyle="0"  linewidth="0" linestyle="1" />
+ <sample name="pwgpy8"     hpath="theory_abs"   type="signal" latex="POWHEG+P8"        color="2"   markerstyle="20" linewidth="3" linestyle="1" />
+ <sample name="pwgh7"      hpath="tt_chi_theory_abs" type="signal" latex="POWHEG+H7"        color="418" markerstyle="20" linewidth="3" linestyle="2" />
+ <sample name="amcatnlopy8" hpath="tt_chi_theory_abs" type="signal" latex="MG5_aMC@NLO+Py8" color="600" markerstyle="20" linewidth="3" linestyle="2" />
+ <sample name="statonly"   hpath="diffxs_abs_statonly" type="unc"    latex="Stat. unc."       color="920" fillcolor="920" alpha="1.0" linewidth="0" />
+ <sample name="statsyst"   hpath="diffxs_abs"   type="unc"    latex="Stat.+Syst. unc."        color="921" fillcolor="921" alpha="1.0" linewidth="0" />
+</samples>
+<inputfiles>
+  <file sample="data"       path="output/statsyst/tt_chi.diffxs.root"      />
+  <file sample="pwgpy8"     path="output/statsyst/tt_chi.diffxs.root"	   />
+  <file sample="pwgh7"      path="data/pwgh7.truth.root"      />
+  <file sample="amcatnlopy8" path="data/amcatnlopy8.truth.root" />
+  <file sample="statonly"   path="output/statsyst/tt_chi.diffxs.root"	   />
+  <file sample="statsyst"   path="output/statsyst/tt_chi.diffxs.root"	   />
+</inputfiles>
+</config>
+<!-- marker styles: https://root.cern.ch/root/html/TAttMarker.html -->

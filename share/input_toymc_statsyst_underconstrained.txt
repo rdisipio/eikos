@@ -1,0 +1,85 @@
+set param  INPUTPATH $PWD
+set param  OUTPUTPATH $PWD/output
+set param  OUTPUTTAG toymc_statsyst_underconstrained
+set param  LUMI 1.0
+set param  PRECISION 2
+set param  REGULARIZATION 1
+set param  OBS x
+
+set truth  path @INPUTPATH@/toymc.underconstrained.root:truth_nominal
+set data   path @INPUTPATH@/toymc.underconstrained.root:data
+
+add sample S
+set sample S type signal
+
+set sample S path nominal reco @INPUTPATH@/toymc.underconstrained.root:reco_nominal
+set sample S path nominal resp @INPUTPATH@/toymc.underconstrained.root:response_nominal
+set sample S path nominal gen  @INPUTPATH@/toymc.underconstrained.root:truth_nominal
+
+add sample B
+set sample B type background
+set sample B path nominal reco @INPUTPATH@/toymc.underconstrained.root:bkg
+
+add systematic syst1 -5 5
+set systematic syst1 variations syst1_u syst1_d
+set sample S path syst1_u reco @INPUTPATH@/toymc.underconstrained.root:reco_syst1_u
+set sample S path syst1_d reco @INPUTPATH@/toymc.underconstrained.root:reco_syst1_d
+set sample B path syst1_u reco @INPUTPATH@/toymc.underconstrained.root:bkg
+set sample B path syst1_d reco @INPUTPATH@/toymc.underconstrained.root:bkg
+
+add systematic syst2 -5 5
+set systematic syst2 variations syst2_u syst2_d 
+set sample S path syst2_u reco @INPUTPATH@/toymc.underconstrained.root:reco_syst2_u
+set sample S path syst2_d reco @INPUTPATH@/toymc.underconstrained.root:reco_syst2_d
+set sample B path syst2_u reco @INPUTPATH@/toymc.underconstrained.root:bkg
+set sample B path syst2_d reco @INPUTPATH@/toymc.underconstrained.root:bkg
+
+add systematic syst3 -5 5
+set systematic syst3 variations syst3_u syst3_d 
+set sample S path syst3_u reco @INPUTPATH@/toymc.underconstrained.root:reco_syst3_u
+set sample S path syst3_d reco @INPUTPATH@/toymc.underconstrained.root:reco_syst3_d
+set sample B path syst3_u reco @INPUTPATH@/toymc.underconstrained.root:bkg
+set sample B path syst3_d reco @INPUTPATH@/toymc.underconstrained.root:bkg
+
+add systematic syst4 -5 5
+set systematic syst4 variations syst4_u syst4_d
+set sample S path syst4_u reco @INPUTPATH@/toymc.underconstrained.root:reco_syst4_u
+set sample S path syst4_d reco @INPUTPATH@/toymc.underconstrained.root:reco_syst4_d
+set sample B path syst4_u reco @INPUTPATH@/toymc.underconstrained.root:bkg
+set sample B path syst4_d reco @INPUTPATH@/toymc.underconstrained.root:bkg
+
+add systematic syst_mod_kappa -5 5
+set systematic syst_mod_kappa type modelling
+set systematic syst_mod_kappa variations syst_mod_kappa_u @symmetrize@
+set sample S path syst_mod_kappa_u reco @INPUTPATH@/toymc.underconstrained.root:reco_modelling_kappa
+set sample S path syst_mod_kappa_u resp @INPUTPATH@/toymc.underconstrained.root:response_modelling_kappa
+set sample S path syst_mod_kappa_u gen  @INPUTPATH@/toymc.underconstrained.root:truth_modelling_kappa
+set sample B path syst_mod_kappa_u reco @INPUTPATH@/toymc.underconstrained.root:bkg
+
+add systematic syst_mod_theta -5 5
+set systematic syst_mod_theta type modelling
+set systematic syst_mod_theta variations syst_mod_theta_u @symmetrize@
+set sample S path syst_mod_theta_u reco @INPUTPATH@/toymc.underconstrained.root:reco_modelling_theta
+set sample S path syst_mod_theta_u resp @INPUTPATH@/toymc.underconstrained.root:response_modelling_theta  
+set sample S path syst_mod_theta_u gen  @INPUTPATH@/toymc.underconstrained.root:truth_modelling_theta
+set sample B path syst_mod_theta_u reco @INPUTPATH@/toymc.underconstrained.root:bkg
+
+
+set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statsyst.underconstrained.root
+set luminosity 1.0
+set regularization curvature
+
+set precision quick
+set prior flat
+run stage:prior nitr:0 drawplots:yes
+
+set precision custom
+set prior gauss
+run stage:statsyst nitr:0 drawplots:yes writehist:yes
+
+set precision custom
+set prior gauss
+run stage:statonly nitr:0 drawplots:no writehist:yes
+
+exit
+
