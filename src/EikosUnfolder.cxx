@@ -770,15 +770,6 @@ double EikosUnfolder::LogLikelihood( const std::vector<double>& parameters )
 void EikosUnfolder::MCMCUserIterationInterface()
 {
   return;
-//   int npar = GetNParameters();
-
-   for( size_t c = 0; c < fMCMCNChains; ++c ) {
-      double logL = fMCMCLogLikelihood[c];
-      double logP = fMCMCLogPrior[c];
-
-      std::cout << "DEBUG: chain " << c << " :: logP = " << logP << " :: logL = " << logL << " :: logP+logL = " << (logP+logL) <<  std::endl;
-   }
-
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

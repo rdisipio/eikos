@@ -38,7 +38,7 @@ class SystType:
 
 class Systematic(object):
 
-  def __init__( self, name="syst", type=SystType.multiplicative, effect=10., twosided=True ):
+  def __init__( self, name="syst", type=SystType.multiplicative, effect=1.0, twosided=True ):
     self.name     = name
     self.type     = type
     self.effect   = effect
@@ -134,6 +134,12 @@ _h['bkg']  = _h['reco_nominal'].Clone("bkg")
 for syst in known_systematics:
   _h["reco_"+syst.name] = _h['reco_nominal'].Clone( "reco_%s"%syst.name )
   print "INFO: systematic %-10s: %.2f %i" % ( syst.name, syst.effect, syst.type )
+# correlated systematics
+_h["reco_syst_c1_u"] = _h['reco_nominal'].Clone( "reco_syst_c1_u" )
+_h["reco_syst_c1_d"] = _h['reco_nominal'].Clone( "reco_syst_c1_d" )
+_h["reco_syst_c2_u"] = _h['reco_nominal'].Clone( "reco_syst_c2_u" )
+_h["reco_syst_c2_d"] = _h['reco_nominal'].Clone( "reco_syst_c2_d" )
+
 
 # switch on event weights
 for h in _h.values(): h.Sumw2()
@@ -222,6 +228,16 @@ for ievent in range(Nevents_mc):
   for syst in known_systematics:
     y_reco, u = syst.Apply(x_reco, w)
     _h["reco_"+syst.name].Fill( y_reco, u )
+  # correlated systematics
+  y_reco_1_u = ( 1 + 0.03 ) * x_reco 
+  y_reco_2_u = y_reco_1_u + 0.01
+  y_reco_1_d = ( 1 - 0.03 ) * x_reco
+  y_reco_2_d = y_reco_1_d - 0.01
+  _h["reco_syst_c1_u"].Fill( y_reco_1_u, 1. )
+  _h["reco_syst_c1_d"].Fill( y_reco_1_d, 1. )
+  _h["reco_syst_c2_u"].Fill( y_reco_2_u, 1. )
+  _h["reco_syst_c2_d"].Fill( y_reco_2_d, 1. )
+
 
 # Do modelling systematics
 
