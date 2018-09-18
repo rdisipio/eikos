@@ -45,9 +45,5 @@ set precision custom
 set prior gauss
 run stage:statsyst nitr:0 drawplots:yes writehist:yes
 
-set precision custom
-set prior gauss
-run stage:statonly nitr:0 drawplots:no writehist:yes
-
 exit
 
