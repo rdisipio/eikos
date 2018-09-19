@@ -229,14 +229,14 @@ for ievent in range(Nevents_mc):
     y_reco, u = syst.Apply(x_reco, w)
     _h["reco_"+syst.name].Fill( y_reco, u )
   # correlated systematics
-  y_reco_1_u = ( 1 + 0.03 ) * x_reco 
-  y_reco_2_u = y_reco_1_u + 0.01
-  y_reco_1_d = ( 1 - 0.03 ) * x_reco
-  y_reco_2_d = y_reco_1_d - 0.01
-  _h["reco_syst_c1_u"].Fill( y_reco_1_u, 1. )
-  _h["reco_syst_c1_d"].Fill( y_reco_1_d, 1. )
-  _h["reco_syst_c2_u"].Fill( y_reco_2_u, 1. )
-  _h["reco_syst_c2_d"].Fill( y_reco_2_d, 1. )
+  y_reco_1_u = ( 1 + 0.10 ) * x_reco 
+  y_reco_2_u = ( 1 + 0.05 ) * y_reco_1_u
+  y_reco_1_d = ( 1 - 0.10 ) * x_reco
+  y_reco_2_d = ( 1 - 0.05 ) * y_reco_1_d 
+  _h["reco_syst_c1_u"].Fill( y_reco_1_u, w )
+  _h["reco_syst_c1_d"].Fill( y_reco_1_d, w )
+  _h["reco_syst_c2_u"].Fill( y_reco_2_u, w )
+  _h["reco_syst_c2_d"].Fill( y_reco_2_d, w )
 
 
 # Do modelling systematics
