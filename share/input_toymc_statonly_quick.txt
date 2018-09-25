@@ -1,6 +1,6 @@
 set param  INPUTPATH $PWD
 set param  OUTPUTPATH $PWD/output
-set param  OUTPUTTAG toymc_statonly
+set param  OUTPUTTAG toymc_statonly_quick
 set param  LUMI 1.0
 set param  PRECISION 2
 set param  REGULARIZATION 1
@@ -19,21 +19,17 @@ add sample B
 set sample B type background
 set sample B path nominal reco @INPUTPATH@/toymc.root:bkg
 
-set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statonly.root
+set outfile $PWD/output/@OUTPUTTAG@/@OBS@.toymc.statonly_quick.root
 set luminosity 1.0
 set regularization unregularized
 
-set precision medium
+set precision low
 set prior flat
 run stage:prior nitr:0 drawplots:yes
 
-set precision medium
+set precision low
 set prior gauss
 run stage:statsyst nitr:0 drawplots:yes writehist:yes
-
-set precision medium
-set prior gauss
-run stage:statonly nitr:0 drawplots:no writehist:no
 
 exit
 
