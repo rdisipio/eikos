@@ -114,11 +114,11 @@ g_unc = TH1F2TGraph( h_unc )
 g_IB  = TH1F2TGraph( h_IB, offset=0.1 )
 g_MI  = TH1F2TGraph( h_MI, offset=-0.1 )
 
-SetTH1FStyle( g_unc, fillcolor=kGray+2, fillstyle=1001, linewidth=0, markersize=0 )
+SetTH1FStyle( g_unc, fillcolor=kGray+1, fillstyle=1001, linewidth=0, markersize=0 )
 SetTH1FStyle( g_IB, color=kBlue, markerstyle=20, markersize=1.5 )
 SetTH1FStyle( g_MI, color=kRed,  markerstyle=25, markersize=1.5 )
 
-g_unc.SetMaximum( 1.5 )
+g_unc.SetMaximum( 1.6 )
 g_unc.SetMinimum( 0.5 )
 
 g_unc.GetXaxis().SetTitle( xtitle[obs] )

@@ -115,11 +115,11 @@ g_underconstrained = TH1F2TGraph( h_underconstrained, 0.1 )
 g_overconstrained  = TH1F2TGraph( h_overconstrained, -0.1 )
 
 #SetTH1FStyle( h_isoconstrained,   fillstyle=1001, color=kYellow, fillcolor=kYellow )
-SetTH1FStyle( h_isoconstrained,   fillstyle=1001, color=kGray+2, fillcolor=kGray+2, markersize=0, linewidth=0 )
+SetTH1FStyle( h_isoconstrained,   fillstyle=1001, color=kGray+1, fillcolor=kGray+1, markersize=0, linewidth=0 )
 SetTH1FStyle( g_underconstrained, color=kBlue, markerstyle=21 )
 SetTH1FStyle( g_overconstrained,  color=kRed, markerstyle=24 )
 
-h_isoconstrained.SetMaximum( 1.5 )
+h_isoconstrained.SetMaximum( 1.6 )
 h_isoconstrained.SetMinimum( 0.5 )
 
 h_isoconstrained.GetXaxis().SetTitle( "X" )
