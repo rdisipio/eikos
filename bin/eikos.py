@@ -371,27 +371,27 @@ class EikosPrompt( Cmd, object ):
 
    ###################
 
-   def write_hist_statsyst( self ):
+   def write_hist_statsyst( self, u ):
       self.outfile.cd()
 
-      migrations = unfolder.GetSignalSample().GetMigrations()
+      migrations = u.GetSignalSample().GetMigrations()
       migrations.SetMinimum( 0. )
       migrations.SetMaximum( 1.0 )
       migrations.get().Write( "migrations" )      
 
-      efficiency = unfolder.GetSignalSample().GetEfficiency()
+      efficiency = u.GetSignalSample().GetEfficiency()
       efficiency.SetMinimum( 0. )
       efficiency.SetMaximum( 1.0 )
       SetHistogramStyle( efficiency, color=kRed )
       efficiency.get().Write( "efficiency" )
 
-      acceptance = unfolder.GetSignalSample().GetAcceptance()
+      acceptance = u.GetSignalSample().GetAcceptance()
       acceptance.SetMinimum( 0. )
       acceptance.SetMaximum( 1.0 )
       SetHistogramStyle( acceptance, color=kBlue )
       acceptance.get().Write( "acceptance" )
 
-      theory_abs = unfolder.GetSignalSample().GetTruth()
+      theory_abs = u.GetSignalSample().GetTruth()
       theory_abs.Scale( 1./self.lumi )
       xs_incl_theory = theory_abs.Integral()
       theory_rel = theory_abs.Clone( "theory_rel" )
@@ -399,19 +399,19 @@ class EikosPrompt( Cmd, object ):
       theory_abs.Write( "theory_abs" )
       theory_rel.Write( "theory_rel" )
 
-      diffxs_abs = unfolder.GetDiffxsAbs()
-      diffxs_rel = unfolder.GetDiffxsRel() 
+      diffxs_abs = u.GetDiffxsAbs()
+      diffxs_rel = u.GetDiffxsRel() 
       diffxs_abs.get().Write( "diffxs_statsyst_abs" )
       diffxs_rel.get().Write( "diffxs_statsyst_rel" )
       
-      data       = unfolder.GetData()
-      mcsignal   = unfolder.GetSignalSample().GetDetector()
+      data       = u.GetData()
+      mcsignal   = u.GetSignalSample().GetDetector()
       prediction   = mcsignal.get().Clone( "prediction" )
       dataminusbkg = data.get().Clone( "dataminusbkg" )
 
       background = None
-      if unfolder.GetBackgroundSample().get() != None: 
-        background = unfolder.GetBackgroundSample().GetDetector()
+      if u.GetBackgroundSample().get() != None: 
+        background = u.GetBackgroundSample().GetDetector()
         prediction.Add( background.get() )
         dataminusbkg.Add( background.get(), -1.0 )
 
@@ -424,7 +424,7 @@ class EikosPrompt( Cmd, object ):
       prediction.Write( "prediction" )
       dataminusbkg.Write( "dataminusbkg" )
 
-      prior_abs = unfolder.GetPrior()
+      prior_abs = u.GetPrior()
       prior_abs.get().Write( "prior_abs" )
       xs_incl_prior = prior_abs.Integral()
       prior_rel = prior_abs.Clone( "prior_rel" )
@@ -435,14 +435,14 @@ class EikosPrompt( Cmd, object ):
       closure.Divide( theory_abs.get() )
       closure.Write( "closure" )
 
-      xs_incl_statsyst = unfolder.GetMarginalizedHistogram( "xs_incl" )
+      xs_incl_statsyst = u.GetMarginalizedHistogram( "xs_incl" )
       xs_incl_statsyst.Write( "xs_incl_statsyst" ) 
 
-      pulls = unfolder.GetSystematicsPullHistogram()
+      pulls = u.GetSystematicsPullHistogram()
       pulls.Write( "pulls" ) 
 
-      corr_abs = unfolder.GetCorrelationMatrixAbs()
-      corr_rel = unfolder.GetCorrelationMatrixRel()
+      corr_abs = u.GetCorrelationMatrixAbs()
+      corr_rel = u.GetCorrelationMatrixRel()
       corr_abs.Write( "corr_abs" )
       corr_rel.Write( "corr_rel" )
 
@@ -457,7 +457,7 @@ class EikosPrompt( Cmd, object ):
          h_psig = dataminusbkg.Clone( "pseudosignal" )
          h_psig.Multiply( acceptance.get() )
 
-         h_response = unfolder.GetSignalSample().GetResponse().get()
+         h_response = u.GetSignalSample().GetResponse().get()
          if h_response == None: 
            print "ERROR: invalid histogram: response matrix" 
          m_response = RooUnfoldResponse( h_response.GetName(), h_response.GetTitle() )
@@ -515,14 +515,14 @@ class EikosPrompt( Cmd, object ):
 
    ###################
 
-   def write_hist_statonly( self ):
-      diffxs_abs = unfolder.GetDiffxsAbs()
-      diffxs_rel = unfolder.GetDiffxsRel()
+   def write_hist_statonly( self, u ):
+      diffxs_abs = u.GetDiffxsAbs()
+      diffxs_rel = u.GetDiffxsRel()
       diffxs_abs.get().Write( "diffxs_statonly_abs" )
       diffxs_rel.get().Write( "diffxs_statonly_rel" )
 
-      corr_abs = unfolder.GetCorrelationMatrixAbs()
-      corr_rel = unfolder.GetCorrelationMatrixRel()
+      corr_abs = u.GetCorrelationMatrixAbs()
+      corr_rel = u.GetCorrelationMatrixRel()
       corr_abs.Write( "corr_statonly_abs" )
       corr_rel.Write( "corr_statonly_rel" )
 
@@ -557,16 +557,22 @@ class EikosPrompt( Cmd, object ):
        BCLog.OutSummary( "\033[92m\033[1mStarting stat only run.\033[0m" )
 
      # Do run with iterations
+     all_unfolders = [ unfolder ]
+
      for k_itr in range( n_itr+1 ):
        BCLog.OutSummary( "\033[92m\033[1mIteration %i/%i\033[0m" % (k_itr+1,n_itr+1) )
-       unfolder.SetFlagIgnorePrevOptimization( True )
-       unfolder.PrepareForRun( run_stage )
+
+       all_unfolders += [ EikosUnfolder( all_unfolders[k_itr] ) ]
+       unfolder_k = all_unfolders[k_itr+1]
+
+       unfolder_k.SetFlagIgnorePrevOptimization( True )
+       unfolder_k.PrepareForRun( run_stage )
 
        BCLog.OutSummary( "\033[92m\033[1mStarting Marginalization...\033[0m" )
-       unfolder.MarginalizeAll()
-       bestfit = unfolder.FindMode( unfolder.GetBestFitParameters() )
+       unfolder_k.MarginalizeAll()
+       bestfit = unfolder_k.FindMode( unfolder_k.GetBestFitParameters() )
 
-       unfolder.PrintSummary()
+       unfolder_k.PrintSummary()
        for i in range( bestfit.size() ):
          print "BestFit :: %-2i) %f" % ( i, bestfit[i] )
 
@@ -577,19 +583,19 @@ class EikosPrompt( Cmd, object ):
           elif run_stage == kStageStatSyst:      rtag = "statsyst"
           elif run_stage == kStageStatOnly:      rtag = "statonly"
 
-          unfolder.PrintKnowledgeUpdatePlots( "%s/%s_update_%s_itr%i.pdf"  % ( pdir, gparams['OBS'], rtag, k_itr ) )
-          unfolder.PrintAllMarginalized( "%s/%s_marginalized_%s_itr%i.pdf" % ( pdir, gparams['OBS'], rtag, k_itr ) )
+          unfolder_k.PrintKnowledgeUpdatePlots( "%s/%s_update_%s_itr%i.pdf"  % ( pdir, gparams['OBS'], rtag, k_itr ) )
+          unfolder_k.PrintAllMarginalized( "%s/%s_marginalized_%s_itr%i.pdf" % ( pdir, gparams['OBS'], rtag, k_itr ) )
           print "INFO: finished printing plots for stage %s" % rtag
 
        # Post-run
        if run_stage == kStageEstimatePrior:
-          prior_abs = unfolder.GetDiffxsAbs( "prior_abs" )
-          prior_rel = unfolder.GetDiffxsRel( "prior_rel" )
+          prior_abs = unfolder_k.GetDiffxsAbs( "prior_abs" )
+          prior_rel = unfolder_k.GetDiffxsRel( "prior_rel" )
           print "DEBUG: post run: set regularization method %i" % int(gparams['REGULARIZATION'])
-          unfolder.SetRegularization( int(gparams['REGULARIZATION']) )
+          unfolder_k.SetRegularization( int(gparams['REGULARIZATION']) )
 
           print "DEBUG: stage:prior :: post run: set diffxs -> prior"
-          unfolder.SetPrior( prior_abs )
+          unfolder_k.SetPrior( prior_abs )
        elif run_stage == kStageStatSyst:
           print "INFO: stage:stat+syst :: post run: nothing to do for stat+syst"
        elif run_stage == kStageStatOnly:
@@ -599,8 +605,8 @@ class EikosPrompt( Cmd, object ):
 
      # Write out histograms
      if write_hist == True:
-       if   run_stage == kStageStatSyst: self.write_hist_statsyst()
-       elif run_stage == kStageStatOnly: self.write_hist_statonly()
+       if   run_stage == kStageStatSyst: self.write_hist_statsyst( unfolder_k )
+       elif run_stage == kStageStatOnly: self.write_hist_statonly( unfolder_k )
 
      # Print out run end message
      if run_stage == kStageEstimatePrior:
@@ -609,6 +615,7 @@ class EikosPrompt( Cmd, object ):
         BCLog.OutSummary( "\033[92m\033[1mEnd of second run: stat+syst distribution estimated.\033[0m" )
      elif run_stage == kStageStatOnly:
         BCLog.OutSummary( "\033[92m\033[1mEnd of third run: stat only distribution estimated.\033[0m" )
+
 
 ##########################
 

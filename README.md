@@ -41,12 +41,27 @@ eikos.py input_toymc_simple.txt | tee stdout.txt
 
 To create diffxs plots
 ```
-eikos-plot-diffxs.py -c share/config_plot_diffxs_tt_m_abs.xml
+eikos-plot-diffxs.py -c ../share/config_plot_toymc_x_abs.xml
+eikos-plot-diffxs.py -c ../share/config_plot_toymc_x_rel.xml
 ```
 
 To create systematics pull plots:
 ```
-eikos-plot-systematics_pulls.py
+eikos-plot-systematics_pulls.py output/toymc_statsyst/x.toymc.statsyst.root
+```
+
+Other plots:
+```
+eikos-plot-migrations.py output/toymc_statsyst/x.toymc.statsyst.root
+eikos-plot-corrections.py output/toymc_statsyst/x.toymc.statsyst.root 
+eikos-plot-correlation-matrix.py output/toymc_statsyst/x.toymc.statsyst.root
+```
+
+Closure and stress tests
+```
+eikos.py ../share/input_toymc_statonly_closure.txt 
+eikos-plot-closure.py closure
+eikos-plot-closure.py stress
 ```
 
 Configuration file

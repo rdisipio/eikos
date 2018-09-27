@@ -39,6 +39,7 @@ class EikosUnfolder : public BCModel, public TObject
 {
  public:
     EikosUnfolder();
+    EikosUnfolder( const EikosUnfolder& other );
     ~EikosUnfolder();
 
     void SetRegularization( REGULARIZATION r )   { m_regularization = r; };

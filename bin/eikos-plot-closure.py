@@ -119,15 +119,24 @@ if test_type == "closure":
   h_truth = h_truth_nominal
 else:
   h_truth = h_truth_other
+
+print "INFO: unfolded:"
+h_unf.Print("all")
+print "INFO: truth:"
+h_truth.Print("all")
+
 h_ratio = h_unf.Clone("h_ratio")
 h_unc   = h_truth.Clone("h_unc")
 DivideBy( h_unc, h_truth )
 DivideBy( h_ratio, h_truth )
 
+print "INFO: ratio:"
+h_ratio.Print("all")
+
 g_unc = TH1F2TGraph( h_unc )
 SetTH1FStyle( g_unc, fillstyle=1001, fillcolor=kGray+1, linewidth=0, markersize=0)
-g_unc.SetMinimum(0.8)
-g_unc.SetMaximum(1.2)
+g_unc.SetMinimum(0.5)
+g_unc.SetMaximum(1.5)
 
 c = TCanvas("c", "C", 800, 800 )
 c.SetRightMargin(0.05)

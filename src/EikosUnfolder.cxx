@@ -5,8 +5,18 @@
 ClassImp( EikosUnfolder )
 
 EikosUnfolder::EikosUnfolder() : 
-  m_nbins_truth(-1), m_nbins_reco(-1), m_regularization(kUnregularized), m_prior_shape(kPriorFlat), m_syst_initialized(false), m_obs_initialized(false),
-  m_lumi(1.), m_h_data(NULL), m_h_truth(NULL), m_h_prior(NULL), m_stage_iteration(0), m_runStage(kStageUninitialized), m_bkg_name("background")
+  BCModel(),
+  m_nbins_truth(-1),
+  m_nbins_reco(-1), 
+  m_regularization(kUnregularized), 
+  m_prior_shape(kPriorFlat), 
+  m_syst_initialized(false), 
+  m_obs_initialized(false),
+  m_lumi(1.), 
+  m_h_data(NULL), m_h_truth(NULL), m_h_prior(NULL), 
+  m_stage_iteration(0), 
+  m_runStage(kStageUninitialized), 
+  m_bkg_name("background")
 {
    gErrorIgnoreLevel = kSysError;
 }
@@ -16,6 +26,38 @@ EikosUnfolder::~EikosUnfolder()
 //  m_samples.clear();
 }
 
+EikosUnfolder::EikosUnfolder( const EikosUnfolder& other ) : 
+   BCModel( other )
+{
+    m_nbins_truth = other.m_nbins_truth;
+    m_nbins_reco  = other.m_nbins_reco;
+    m_prior_shape = other.m_prior_shape;
+    m_syst_initialized = other.m_syst_initialized;
+    m_obs_initialized  = other.m_obs_initialized; 
+    m_lumi = other.m_lumi;
+    m_h_data = other.m_h_data;
+    m_h_truth = other.m_h_truth;
+    m_h_prior = other.m_h_prior;
+    m_stage_iteration = other.m_stage_iteration;
+    m_runStage = other.m_runStage;
+    m_bkg_name = other.m_bkg_name;
+
+    m_regularization = other.m_regularization;
+    m_xedges_truth   = other.m_xedges_truth;
+    m_bw_truth       = other.m_bw_truth;
+    m_xedges_reco    = other.m_xedges_reco;
+    m_bw_reco        = other.m_bw_reco;
+    
+    m_samples        = other.m_samples;
+    m_samples_index  = other.m_samples_index;
+    m_signal_sample  = other.m_signal_sample;
+    
+    m_syst_index = other.m_syst_index;
+    m_syst_names = other.m_syst_names;
+    m_syst_pairs = other.m_syst_pairs;
+    m_syst_values = other.m_syst_values;
+    m_syst_types  = other.m_syst_types;
+}
 
 /////////////////////////////////
 

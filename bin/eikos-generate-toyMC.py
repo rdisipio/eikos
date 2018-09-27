@@ -82,8 +82,8 @@ known_systematics = [
   Systematic( name="syst1_d", type=SystType.multiplicative, effect=-3.00, twosided=True ),
   Systematic( name="syst2_u", type=SystType.weight,         effect=2.00,  twosided=True ),
   Systematic( name="syst2_d", type=SystType.weight,         effect=-2.00,  twosided=True ),
-  Systematic( name="syst3_u", type=SystType.weight,         effect=-3.00, twosided=True ),
-  Systematic( name="syst3_d", type=SystType.weight,         effect=3.00,  twosided=True ),
+  Systematic( name="syst3_u", type=SystType.weight,         effect=-5.00, twosided=True ),
+  Systematic( name="syst3_d", type=SystType.weight,         effect=5.00,  twosided=True ),
   Systematic( name="syst4_u", type=SystType.additive,       effect=0.10,   twosided=True ),
   Systematic( name="syst4_d", type=SystType.additive,       effect=-0.10,  twosided=True ),
 ]
@@ -151,12 +151,12 @@ for h in _h.values(): h.Sumw2()
 kappa_nominal = 2.5
 mu_nominal    = 0.
 theta_nominal = 10.
-kappa_modelling_kappa = kappa_nominal - 0.25
+kappa_modelling_kappa = kappa_nominal + 0.1
 mu_modelling_kappa    = mu_nominal
 theta_modelling_kappa = theta_nominal
 kappa_modelling_theta = kappa_nominal
 mu_modelling_theta    = mu_nominal
-theta_modelling_theta = theta_nominal + 0.5
+theta_modelling_theta = theta_nominal - 1.0
 
 f_gamma_nominal = TF1("gamma_nominal", "TMath::GammaDist(x, [0], [1], [2])", 0, 100 )
 f_gamma_nominal.SetParameters( kappa_nominal, mu_nominal, theta_nominal )
