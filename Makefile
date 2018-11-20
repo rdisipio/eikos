@@ -8,7 +8,7 @@ OMPFLAGS     = -fopenmp -lgomp
 CXX          = g++
 CXXFLAGS     =  -g -Wall -fPIC -Wno-deprecated -O2
 LD           = /usr/bin/ld -m elf_x86_64
-LDFLAGS      =  -g -O2
+LDFLAGS      =  -g -O2 -fopenmp
 SOFLAGS      = -shared
 
 # standard commands
@@ -53,7 +53,7 @@ library: src/EikosUnfolderDict.o $(CXXOBJS)
 	@echo
 	@echo Building shared library libEikos.so
 	@echo 
-	$(CXX) -g -shared -fPIC -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(LIBS) -lc
+	$(CXX) -g -shared -fPIC -fopenmp -Wl,-soname,libEikos.so -o libEikos.so $(CXXOBJS) src/EikosUnfolderDict.o $(LIBS) -lc
 
 install:
 	mv libEikos.so $(BATINSTALLDIR)/lib

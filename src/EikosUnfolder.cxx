@@ -1,6 +1,7 @@
 // Header files passed as explicit arguments
 #include "include/EikosUnfolder.h"
-#include "BAT/BCMath.h"
+#include <BAT/BCMath.h>
+#include <TFile.h>
 
 ClassImp( EikosUnfolder )
 
@@ -135,7 +136,7 @@ int EikosUnfolder::AddSystematic( const std::string& sname, double min, double m
 
   m_syst_index[sname] = index;
   m_syst_pairs.push_back( SystPair_t( "none_u", "none_d" ) );
-  m_syst_values.push_back( SystValues_t( 0., 0. ) );
+  m_syst_values.push_back( SystValues_t() );
   m_syst_types.push_back( kDetector );
 
   GetParameter(index).SetPrior(new BCGaussianPrior( 0., 1. ) );
@@ -1000,3 +1001,48 @@ pTH2D_t EikosUnfolder::GetCorrelationMatrixRel( const std::string hname )
    return h_corr;
 }
 
+
+void EikosUnfolder::SaveKnowledgeUpdate(const std::string& filename, const std::string& option )
+{
+    // remember current directory
+    TDirectory* dir = gDirectory;
+
+    TFile* outfile = TFile::Open(filename.c_str(), option.c_str());
+
+    if (!outfile) {
+        BCLog::OutError("BCModel::WriteKnowledgeUpdate: Could not open output file.");
+        return;
+    }
+
+    if (!outfile->IsWritable()) {
+        BCLog::OutError("BCModel::WriteKnowledgeUpdate: File must be opened in writeable mode.");
+        return;
+    }
+
+    // write histograms
+    char hname[128];
+    for (unsigned i = 0; i < GetNVariables(); ++i) {
+        if (MarginalizedHistogramExists(i)) {
+            sprintf( hname, "posterior_%i", (i+1) );
+            outfile->WriteTObject( GetMarginalizedHistogram(i), hname );
+
+            sprintf( hname, "prior_%i", (i+1) );
+            outfile->WriteTObject( (TH1D*)BCModel::GetPrior(i).GetHistogram(), hname );
+        }
+        for (unsigned j = 0; j < GetNVariables(); ++j) {
+            if (MarginalizedHistogramExists(i, j)) {
+                sprintf( hname, "posterior_%i_%i", (i+1), (j+1) );
+                outfile->WriteTObject( GetMarginalizedHistogram(i, j), hname );
+
+                sprintf( hname, "prior_%i_%i", (i+1), (j+1) );
+                outfile->WriteTObject( (TH2D*)BCModel::GetPrior(i,j).GetHistogram(), hname );
+            }
+        }
+    }
+
+    outfile->Close();
+
+    // restore directory
+    gDirectory = dir;
+
+}

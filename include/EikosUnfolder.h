@@ -95,6 +95,8 @@ class EikosUnfolder : public BCModel, public TObject
     virtual void CalculateObservables(const std::vector<double>& parameters);
     virtual void MCMCUserIterationInterface();
 
+    virtual void SaveKnowledgeUpdate(const std::string& filename, const std::string& option = "RECREATE" );
+
     ClassDef( EikosUnfolder, 1 )
 
  protected:

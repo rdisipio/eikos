@@ -33,6 +33,7 @@ gparams['REGULARIZATION'] = 1
 gparams['OUTPUTPATH'] = "$PWD/output"
 gparams['OUTPUTTAG']  = "test"
 gparams['NITR']       = 2
+gparams['MARG_METHOD'] = 1 #kMargMetropolis
 
 systematics = {}
 
@@ -40,6 +41,7 @@ d_prior_shape    = { 'flat' : kPriorFlat, 'gauss' : kPriorGauss, 'gamma' : kPrio
 d_regularization = { 'unregularized' : kUnregularized, 'curvature' : kCurvature, 'multinormal' : kMultinormal }
 d_stage          = { 'prior' : kStageEstimatePrior, 'statsyst' : kStageStatSyst, 'statonly' : kStageStatOnly, 'onesyst' : kStageTableOfSyst }
 d_precision      = { 'low':0, 'quick':1, 'medium':2, 'high':2, 'veryhigh':3, 'custom':4 }
+#d_marginalization = { 'metropolis':kMargMetropolis, 'montecarlo':kMargMonteCarlo, 'default':kMargDefault }
 
 BCAux.SetStyle()
 BCLog.OpenLog( "log.txt" )
@@ -569,7 +571,7 @@ class EikosPrompt( Cmd, object ):
        unfolder_k.PrepareForRun( run_stage )
 
        BCLog.OutSummary( "\033[92m\033[1mStarting Marginalization...\033[0m" )
-       unfolder_k.MarginalizeAll()
+       unfolder_k.MarginalizeAll( gparams['MARG_METHOD'] )
        bestfit = unfolder_k.FindMode( unfolder_k.GetBestFitParameters() )
 
        unfolder_k.PrintSummary()
@@ -586,6 +588,7 @@ class EikosPrompt( Cmd, object ):
           unfolder_k.PrintKnowledgeUpdatePlots( "%s/%s_update_%s_itr%i.pdf"  % ( pdir, gparams['OBS'], rtag, k_itr ) )
           unfolder_k.PrintAllMarginalized( "%s/%s_marginalized_%s_itr%i.pdf" % ( pdir, gparams['OBS'], rtag, k_itr ) )
           print "INFO: finished printing plots for stage %s" % rtag
+          unfolder_k.SaveKnowledgeUpdate( "%s/%s_marginalized_%s_itr%i.root" % ( pdir, gparams['OBS'], rtag, k_itr ), "RECREATE" )
 
        # Post-run
        if run_stage == kStageEstimatePrior:

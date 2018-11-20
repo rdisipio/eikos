@@ -27,7 +27,7 @@ n_syst = h_pulls.GetNbinsX()
 h_pulls.SetMarkerStyle( 20 )
 h_pulls.SetMarkerSize( 1.5 )
 h_pulls.GetXaxis().LabelsOption( "v" )
-h_pulls.GetXaxis().SetLabelSize(0.03)
+h_pulls.GetXaxis().SetLabelSize(0.06)
 h_pulls.GetYaxis().SetTitle( "( #theta_{fit} - #theta_{0} ) / #Delta#theta" );
 
 c = TCanvas( "c", "C", 1200, 800 )
