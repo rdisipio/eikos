@@ -61,19 +61,28 @@ def Normalize( h, sf=1.0 ):
 infilename = sys.argv[1]
 infile = TFile.Open( infilename )
 
-c = TCanvas("c", "C", 800, 800 )
-gPad.SetLeftMargin( 0.15 )
+c = TCanvas("c", "C", 1200, 800 )
+gPad.SetLeftMargin( 0.17 )
 gPad.SetTopMargin( 0.05 )
+gPad.SetBottomMargin( 0.15 )
 
-param = 1
-
+priors = []
+posteriors = []
+param = 0
 while True:
-  
-  try:
-     h_prior     = infile.Get( "prior_%i" % param )
-     h_posterior = infile.Get( "posterior_%i" % param )
-  except:
+  param += 1
+
+  priors     += [ infile.Get( "prior_%i" % param ) ]
+  posteriors += [ infile.Get( "posterior_%i" % param ) ]
+
+  h_prior     = priors[-1]
+  h_posterior = posteriors[-1]
+
+  if h_prior == None: 
      exit(0)
+  if h_posterior == None:     
+     exit(0)
+
 
   SetTH1FStyle( h_prior,     fillstyle=1001, fillcolor=kGray+1, linewidth=0, markersize=0 )
   SetTH1FStyle( h_posterior, color=kBlack, linewidth=3, markersize=0, markerstyle=0 )
@@ -85,23 +94,26 @@ while True:
   h_prior.SetMaximum( hmax )
   h_posterior.SetMaximum( hmax )
 
-  h_prior.Draw()
+  h_prior.Draw("h")
   h_posterior.Draw("h same")
 
-  h_prior.GetYaxis().SetTitleOffset(1.5)
+  h_prior.GetYaxis().SetTitleOffset(1.3)
+  h_prior.GetYaxis().SetLabelSize(0.06)
+  h_prior.GetXaxis().SetTitleSize(0.06)
+  h_prior.GetYaxis().SetTitleSize(0.06)
 
   lparams = {
         'xoffset' : 0.65,
         'yoffset' : 0.90,
-        'width'   : 0.35,
-        'height'  : 0.04,
+        'width'   : 0.40,
+        'height'  : 0.08,
         }
 
   leg = MakeLegend( lparams )
   leg.SetTextFont( 42 )
-  leg.SetTextSize(0.05)
+  leg.SetTextSize(0.06)
   leg.SetNColumns(1)
-  leg.AddEntry( h_prior, "Prior", "f" )
+  leg.AddEntry( h_prior,     "Prior", "f" )
   leg.AddEntry( h_posterior, "Posterior", "f" )
   leg.Draw()
   leg.SetY1( leg.GetY1() - lparams['height'] * leg.GetNRows() )
@@ -115,5 +127,3 @@ while True:
      pass
 
   c.SaveAs( "output/%s/posteriors/posterior_%i.pdf" % (outdir,param) )
-
-  param += 1
