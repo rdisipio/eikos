@@ -106,6 +106,7 @@ for param1 in range( 1, 200 ):
     h_prior.GetYaxis().SetLabelSize(0.06)
     h_prior.GetXaxis().SetTitleSize(0.06)
     h_prior.GetYaxis().SetTitleSize(0.06)
+    h_prior.GetXaxis().SetLabelSize(0.06)
 
     lparams = {
         'xoffset' : 0.65,
